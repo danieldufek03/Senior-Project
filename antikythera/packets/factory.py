@@ -2,25 +2,25 @@
 # -*- coding: utf-8 -*-
 """ Polymorphic Packet Factory
 
-``PacketFactory`` allows different types of packet factories to be
-subclassed from the base class. This is desirable to make the
-definition of packets used flexible for both quickly evolving
-technologies and security counter and counter-counter measures.
+    :py:obj:`PacketFactory` allows different types of packet factories to be
+    subclassed from the base class. This is desirable to make the
+    definition of packets used flexible for both quickly evolving
+    technologies and security counter and counter-counter measures.
 
-Example:
-    Packet making factories can be added using the the ``addFactory()``
-    method. These are stored in the ``factories`` dictionary as ``id``
-    ``Factory`` pairs. Then packets themselves can be created from the
-    factory by calling ``createPacket()``with the parameters needed
-    to build the packet for the given packet type.
+    Example:
+        Packet making factories can be added using the the ``addFactory()``
+        method. These are stored in the ``factories`` dictionary as ``id``
+        ``Factory`` pairs. Then packets themselves can be created from the
+        factory by calling ``createPacket()`` with the parameters needed
+        to build the packet for the given packet type.
 
-        >>> from factory import PacketFactory
-        >>> factory = PacketFactory
-        >>> from system import System
-        >>> factory.addFactory("System", System.Factory)
-        >>> sys_pkt = factory.createPacket("System", "Type1", '\x42')
-        >>> sys_pkt.data
-        'B'
+            >>> from factory import PacketFactory
+            >>> factory = PacketFactory
+            >>> from system import System
+            >>> factory.addFactory("System", System.Factory)
+            >>> sys_pkt = factory.createPacket("System", "Type1", '\x42')
+            >>> sys_pkt.data
+            'B'
 
     Note:
         The ``Factory`` objects that will be added must each be imported.
@@ -62,7 +62,7 @@ class PacketFactory:
 
     @staticmethod
     def createPacket(id, type, data):
-         """ Add an {identifier : ``Factory``} object pair to ``factories``.
+        """ Add an {identifier : ``Factory``} object pair to ``factories``.
 
         Args:
             param1 id: A dictionary key corresponding to a key in the
@@ -77,6 +77,6 @@ class PacketFactory:
                 constructed with the given data.
 
         """
-       if PacketFactory.factories[id] not in PacketFactory.factories:
+        if PacketFactory.factories[id] not in PacketFactory.factories:
             PacketFactory.factories[id] = eval(id + '.Factory()')
         return PacketFactory.factories[id].create(type, data)

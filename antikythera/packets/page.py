@@ -7,6 +7,8 @@
 import sys
 import logging
 
+from packet import Packet
+
 __copyright__ = "Finding Ray"
 __license__ = "gpl3"
 
