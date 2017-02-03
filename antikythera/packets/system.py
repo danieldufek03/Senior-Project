@@ -47,7 +47,7 @@ class Type2(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        "Type1 system information packet"
+        "Type2 system information packet"
     def decode():
         return data
 
@@ -56,7 +56,7 @@ class Type3(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        "Type1 system information packet"
+        "Type3 system information packet"
     def decode():
         return data
 
@@ -65,7 +65,7 @@ class Type4(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        return "Type1 system information packet"
+        return "Type4 system information packet"
     def decode():
         return data
 
@@ -74,7 +74,7 @@ class Type2ter(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        "Type1 system information packet"
+        "Type2ter system information packet"
     def decode():
         return data
 
@@ -83,7 +83,7 @@ class Type2quater(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        "Type1 system information packet"
+        "Type2quater system information packet"
     def decode():
         return data
 
@@ -92,6 +92,6 @@ class Type13(System):
         super().__init__()
         self.data = decode()
     def __str__(self):
-        "Type1 system information packet"
+        "Type13 system information packet"
     def decode():
         return data
