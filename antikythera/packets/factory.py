@@ -54,9 +54,9 @@ class PacketFactory:
         """ Add an {identifier : ``Factory``} object pair to ``factories``.
 
         Args:
-            param1 (id): the identifier can be any valid key type for a python
+            id (str): the identifier can be any valid key type for a python
                 dictionary.
-            param2 (:obj:`factory`): a packet factory subclass.
+            factory (:obj:`factory`): a packet factory subclass.
 
         """
         PacketFactory.factories[id] = factory
@@ -67,12 +67,13 @@ class PacketFactory:
         """ Add an ``{identifier : Factory}`` object pair to :py:data:`factories`.
 
         Args:
-            param1 (id): A dictionary key corresponding to a key in the
+            id (str): A dictionary key corresponding to a key in the
                 :py:data:`factories` dictionary. This selects the subclassed
                 factory to create the packet from.
-            param2 (type): the selector for the type of packet the
+            type (str): the selector for the type of packet the
                 subclassed factory should create.
-            param3 (data): the data to construct the packet from.
+            data: the data to construct the packet from, type is dependant
+                on ``Factory``.
 
         Returns:
             :obj:`antikythera.packets.packet.Packet`:

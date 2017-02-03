@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
+""" GSM immediate assignment packets.
 
 """
 
@@ -15,13 +15,26 @@ __license__ = "gpl3"
 _logger = logging.getLogger(__name__)
 
 class  Assign(Packet):
+    """ Immediate assignment packet attributes and factory.
+
+    """
     def __init__(self):
         super().__init__()
         self.packet_class = "Immediate Assignment"
 
     class Factory:
+        """ Immediate assignment packet factory.
+
+        """
         @staticmethod
         def create(type):
+            """ Create an immediate assignment packet of the given type.
+
+            Args:
+                type (str): the type of packet subclass to create.
+                data: the data to construct the packet with.
+
+            """
             if type == "Type1": return Type1(data)
             else:
                 _logger.critical("Bad packet creation of type: " + type)
