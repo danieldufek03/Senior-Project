@@ -16,6 +16,7 @@ _logger = logging.getLogger(__name__)
 
 class  Page(Packet):
     def __init__(self):
+        super().__init__()
         self.packet_class = "Paging"
 
     class Factory:

@@ -16,6 +16,7 @@ _logger = logging.getLogger(__name__)
 
 class  Assign(Packet):
     def __init__(self):
+        super().__init__()
         self.packet_class = "Immediate Assignment"
 
     class Factory:

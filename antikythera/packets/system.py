@@ -16,6 +16,7 @@ from packet import Packet
 
 class System(Packet):
     def __init__(self):
+        super().__init__()
         self.packet_class = "System Information"
 
     class Factory:
@@ -34,6 +35,7 @@ class System(Packet):
 
 class Type1(System):
     def __init__(self, data):
+        super().__init__()
         self.data = self.decode(data)
     def __str__(self):
         "Type1 system information packet"
@@ -42,6 +44,7 @@ class Type1(System):
 
 class Type2(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         "Type1 system information packet"
@@ -50,6 +53,7 @@ class Type2(System):
 
 class Type3(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         "Type1 system information packet"
@@ -58,6 +62,7 @@ class Type3(System):
 
 class Type4(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         return "Type1 system information packet"
@@ -66,6 +71,7 @@ class Type4(System):
 
 class Type2ter(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         "Type1 system information packet"
@@ -74,6 +80,7 @@ class Type2ter(System):
 
 class Type2quater(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         "Type1 system information packet"
@@ -82,6 +89,7 @@ class Type2quater(System):
 
 class Type13(System):
     def __init__(self, data):
+        super().__init__()
         self.data = decode()
     def __str__(self):
         "Type1 system information packet"
