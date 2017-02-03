@@ -64,11 +64,11 @@ class PacketFactory:
 
     @staticmethod
     def createPacket(id, type, data):
-        """ Add an {identifier : ``Factory``} object pair to ``factories``.
+        """ Add an ``{identifier : Factory}`` object pair to :py:data:`factories`.
 
         Args:
             param1 (id): A dictionary key corresponding to a key in the
-                ``factories`` dictionary. This selects the subclassed
+                :py:data:`factories` dictionary. This selects the subclassed
                 factory to create the packet from.
             param2 (type): the selector for the type of packet the
                 subclassed factory should create.
