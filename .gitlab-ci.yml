@@ -1,0 +1,22 @@
+stages:
+    - docs 
+
+#####################
+# Build Sphinx Docs #
+#####################
+# use docker image with latex preinstalled
+
+pages:
+    image: python
+    stage: docs
+    script:
+        - apt-get --yes update && apt-get --yes install git
+        - pip install -r requirements.txt
+        - pip install -U setuptools
+        - python setup.py docs
+        - mv -p docs/_build/html/ public/
+    tags:
+        - docker
+    artifacts:
+        paths:
+        - public
