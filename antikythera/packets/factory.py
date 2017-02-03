@@ -51,7 +51,7 @@ class PacketFactory:
 
     @staticmethod
     def addFactory(id, factory):
-        """ Add an {identifier : ``Factory``} object pair to ``factories``.
+        """ Add an ``{identifier : Factory}`` object pair to ``factories``.
 
         Args:
             id (str): the identifier can be any valid key type for a python
@@ -64,14 +64,19 @@ class PacketFactory:
 
     @staticmethod
     def createPacket(id, type, data):
-        """ Add an ``{identifier : Factory}`` object pair to :py:data:`factories`.
+        """ Create a packet
+
+        Packets are created from the given identifier coresponding to a
+        factory in :py:data:`factories`, that has been created with
+        :py:mod:`addFactory`, using the supplied subclass type and data.
 
         Args:
             id (str): A dictionary key corresponding to a key in the
                 :py:data:`factories` dictionary. This selects the subclassed
                 factory to create the packet from.
-            type (str): the selector for the type of packet the
-                subclassed factory should create.
+            type (str): the selector for the type of packet the subclassed 
+                factory should create. This must match a valid type for the
+                factory selected.
             data: the data to construct the packet from, type is dependant
                 on ``Factory``.
 
