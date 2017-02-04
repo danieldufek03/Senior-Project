@@ -21,6 +21,9 @@ test:
         - pip install -U setuptools
         - python setup.py test
         - mv htmlcov public/
+    artifacts:
+        paths:
+            - public
 
 
 #####################
@@ -32,11 +35,12 @@ pages:
     image: python
     stage: pages
     script:
+        - source public
         - apt-get --yes update && apt-get --yes install git
         - pip install -r requirements.txt
         - pip install -U setuptools
         - python setup.py docs
-        - mv docs/_build/html public/
+        - mv docs/_build/html/* public/
     tags:
         - docker
     artifacts:
