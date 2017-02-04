@@ -7,12 +7,9 @@ stages:
 before_script:
 
     # Kivy / Cython requirements
-    - apt-get update --yes && apt-get install --yes \
-        python-pip \
+    - apt-get --yes update && apt-get --yes install \
         build-essential \
         git \
-        python \
-        python-dev \
         ffmpeg \
         libsdl2-dev \
         libsdl2-image-dev \
