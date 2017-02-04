@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from antikythera.skeleton import fib
+from antikythera.antikythera import fib
 
 __author__ = "Derek Goddeau"
 __copyright__ = "Derek Goddeau"
