@@ -54,7 +54,7 @@ shell_setup()
     apt-get --yes install zlib1g-dev
 
     # Install python
-    apt-get --yes install python3 python3-pip
+    apt-get --yes install python3 python3-pip python3-dev
         
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
