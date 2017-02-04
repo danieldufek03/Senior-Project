@@ -5,7 +5,7 @@ stages:
 
 
 before_script:
-    - setup.sh
+    - bash setup.sh
 
 ########
 # Test #
