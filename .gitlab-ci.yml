@@ -19,6 +19,7 @@ test_x86:
         - python setup.py test
     tags:
         - docker
+        - x86
 
 test_armv7l:
     stage: test
@@ -55,6 +56,7 @@ pages:
         - mv docs/_build/html/* public/
     tags:
         - docker
+        - x86
     artifacts:
         paths:
         - public
