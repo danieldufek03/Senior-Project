@@ -41,9 +41,7 @@ shell_setup()
 
     echo "[*] Installing without docker"
 
-    # Add repository for ffmpeg package
-    echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
-    echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
+    # Do not add repositories each run
 
     # Install Kivy / Cython dependencies
     apt-get --yes update && apt-get --assume-yes --force-yes install deb-multimedia-keyring
