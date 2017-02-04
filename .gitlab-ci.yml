@@ -5,6 +5,25 @@ stages:
 
 
 before_script:
+
+    # Kivy / Cython requirements
+    - apt-get update --yes && apt-get install --yes \
+        python-pip \
+        build-essential \
+        git \
+        python \
+        python-dev \
+        ffmpeg \
+        libsdl2-dev \
+        libsdl2-image-dev \
+        libsdl2-mixer-dev \
+        libsdl2-ttf-dev \
+        libportmidi-dev \
+        libswscale-dev \
+        libavformat-dev \
+        libavcodec-dev \
+        zlib1g-dev
+        
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
     # before Kivy and pip provides no way to do this.
