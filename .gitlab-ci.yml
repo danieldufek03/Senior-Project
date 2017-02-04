@@ -7,6 +7,8 @@ stages:
 before_script:
 
     # Kivy / Cython requirements
+    - echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
+    - echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
     - apt-get --yes update && apt-get --yes install git build-essential
     - apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
     - apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
