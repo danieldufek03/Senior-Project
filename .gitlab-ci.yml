@@ -20,7 +20,7 @@ test_x86:
     tags:
         - docker
 
-test_armv71:
+test_armv7l:
     stage: test
     script:
         - pip3 install -r test-requirements.txt
