@@ -5,28 +5,13 @@ stages:
 
 
 before_script:
-
-    # Kivy / Cython requirements
-    - echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
-    - echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
-    - apt-get --yes update && apt-get --assume-yes --force-yes install deb-multimedia-keyring
-    - apt-get --yes update && apt-get --yes install git build-essential
-    - apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
-    - apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
-    - apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
-    - apt-get --yes install zlib1g-dev
-        
-    # Install items in requirements.txt in order from top to bottom
-    # This is required because the Cython package must be installed
-    # before Kivy and pip provides no way to do this.
-    - cat requirements.txt | xargs -n 1 -L 1 pip install
-    - pip install -U setuptools
+    - setup.sh
 
 ########
 # Test #
 ########
 
-test:
+test_x86:
     image: python
     stage: test
     script:
@@ -34,6 +19,14 @@ test:
         - python setup.py test
     tags:
         - docker
+
+test_armv71:
+    stage: test
+    script:
+        - pip3 install -r test-requirements.txt
+        - python3 setup.py test
+    tags:
+        - arm
 
 #####################
 # Build Sphinx Docs #
