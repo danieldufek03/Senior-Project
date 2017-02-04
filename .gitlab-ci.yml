@@ -7,20 +7,11 @@ stages:
 before_script:
 
     # Kivy / Cython requirements
-    - apt-get --yes update && apt-get --yes install git
-    - apt-get --yes update && apt-get --yes install \
-        build-essential \
-        git \
-        ffmpeg \
-        libsdl2-dev \
-        libsdl2-image-dev \
-        libsdl2-mixer-dev \
-        libsdl2-ttf-dev \
-        libportmidi-dev \
-        libswscale-dev \
-        libavformat-dev \
-        libavcodec-dev \
-        zlib1g-dev
+    - apt-get --yes update && apt-get --yes install git build-essential
+    - apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
+    - apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
+    - apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
+    - apt-get --yes install zlib1g-dev
         
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
