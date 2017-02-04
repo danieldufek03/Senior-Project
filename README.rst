@@ -4,6 +4,7 @@ antikythera
 
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/build.svg
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
+    :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
 
 IMSI Catcher detection, analysis and display.
 
