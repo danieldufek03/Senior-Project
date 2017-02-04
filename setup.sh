@@ -39,6 +39,8 @@ docker_setup()
 shell_setup()
 {
 
+    echo "[*] Installing without docker"
+
     # Add repository for ffmpeg package
     echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
     echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
@@ -67,7 +69,7 @@ if [ $ARCH = "x86_64" ]; then
 
     docker_setup
 
-elif [ $ARCH = "armv71" ]; then
+elif [ $ARCH = "armv7l" ]; then
 
     if [ -f /.dockerenv ]; then
         docker_setup
