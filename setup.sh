@@ -39,11 +39,9 @@ docker_setup()
 shell_setup()
 {
 
-    echo "[*] Installing without docker"
-
     # Do not add repositories each run
-
-    # Install Kivy / Cython dependencies
+    echo "\n\n[*] Installing without docker\n\n"
+    echo "[*] Installing Kivy and Cython dependencies"
     apt-get --yes update && apt-get --assume-yes --force-yes install deb-multimedia-keyring
     apt-get --yes update && apt-get --yes install git build-essential
     apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
@@ -52,8 +50,10 @@ shell_setup()
     apt-get --yes install zlib1g-dev
 
     # Install python
+    echo "\n\n[*] Installing python, pip, dev"
     apt-get --yes install python3 python3-pip python3-dev
         
+    echo "\n\n[*] Installing requirements.txt"
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
     # before Kivy and pip provides no way to do this.
