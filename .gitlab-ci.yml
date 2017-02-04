@@ -29,6 +29,7 @@ test_armv7l:
         - arm
 
 test_rpi:
+    image: resin/raspberrypi2-python
     stage: test
     script:
         - pip3 install -r test-requirements.txt
