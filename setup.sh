@@ -36,6 +36,8 @@ docker_setup()
 #
 # Shell executer from a Debian environment
 #
+# All installation and configureation done server side.
+#
 shell_setup()
 {
 
