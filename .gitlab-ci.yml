@@ -16,6 +16,8 @@ test:
         - pip install -r test-requirements.txt
         - pip install -U setuptools
         - python setup.py test
+    tags:
+        - docker
 
 #####################
 # Build Sphinx Docs #
