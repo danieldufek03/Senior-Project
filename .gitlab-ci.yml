@@ -3,10 +3,6 @@ stages:
     - pages
     - package
 
-cache:
-    paths:
-        - public/
-
 
 ########
 # Test #
@@ -20,11 +16,6 @@ test:
         - pip install -r test-requirements.txt
         - pip install -U setuptools
         - python setup.py test
-        - mv htmlcov public/
-    artifacts:
-        paths:
-            - public
-
 
 #####################
 # Build Sphinx Docs #
@@ -35,11 +26,13 @@ pages:
     image: python
     stage: pages
     script:
-        - source public
         - apt-get --yes update && apt-get --yes install git
         - pip install -r requirements.txt
+        - pip install -r test-requirements.txt
         - pip install -U setuptools
+        - python setup.py test
         - python setup.py docs
+        - mv htmlcov public/
         - mv docs/_build/html/* public/
     tags:
         - docker
