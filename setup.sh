@@ -45,8 +45,22 @@ shell_setup()
     echo "[*] Installing Kivy and Cython dependencies"
     echo ""
     echo "-------------------------------------------------------------"
-    apt-get --yes update && apt-get --assume-yes --force-yes install deb-multimedia-keyring
-    apt-get --yes update && apt-get --yes install git build-essential
+    echo ""
+    echo "[*] Update"
+    echo ""
+    #apt-get --yes update
+    echo ""
+    echo "[*] Install keyring"
+    echo ""
+    #apt-get --assume-yes --force-yes install deb-multimedia-keyring
+    echo ""
+    echo "[*] Update"
+    echo ""
+    #apt-get --yes update
+    echo ""
+    echo "[*] Install packages"
+    echo ""
+    apt-get --yes install git build-essential
     apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
     apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
     apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
