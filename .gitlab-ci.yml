@@ -28,6 +28,16 @@ test_armv7l:
     tags:
         - arm
 
+test_rpi:
+    stage: test
+    script:
+        - pip3 install -r test-requirements.txt
+        - python3 setup.py test
+    tags:
+        - rpi
+        - docker
+
+
 #####################
 # Build Sphinx Docs #
 #####################
