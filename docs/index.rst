@@ -9,13 +9,42 @@ antikythera
 
 This is the documentation of **antikythera**.
 
+:abbr:`GUI (Graphical User Interface)` dependancies Debian::
+
+    sudo apt-get update -y && sudo apt-get install -y \
+        python-pip \
+        build-essential \
+        git \
+        python \
+        python-dev \
+        ffmpeg \
+        libsdl2-dev \
+        libsdl2-image-dev \
+        libsdl2-mixer-dev \
+        libsdl2-ttf-dev \
+        libportmidi-dev \
+        libswscale-dev \
+        libavformat-dev \
+        libavcodec-dev \
+        zlib1g-dev
+
+:abbr:`GUI (Graphical User Interface)` dependancies ARM::
+
+    sudo apt-get update
+    sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+       pkg-config libgl1-mesa-dev libgles2-mesa-dev \
+       python-setuptools libgstreamer1.0-dev git-core \
+       gstreamer1.0-plugins-{bad,base,good,ugly} \
+       gstreamer1.0-{omx,alsa} python-dev cython
+
+
 Quick development setup::
 
     apt-get install python3
     mkdir -p ~/.virtualenv
     python3 -m venv ~/.virtualenv/antikythera
     source ~/.virtualenv/antikythera/bin/activate
-    pip install -r requirements.txt
+    cat requirements.txt | xargs -n 1 -L 1 pip install
     pip install -r test-requirements.txt
     pip install -U setuptools
 
