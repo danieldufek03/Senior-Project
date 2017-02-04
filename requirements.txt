@@ -3,3 +3,4 @@
 # scipy>=0.9
 sphinx
 sphinx_rtd_theme
+wheel
