@@ -1,9 +1,8 @@
 stages:
     - test
     - pages
-    - package
-    - environment_build
-    - environment_release
+    - staging
+    - deploy
 
 variables:
     CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:$CI_BUILD_REF_NAME
@@ -71,12 +70,12 @@ pages:
 
 
 ###########
-# Package #
+# Staging #
 ###########
 
 package:
     image: python
-    stage: package
+    stage: staging
     script:
         - bash setup.sh
         - python setup.py sdist bdist_wheel
@@ -90,13 +89,8 @@ package:
     only:
         - master
 
-
-######################
-# Update Environment #
-######################
-
 build_env:
-    stage: environment_build
+    stage: staging
     image: janeczku/docker-armhf:latest
     script:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
@@ -110,8 +104,12 @@ build_env:
         - master    
 
 
+##########
+# Deploy #
+##########
+
 release_env:
-    stage: environment_release
+    stage: deploy
     image: janeczku/docker-armhf:latest
     script:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
