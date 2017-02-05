@@ -86,6 +86,7 @@ package:
             - dist/
     tags:
         - docker
+        - x86
     only:
         - master
 
