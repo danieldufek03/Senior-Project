@@ -2,10 +2,16 @@ stages:
     - test
     - pages
     - package
+    - environment_build
+    - environment_release
 
+variables:
+    CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:$CI_BUILD_REF_NAME
+    CONTAINER_RELEASE_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
 
 before_script:
     - bash setup.sh
+
 
 ########
 # Test #
@@ -28,6 +34,7 @@ test_armv7l:
         - python3 setup.py test
     tags:
         - arm
+    allow_failure: true
 
 test_rpi:
     image: resin/raspberrypi2-python:3.5.1
@@ -43,7 +50,6 @@ test_rpi:
 #####################
 # Build Sphinx Docs #
 #####################
-# use docker image with latex preinstalled
 
 pages:
     image: python
@@ -63,6 +69,7 @@ pages:
     only:
         - master
 
+
 ###########
 # Package #
 ###########
@@ -80,3 +87,36 @@ package:
         - docker
     only:
         - master
+
+
+######################
+# Update Environment #
+######################
+
+build_env:
+    image: janeczku/docker-armhf:latest
+    script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
+        - docker build -t $CONTAINER_TEST_IMAGE .
+        - docker push $CONTAINER_TEST_IMAGE .
+    tags:
+        - docker
+        - rpi
+        - dind
+    only:
+        - master    
+
+
+release_env:
+    image: janeczku/docker-armhf:latest
+    script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
+        - docker pull $CONTAINER_TEST_IMAGE
+        - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+        - docker push $CONTAINER_RELEASE_IMAGE
+    tags:
+        - docker
+        - rpi
+        - dind
+    only:
+        - master    
