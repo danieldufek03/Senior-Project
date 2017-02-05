@@ -9,10 +9,6 @@ variables:
     CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:$CI_BUILD_REF_NAME
     CONTAINER_RELEASE_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
 
-before_script:
-    - bash setup.sh
-
-
 ########
 # Test #
 ########
@@ -21,6 +17,7 @@ test_x86:
     image: python
     stage: test
     script:
+        - bash setup.sh
         - pip install -r test-requirements.txt
         - python setup.py test
     tags:
@@ -30,6 +27,7 @@ test_x86:
 test_armv7l:
     stage: test
     script:
+        - bash setup.sh
         - pip3 install -r test-requirements.txt
         - python3 setup.py test
     tags:
@@ -40,6 +38,7 @@ test_rpi:
     image: resin/raspberrypi2-python:3.5.1
     stage: test
     script:
+        - bash setup.sh
         - pip3 install -r test-requirements.txt
         - python3 setup.py test
     tags:
@@ -55,6 +54,7 @@ pages:
     image: python
     stage: pages
     script:
+        - bash setup.sh
         - pip install -r test-requirements.txt
         - python setup.py test
         - python setup.py docs
@@ -78,6 +78,7 @@ package:
     image: python
     stage: package
     script:
+        - bash setup.sh
         - python setup.py sdist bdist_wheel
     artifacts:
         name: "${CI_PROJECT_NAME}_${CI_PIPELINE_ID}"
