@@ -51,7 +51,7 @@ test_armv7l:
 # before being baked in.
 #
 test_rpi:
-    image: registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
+    image: registry.gitlab.com/finding-ray/antikythera:latest
     stage: test
     script:
         - bash setup.sh
