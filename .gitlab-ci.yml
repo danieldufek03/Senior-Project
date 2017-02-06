@@ -5,8 +5,8 @@ stages:
     - deploy
 
 variables:
-    CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:$CI_BUILD_REF_NAME
-    CONTAINER_RELEASE_IMAGE: registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
+    CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/antikythera:$CI_BUILD_REF_NAME
+    CONTAINER_RELEASE_IMAGE: registry.gitlab.com/finding-ray/antikythera:latest
 
 ########
 # Test #
