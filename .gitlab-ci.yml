@@ -95,7 +95,7 @@ build_env:
     script:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
         - docker build -t $CONTAINER_TEST_IMAGE .
-        - docker push $CONTAINER_TEST_IMAGE .
+        - docker push $CONTAINER_TEST_IMAGE
     tags:
         - docker
         - rpi

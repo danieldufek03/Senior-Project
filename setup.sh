@@ -28,6 +28,7 @@ docker_setup()
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
     # before Kivy and pip provides no way to do this.
+    pip install --upgrade pip
     cat requirements.txt | xargs -n 1 -L 1 pip install
     pip install -U setuptools
 
@@ -44,6 +45,7 @@ shell_setup()
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
     # before Kivy and pip provides no way to do this.
+    pip install --upgrade pip
     cat requirements.txt | xargs -n 1 -L 1 pip3 install
     pip3 install -U setuptools
 
