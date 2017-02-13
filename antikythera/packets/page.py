@@ -42,3 +42,29 @@ class  Page(Packet):
                 _logger.critical("Bad packet creation of type: " + type)
                 sys.exit(127)
 
+class Type1(Page):
+    def __init__(self, data):
+        super().__init__()
+        self.data = self.decode(data)
+    def __str__(self):
+        return "Type1 paging packet"
+    def decode(self, data):
+        return data
+
+class Type2(Page):
+    def __init__(self, data):
+        super().__init__()
+        self.data = decode()
+    def __str__(self):
+        return "Type2 paging packet"
+    def decode():
+        return data
+
+class Type3(Page):
+    def __init__(self, data):
+        super().__init__()
+        self.data = decode()
+    def __str__(self):
+        return "Type3 paging packet"
+    def decode():
+        return data

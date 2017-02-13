@@ -39,3 +39,12 @@ class  Assign(Packet):
             else:
                 _logger.critical("Bad packet creation of type: " + type)
                 sys.exit(127)
+
+class Immediate(Assign):
+    def __init__(self, data):
+        super().__init__()
+        self.data = self.decode(data)
+    def __str__(self):
+        return "Immediate assignment packet"
+    def decode(self, data):
+        return data
