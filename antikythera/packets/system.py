@@ -59,6 +59,7 @@ class Type1(System):
     def __init__(self, data):
         super().__init__()
         self.data = self.decode(data)
+        self.arfcns
     def __str__(self):
         return "Type1 system information packet"
     def decode(self, data):
@@ -78,6 +79,7 @@ class Type2(System):
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.neighbor_arfcns
     def __str__(self):
         return "Type2 system information packet"
     def decode():
@@ -101,6 +103,9 @@ class Type3(System):
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.cell_id
+        self.lai
+        self.gprs
     def __str__(self):
         return "Type3 system information packet"
     def decode():
@@ -124,6 +129,9 @@ class Type4(System):
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.lai
+        self.select_params
+        self.gprs
     def __str__(self):
         return "Type4 system information packet"
     def decode():
@@ -139,30 +147,53 @@ class Type2ter(System):
         neighbor_disc: Verbose neighboring cell description.
         neighbor_arfcns: Absolute Radio Frequency Channel Numbers of
             neighboring cells.
+        bcch_freqs: List of BCCH frequencies
 
     """
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.neighbor_arfcns
+        self.bcch_freqs
     def __str__(self):
         return "Type2ter system information packet"
     def decode():
         return data
 
 class Type2quater(System):
+    """ Type2quarter GSM System Information Packet.
+
+    Args:
+        data: the data to construct the packet with.
+
+    Attributes:
+        neighbor_3g: 3G neighbor cell description
+
+    """
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.neighbor_3g
     def __str__(self):
-        "Type2quater system information packet"
+        return "Type2quater system information packet"
     def decode():
         return data
 
 class Type13(System):
+    """ Type4 GSM System Information Packet.
+
+    Args:
+        data: the data to construct the packet with.
+
+    Attributes:
+        gprs: General Radio Packet Service (GRPS) information.
+
+    """
     def __init__(self, data):
         super().__init__()
         self.data = decode()
+        self.gprs
     def __str__(self):
-        "Type13 system information packet"
+        return "Type13 system information packet"
     def decode():
         return data
