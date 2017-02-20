@@ -34,6 +34,8 @@ test_armv7l:
         - python3 setup.py test
     tags:
         - arm
+    only:
+        - runners
     allow_failure: true
 
 
