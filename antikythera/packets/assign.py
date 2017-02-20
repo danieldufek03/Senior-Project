@@ -27,7 +27,7 @@ class  Assign(Packet):
 
         """
         @staticmethod
-        def create(type):
+        def create(type, data):
             """ Create an immediate assignment packet of the given type.
 
             Args:
@@ -41,9 +41,21 @@ class  Assign(Packet):
                 sys.exit(127)
 
 class Immediate(Assign):
+    """ GSM Immediate Assignment Packet.
+
+    Args:
+        data: the data to construct the packet with.
+
+    Attributes:
+        time_slot: When to connect.
+        page_mode: Extended Paging.
+
+    """
     def __init__(self, data):
         super().__init__()
         self.data = self.decode(data)
+        self.time_slot
+        self.page_mode
     def __str__(self):
         return "Immediate assignment packet"
     def decode(self, data):
