@@ -32,7 +32,9 @@
 import logging
 
 # Local Imports
-from system import System
+from antikythera.packets.system import System
+from antikythera.packets.page import Page 
+from antikythera.packets.assign import Assign
 
 # from antikythera import __version__
 

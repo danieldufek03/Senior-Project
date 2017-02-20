@@ -12,7 +12,7 @@ __license__ = "gpl3"
 
 _logger = logging.getLogger(__name__)
 
-from packet import Packet
+from antikythera.packets.packet import Packet
 
 class System(Packet):
     """ System information packet attributes and factory.
@@ -39,7 +39,7 @@ class System(Packet):
             elif type == "Type3": return Type3(data)
             elif type == "Type4": return Type4(data)
             elif type == "Type2ter": return Type2ter(data)
-            elif type == "Type2quater": return Type2quater(data)
+            elif type == "Type2quarter": return Type2quarter(data)
             elif type == "Type13": return Type13(data)
             else:
                 _logger.critical("Bad packet creation of type: " + type)
@@ -59,7 +59,7 @@ class Type1(System):
     def __init__(self, data):
         super().__init__()
         self.data = self.decode(data)
-        self.arfcns
+        self.arfcns = None
     def __str__(self):
         return "Type1 system information packet"
     def decode(self, data):
@@ -78,11 +78,11 @@ class Type2(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.neighbor_arfcns
+        self.data = self.decode(data)
+        self.neighbor_arfcns = None
     def __str__(self):
         return "Type2 system information packet"
-    def decode():
+    def decode(self, data):
         return data
 
 class Type3(System):
@@ -102,13 +102,13 @@ class Type3(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.cell_id
-        self.lai
-        self.gprs
+        self.data = self.decode(data)
+        self.cell_id = None
+        self.lai = None
+        self.gprs = None
     def __str__(self):
         return "Type3 system information packet"
-    def decode():
+    def decode(self, data):
         return data
 
 class Type4(System):
@@ -128,17 +128,17 @@ class Type4(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.lai
-        self.select_params
-        self.gprs
+        self.data = self.decode(data)
+        self.lai = None
+        self.select_params = None
+        self.gprs = None
     def __str__(self):
         return "Type4 system information packet"
-    def decode():
+    def decode(self, data):
         return data
 
 class Type2ter(System):
-     """ Type4 GSM System Information Packet.
+    """ Type4 GSM System Information Packet.
 
     Args:
         data: the data to construct the packet with.
@@ -152,15 +152,15 @@ class Type2ter(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.neighbor_arfcns
-        self.bcch_freqs
+        self.data = self.decode(data)
+        self.neighbor_arfcns = None
+        self.bcch_freqs = None
     def __str__(self):
         return "Type2ter system information packet"
-    def decode():
+    def decode(self, data):
         return data
 
-class Type2quater(System):
+class Type2quarter(System):
     """ Type2quarter GSM System Information Packet.
 
     Args:
@@ -172,11 +172,11 @@ class Type2quater(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.neighbor_3g
+        self.data = self.decode(data)
+        self.neighbor_3g = None
     def __str__(self):
-        return "Type2quater system information packet"
-    def decode():
+        return "Type2quarter system information packet"
+    def decode(self, data):
         return data
 
 class Type13(System):
@@ -191,9 +191,9 @@ class Type13(System):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.gprs
+        self.data = self.decode(data)
+        self.gprs = None
     def __str__(self):
         return "Type13 system information packet"
-    def decode():
+    def decode(self, data):
         return data

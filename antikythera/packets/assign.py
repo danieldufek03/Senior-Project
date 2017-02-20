@@ -7,7 +7,7 @@
 import sys
 import logging
 
-from packet import Packet
+from antikythera.packets.packet import Packet
 
 __copyright__ = "Finding Ray"
 __license__ = "gpl3"
@@ -35,7 +35,7 @@ class  Assign(Packet):
                 data: the data to construct the packet with.
 
             """
-            if type == "Type1": return Type1(data)
+            if type == "Immediate": return Immediate(data)
             else:
                 _logger.critical("Bad packet creation of type: " + type)
                 sys.exit(127)
@@ -54,8 +54,8 @@ class Immediate(Assign):
     def __init__(self, data):
         super().__init__()
         self.data = self.decode(data)
-        self.time_slot
-        self.page_mode
+        self.time_slot = None
+        self.page_mode = None
     def __str__(self):
         return "Immediate assignment packet"
     def decode(self, data):

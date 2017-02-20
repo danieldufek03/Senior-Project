@@ -7,7 +7,7 @@
 import sys
 import logging
 
-from packet import Packet
+from antikythera.packets.packet import Packet
 
 __copyright__ = "Finding Ray"
 __license__ = "gpl3"
@@ -63,11 +63,11 @@ class Type1(Page):
     def __init__(self, data):
         super().__init__()
         self.data = self.decode(data)
-        self.imsi
-        self.tmsi
-        self.ptmsi
-        self.page_mode
-        self.channel_needed
+        self.imsi = None
+        self.tmsi = None
+        self.ptmsi = None
+        self.page_mode = None
+        self.channel_needed = None
     def __str__(self):
         return "Type1 paging packet"
     def decode(self, data):
@@ -92,15 +92,15 @@ class Type2(Page):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
-        self.imsi
+        self.data = self.decode(data)
+        self.imsi = None
         self.tmsis = []
         self.ptmsis = []
-        self.page_mode
-        self.channel_needed
+        self.page_mode = None
+        self.channel_needed = None
     def __str__(self):
         return "Type2 paging packet"
-    def decode():
+    def decode(self, data):
         return data
 
 class Type3(Page):
@@ -121,12 +121,12 @@ class Type3(Page):
     """
     def __init__(self, data):
         super().__init__()
-        self.data = decode()
+        self.data = self.decode(data)
         self.tmsis = []
         self.ptmsis = []
-        self.page_mode
-        self.channel_needed
+        self.page_mode = None
+        self.channel_needed = None
     def __str__(self):
         return "Type3 paging packet"
-    def decode():
+    def decode(self, data):
         return data
