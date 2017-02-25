@@ -26,6 +26,11 @@ workaround to this which automates the install::
     cat requirements.txt | xargs -n 1 -L 1 pip install
     pip install -r test-requirements.txt
 
+Then the program can be installed and ran as follows::
+
+    python setup.py install
+    sonar [options]
+
 Description
 ===========
 

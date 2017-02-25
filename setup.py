@@ -3,9 +3,6 @@
 """
     Setup file for antikythera.
 
-    This file was generated with PyScaffold 2.5, a tool that easily
-    puts up a scaffold for your new Python project. Learn more under:
-    http://pyscaffold.readthedocs.org/
 """
 
 import sys
