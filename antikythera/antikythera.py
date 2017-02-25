@@ -6,9 +6,9 @@ console script. To run this script uncomment the following line in the
 entry_points section in setup.cfg:
 
     console_scripts =
-        hello_world = antikythera.module:function
+     fibonacci = ${package}.skeleton:run
 
-Then run `python setup.py install` which will install the command `hello_world`
+Then run `python setup.py install` which will install the command `fibonacci`
 inside your current environment.
 Besides console scripts, the header (i.e. until _logger...) of this file can
 also be used as template for Python modules.
@@ -23,19 +23,21 @@ import logging
 
 from antikythera import __version__
 
-__author__ = "Derek Goddeau"
-__copyright__ = "Derek Goddeau"
-__license__ = "gpl3"
+__author__ = "${author}"
+__copyright__ = "${author}"
+__license__ = "${license}"
 
 _logger = logging.getLogger(__name__)
 
 
 def fib(n):
-    """
-    Fibonacci example function
+    """Fibonacci example function
 
-    :param n: integer
-    :return: n-th Fibonacci number
+    Args:
+      n (int): integer
+
+    Returns:
+      int: n-th Fibonacci number
     """
     assert n > 0
     a, b = 1, 1
@@ -45,34 +47,69 @@ def fib(n):
 
 
 def parse_args(args):
-    """
-    Parse command line parameters
+    """Parse command line parameters
 
-    :param args: command line parameters as list of strings
-    :return: command line parameters as :obj:`airgparse.Namespace`
+    Args:
+      args ([str]): command line parameters as list of strings
+
+    Returns:
+      :obj:`argparse.Namespace`: command line parameters namespace
     """
     parser = argparse.ArgumentParser(
         description="Just a Fibonnaci demonstration")
     parser.add_argument(
-        '-v',
         '--version',
         action='version',
         version='antikythera {ver}'.format(ver=__version__))
     parser.add_argument(
         dest="n",
         help="n-th Fibonacci number",
+        type=int,
         metavar="INT")
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        dest="loglevel",
+        help="set loglevel to INFO",
+        action='store_const',
+        const=logging.INFO)
+    parser.add_argument(
+        '-vv',
+        '--very-verbose',
+        dest="loglevel",
+        help="set loglevel to DEBUG",
+        action='store_const',
+        const=logging.DEBUG)
     return parser.parse_args(args)
 
 
+def setup_logging(loglevel):
+    """Setup basic logging
+
+    Args:
+      loglevel (int): minimum loglevel for emitting messages
+    """
+    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+    logging.basicConfig(level=loglevel, stream=sys.stdout,
+                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
+
+
 def main(args):
+    """Main entry point allowing external calls
+
+    Args:
+      args ([str]): command line parameter list
+    """
     args = parse_args(args)
+    setup_logging(args.loglevel)
+    _logger.debug("Starting crazy calculations...")
     print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
     _logger.info("Script ends here")
 
 
 def run():
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    """Entry point for console_scripts
+    """
     main(sys.argv[1:])
 
 
