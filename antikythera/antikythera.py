@@ -5,7 +5,6 @@
 The main program loop.
 
 """
-import argparse
 import sys
 import logging
 
