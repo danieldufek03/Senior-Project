@@ -1,3 +1,4 @@
+appdirs
 sphinx
 sphinx_rtd_theme
 wheel
