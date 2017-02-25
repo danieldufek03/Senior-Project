@@ -46,18 +46,18 @@ def main(args):
         setup_logs(logging.WARNING)
 
     # Save input parameters to logfile
-    _logger.info("[*] Starting main()")
-    _logger.info("[*] Threads Requested: {}".format(args.threads))
+    _logger.info("Starting main()")
+    _logger.info("Threads Requested: {}".format(args.threads))
     if args.capture is not None:
-        _logger.info("[*] Input Source: {}".format(args.capture))
+        _logger.info("Input Source: {}".format(args.capture))
     else:
-        _logger.info("[*] Input Source: {}".format(args.interface))
+        _logger.info("Input Source: {}".format(args.interface))
 
     # Start program loop
-    _logger.info("[*] Setup complete starting program".format(args.interface))
+    _logger.info("Setup complete starting program".format(args.interface))
     anti()
     
-    _logger.info("[*] All done, shutting down.")
+    _logger.info("All done, shutting down.")
     logging.shutdown()
 
 
