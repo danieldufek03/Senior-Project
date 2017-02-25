@@ -37,7 +37,8 @@ def main(args):
       args ([str]): command line parameter list
 
     """
-    args = parse_args(args)
+    parser = create_parser()
+    args = parser.argparse(args)
 
     # Set up logs, default to warning
     if args.loglevel:
@@ -62,7 +63,7 @@ def main(args):
 
 
 
-def parse_args(args):
+def create_parser():
     """ Parse command line parameters.
 
     :return: command line parameters as :obj:`argparse.Namespace`
@@ -118,7 +119,7 @@ def parse_args(args):
         help="The identifier of the network interface to use.",
         action='store')
 
-    return parser.parse_args(args)
+    return parser
 
 
 def setup_logs(loglevel):
