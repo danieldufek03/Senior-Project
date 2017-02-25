@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" antikythera.py
+""" cli.py
 
-This is the Antikythera console script.
-
-To run this script uncomment the following line in the
-entry_points section in setup.cfg:
-
-    console_scripts =
-        hello_world = antikythera.module:function
-
-Then run `python setup.py install` which will install the command `hello_world`
-inside your current environment.
-
-Todo:
-    * Add Windows logging
+This is the Antikythera console script. It provides the
+entry points that are used to run the program when it is
+installed. To install the program run ``python setup.py install``
+and it will be installed on the system.
 
 """
 import os
@@ -23,6 +14,7 @@ import argparse
 import logging
 
 from antikythera import __version__
+from antikythera.antikythera import anti
 
 try:
     import appdirs
@@ -36,34 +28,36 @@ __license__ = "GNU GPLv3+"
 _logger = logging.getLogger(__name__)
 
 def main(args):
-    """Main entry point allowing external calls
+    """Main entry point allowing external calls.
+
+    Collects command line arguments, sets up the logs, and logs information
+    about them. Then it starts the program loop.
 
     Args:
       args ([str]): command line parameter list
 
     """
-    _logger.debug("Starting main()")
     args = parse_args(args)
 
-    # Setup logs
-    if args.debug:
-        loglevel = "DEBUG"
+    # Set up logs, default to warning
+    if args.loglevel:
+        setup_logs(args.loglevel)
     else:
-        loglevel = args.log
-    setup_logs(loglevel)
+        setup_logs(logging.WARNING)
 
-    if args.verbose:
-        print("[*] Verbose")
-
-    print("[*] Threads".format(args.threads))
-
+    # Save input parameters to logfile
+    _logger.info("[*] Starting main()")
+    _logger.info("[*] Threads Requested: {}".format(args.threads))
     if args.capture is not None:
-        print("[*] Input Source:".format(args.capture))
+        _logger.info("[*] Input Source: {}".format(args.capture))
     else:
-        print("[*] Input Source:".format(args.interface))
-    
+        _logger.info("[*] Input Source: {}".format(args.interface))
 
-    _logger.debug("All done, shutting down.")
+    # Start program loop
+    _logger.info("[*] Setup complete starting program".format(args.interface))
+    anti()
+    
+    _logger.info("[*] All done, shutting down.")
     logging.shutdown()
 
 
@@ -93,24 +87,20 @@ def parse_args(args):
         const=1,
         help="Number of threads to use.",
         action='store'),
-    parser.add_argument(
+    logs.add_argument(
         '-v',
         '--verbose',
-        help="Increase verbosity of output.",
-        action='store_true'),
+        dest="loglevel",
+        help="set loglevel to INFO",
+        action='store_const',
+        const=logging.INFO)
     logs.add_argument(
-        '-d',
-        '--debug',
-        help="Set logging level to DEBUG.",
-        action='store_true'),
-    logs.add_argument(
-        '-l',
-        '--log',
-        nargs='?',
-        type=str,
-        default='INFO',
-        help="Set logging level, defaults to INFO.",
-        action='store'),
+        '-vv',
+        '--very-verbose',
+        dest="loglevel",
+        help="set loglevel to DEBUG",
+        action='store_const',
+        const=logging.DEBUG)
     source.add_argument(
         '-c',
         '--capture',
@@ -150,21 +140,19 @@ def setup_logs(loglevel):
             os.makedirs(logdir)
         except OSError as e:
             print("{}".format(e))
-    logfile = logdir + "log.txt"
+    logfile = logdir + ".txt"
+    print("[*] Logfile: {}".format(logfile))
 
     # Convert `logging' string to a level that can be set
-    numeric_level = getattr(logging, loglevel.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError('[*] Invalid log level: {}'.format(loglevel))
-    logging.basicConfig(level=numeric_level, filename=logfile, filemode='w')
+    logging.basicConfig(level=loglevel, filename=logfile, filemode='w')
 
     # create file handler which logs messages
-    fh = logging.FileHandler('../main.log')
-    fh.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(logfile)
+    fh.setLevel(loglevel)
 
     # create console handler
     ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
+    ch.setLevel(loglevel)
 
     # add the handlers to the logger
     _logger.addHandler(fh)
@@ -176,7 +164,8 @@ def run():
 
     """
     main(sys.argv[1:])
+    return 0
 
 
 if __name__ == "__main__":
-    run()
+    sys.exit(run())

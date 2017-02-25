@@ -30,7 +30,7 @@ __license__ = "${license}"
 _logger = logging.getLogger(__name__)
 
 
-def fib(n):
+def anti():
     """Fibonacci example function
 
     Args:
@@ -39,6 +39,7 @@ def fib(n):
     Returns:
       int: n-th Fibonacci number
     """
+    n = 5
     assert n > 0
     a, b = 1, 1
     for i in range(n-1):
