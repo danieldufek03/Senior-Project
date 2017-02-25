@@ -17,12 +17,20 @@ Todo:
     * Add Windows logging
 
 """
-import argparse
+import os
 import sys
+import argparse
 import logging
 
 from antikythera import __version__
 
+try:
+    import appdirs
+except ImportError as e:
+    print("{}\nMaybe try `pip install -r requirements.txt'".format(e))
+    sys.exit(1)
+
+__author__= "Finding Ray"
 __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
 _logger = logging.getLogger(__name__)
@@ -136,13 +144,13 @@ def setup_logs(loglevel):
             for more information.
 
     """
-    # Detect OS and set logfile location
-    if sys.platform.startswith('linux'):
-        logfile = '/var/tmp/anti.log'
-    elif sys.platform.startswith('win32'):
-        print("[*] Not implemented")
-    else:
-        logfile = '/var/tmp/anti.log'
+    logdir = appdirs.user_log_dir(__name__, __author__)
+    if not os.path.exists(logdir):
+        try:
+            os.makedirs(logdir)
+        except OSError as e:
+            print("{}".format(e))
+    logfile = logdir + "log.txt"
 
     # Convert `logging' string to a level that can be set
     numeric_level = getattr(logging, loglevel.upper(), None)
