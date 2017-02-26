@@ -1,4 +1,5 @@
 appdirs
+pyshark
 sphinx
 sphinx_rtd_theme
 wheel
