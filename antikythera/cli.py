@@ -46,19 +46,24 @@ def main(args):
     else:
         setup_logs(logging.WARNING)
 
-    # Save input parameters to logfile
-    _logger.info("Starting main()")
+    # Save input parameters to logfile and set them
+    _logger.info("Starting gathered arguments, setting them")
     _logger.info("Threads Requested: {}".format(args.threads))
     if args.capture is not None:
         _logger.info("Input Source: {}".format(args.capture))
-        _logger.info("Setup complete starting program".format(args.interface))
-        IMSI_detector = anti(args.threads, capturefile=args.capture)
+        if args.qsize is not None:
+            IMSI_detector = anti(args.threads, capturefile=args.capture, max_qsize=args.qsize)
+        else:
+            IMSI_detector = anti(args.threads, capturefile=args.capture)
     else:
-        _logger.info("Setup complete starting program".format(args.interface))
         _logger.info("Input Source: {}".format(args.interface))
-        IMSI_detector = anti(args.threads, interface=args.interface)
+        if args.qsize is not None:
+            IMSI_detector = anti(args.threads, interface=args.interface, max_qsize=args.qsize)
+        else:
+            IMSI_detector = anti(args.threads, interface=args.interface)
 
     # Start Subprocesses
+    _logger.info("Setup complete starting program")
     IMSI_detector.start()
 
     # Wait
@@ -91,8 +96,15 @@ def create_parser():
         nargs='?',
         type=int,
         default=1,
-        const=1,
         help="Number of threads to use.",
+        action='store'),
+    parser.add_argument(
+        '-q',
+        '--qsize',
+        nargs='?',
+        type=int,
+        default=None,
+        help="The maximum queue size for packets waiting to be processed.",
         action='store'),
     logs.add_argument(
         '-v',
