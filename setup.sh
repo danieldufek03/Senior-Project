@@ -24,7 +24,7 @@ docker_setup()
     apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
     apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
     apt-get --yes install zlib1g-dev
-    apt-get --assume-yes --force-yes install tshark
+    apt-get --yes --assume-yes --force-yes install tshark
         
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed
