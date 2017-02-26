@@ -14,11 +14,11 @@ from queue import Queue, Full
 _logger = logging.getLogger(__name__)
 
 
-def radio(thread_id, q):
+def radio(process_id, q):
     """ Grab the packets from the radio interface.
 
     """
-    _logger.info("Radio worker starting on thread {}.".format(thread_id))
+    _logger.info("Radio worker process {} started.".format(process_id))
 
     i=0
     while True:
@@ -26,10 +26,10 @@ def radio(thread_id, q):
             p = "Packet {}".format(i)
             i+=1
             q.put(p, block=True, timeout=10)
-            _logger.debug("Thread {}: Produced Packet {}: Queue size is now {}.".format(thread_id, p, q.qsize()))
+            _logger.debug("Process {} produced packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
             sleep(random())
         except Full:
-            _logger.debug("Thread {}: Queue full.".format(thread_id))
+            _logger.warning("Process {} cannot write to full Queue.".format(process_id))
             sleep(1)
 
 
