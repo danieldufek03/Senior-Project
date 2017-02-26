@@ -13,7 +13,9 @@ echo "[*] Detected system architecture $ARCH"
 docker_setup()
 {
 
-    # Add repository for ffmpeg package
+   	export DEBIAN_FRONTEND=noninteractive
+
+    #Add repository for ffmpeg package
     echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
     echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
 
