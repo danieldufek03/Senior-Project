@@ -9,7 +9,9 @@ import logging
 
 from kivy.app import App
 from kivy.uix.button import Button
+from kivy.logger import Logger
 
+logging.Logger.manager.root = Logger
 _logger = logging.getLogger(__name__)
 
 class MetricDisplay(App):
@@ -20,9 +22,8 @@ class MetricDisplay(App):
                       font_size=100)
 
 
-def display():
+def run():
     MetricDisplay().run()
-
 
 if __name__ == "__main__":
-    MetricDisplay().run()
+    run()

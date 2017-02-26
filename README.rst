@@ -13,6 +13,17 @@ Description
 
 IMSI Catcher detection, analysis and display.
 
+Usage
+-----
+
+To run with GUI::
+
+    anti [kivy args] -- [non-kivy args]
+
+To run headless::
+
+    anti-cli
+
 
 Development Environment Setup
 =============================
@@ -29,7 +40,7 @@ Linux
 -----
 
 Optionally just run the setup script ``setup.sh``.
-For manual installation install Cython and Kivy dependancies::
+For manual installation install Cython and Kivy dependencies::
 
     apt-get --yes update
     apt-get install deb-multimedia-keyring git build-essential
@@ -37,7 +48,7 @@ For manual installation install Cython and Kivy dependancies::
     apt-get install libswscale-dev libavformat-dev libavcodec-dev
     apt-get install zlib1g-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
 
-Install tshark::
+Install Tshark::
 
     apt-get --yes install tshark
 
@@ -58,4 +69,3 @@ workaround to this which automates the install::
 Then the program can be installed and ran as follows::
 
     python setup.py install
-    sonar [options]
