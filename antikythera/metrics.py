@@ -5,10 +5,11 @@
 Analysis of the recieved packets.
 
 """
-import sys
 import logging
 
-from queue import Queue, Empty, Full
+from random import random
+from time import sleep
+from queue import Queue, Empty
 
 _logger = logging.getLogger(__name__)
 
@@ -21,13 +22,12 @@ def metrics(thread_id, q):
 
     while True:
         try:
-            _logger.debug("Thread {}: consuming.".format(thread_id))
             p = q.get(block=True, timeout=10)
-            q.task_done()
-            sleep(0.01)
+            _logger.debug("Thread {}: Consumed Packet {}: Queue size is now {}.".format(thread_id, p, q.qsize()))
+            sleep(random()+0.7)
         except Empty:
             _logger.info("Thread {}: queue empty.".format(thread_id))
-            sleep(0.01)
+            sleep(1)
 
 if __name__ == "__main__":
-    anti()
+    metrics()

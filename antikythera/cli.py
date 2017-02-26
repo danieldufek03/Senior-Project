@@ -52,12 +52,17 @@ def main(args):
     if args.capture is not None:
         _logger.info("Input Source: {}".format(args.capture))
         _logger.info("Setup complete starting program".format(args.interface))
-        anti(args.threads, capturefile=args.capture)
+        IMSI_detector = anti(args.threads, capturefile=args.capture)
     else:
         _logger.info("Setup complete starting program".format(args.interface))
         _logger.info("Input Source: {}".format(args.interface))
-        anti(args.threads, interface=args.interface)
+        IMSI_detector = anti(args.threads, interface=args.interface)
 
+    # Start Subprocesses
+    IMSI_detector.start()
+
+    # Wait
+    IMSI_detector.join()
     
     _logger.info("All done, shutting down.")
     logging.shutdown()

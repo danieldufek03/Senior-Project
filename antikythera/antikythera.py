@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """ antikythera.py
 
-The main program loop.
+The main program manager.
 
 """
-import sys
 import logging
 
-from threading import Thread
-from queue import Queue
+from multiprocessing import Manager, Process, Pool, Queue
 
 #from antikythera.gui import display
 from antikythera.radio import radio
@@ -18,33 +16,62 @@ from antikythera.metrics import metrics
 _logger = logging.getLogger(__name__)
 
 
-def anti(num_threads, interface=None, capturefile=None):
-    """ Start the worker threads.
+class anti():
+    """ Start the worker processes.
 
     """
-    q = Queue()
-    threads = []
-    
-    #_logger.debug("Creating radio worker thread 0")
-    #gui_worker = Thread(target=display, args=())
-    #gui_worker.setDaemon(False)
-    #threads.append(gui_worker)
+    def __init__(self, num_processes, interface=None, capturefile=None):
+        """
 
-    _logger.debug("Creating radio worker thread 1")
-    radio_worker = Thread(target=radio, args=(1, q))
-    radio_worker.setDaemon(True)
-    threads.append(radio_worker)
+        """
+        self.queue = Queue()
+        self.NUMBER_OF_PROCESSES = num_processes
+        self.workers = []
+        self.interface = interface
+        self.capturefile = capturefile
+        _logger.info(self)
 
-    for thread_id in range(num_threads):
-        _logger.debug("Creating metric worker thread {}".format(thread_id))
-        metric_worker = Thread(target=radio, args=(thread_id + 2, q))
-        metric_worker.setDaemon(True)
-        threads.append(metric_worker)
+    def __str__(self):
+        s = ("Initial Process Manager State:\n" +
+             "Queue: {}\n".format(self.queue) +
+             "Queue Size: {}\n".format(self.queue.qsize()) +
+             "Number of Processes Initial: {}\n".format(self.NUMBER_OF_PROCESSES) +
+             "Number of Processes Created: {}\n".format(len(self.workers)) +
+             "Network Interface: {}\n".format(self.interface) +
+             "Capture File: {}".format(self.capturefile)
+            )
+        return s
 
-    for thread in threads:
-        _logger.debug("Starting thread {}".format(thread))
-        thread.start()
 
-    for thread in threads:
-        _logger.debug("Joining thread {}".format(thread))
-        thread.join()
+    def start(self):
+        """
+
+        """
+        for i in range(self.NUMBER_OF_PROCESSES):
+            _logger.info("Creating metric worker process".format(i))
+            metric_worker = Process(target=metrics, args=(i + 2, self.queue))
+            self.workers.append(metric_worker)
+
+        _logger.info("Creating radio worker process")
+        radio_worker = Process(target=radio, args=(1, self.queue))
+        self.workers.append(radio_worker)
+
+        #_logger.info("Creating GUI process")
+        #gui_worker = Process(target=display, args=())
+        #self.workers.append(gui_worker)
+
+        for worker in self.workers:
+            _logger.info("Starting process".format(worker))
+            worker.start()
+
+
+    def join(self):
+        """
+
+        """
+        for worker in self.workers:
+            _logger.info("Joining process".format(worker))
+            worker.join()
+
+if __name__ == '__main__':
+    a = anti(0)
