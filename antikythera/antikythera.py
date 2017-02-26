@@ -33,12 +33,12 @@ class anti():
 
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
-             "Queue: {}\n".format(self.queue) +
-             "Queue Size: {}\n".format(self.queue.qsize()) +
-             "Number of Processes Initial: {}\n".format(self.NUMBER_OF_PROCESSES) +
-             "Number of Processes Created: {}\n".format(len(self.workers)) +
-             "Network Interface: {}\n".format(self.interface) +
-             "Capture File: {}".format(self.capturefile)
+             "[*] Queue: {}\n".format(self.queue) +
+             "[*] Queue Size: {}\n".format(self.queue.qsize()) +
+             "[*] Number of Processes Initial: {}\n".format(self.NUMBER_OF_PROCESSES) +
+             "[*] Number of Processes Created: {}\n".format(len(self.workers)) +
+             "[*] Network Interface: {}\n".format(self.interface) +
+             "[*] Capture File: {}".format(self.capturefile)
             )
         return s
 
