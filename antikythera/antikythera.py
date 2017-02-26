@@ -9,7 +9,6 @@ import logging
 
 from multiprocessing import Manager, Process, Pool, Queue
 
-#from antikythera.gui import display
 from antikythera.radio import radio
 from antikythera.metrics import metrics
 
@@ -20,7 +19,8 @@ class anti():
     """ Start the worker processes.
 
     """
-    def __init__(self, num_processes, interface=None, capturefile=None, max_qsize=100000):
+    def __init__(self, num_processes, headless, interface=None,
+                 capturefile=None, max_qsize=100000):
         """
 
         """
@@ -30,14 +30,16 @@ class anti():
         self.workers = []
         self.interface = interface
         self.capturefile = capturefile
+        self.headless = headless
         _logger.info(self)
 
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
+             "[*] Headless: {}\n".format(self.headless) +
              "[*] Queue: {}\n".format(self.queue) +
              "[*] Queue Size: {}\n".format(self.queue.qsize()) +
              "[*] Max Queue Size: {}\n".format(self.MAX_QUEUE_SIZE) +
-             "[*] Number of Processes Initial: {}\n".format(self.NUMBER_OF_PROCESSES) +
+             "[*] Number of Processes to Create: {}\n".format(self.NUMBER_OF_PROCESSES) +
              "[*] Number of Processes Created: {}\n".format(len(self.workers)) +
              "[*] Network Interface: {}\n".format(self.interface) +
              "[*] Capture File: {}".format(self.capturefile)
@@ -59,9 +61,13 @@ class anti():
         radio_worker = Process(target=radio, name="radio", args=("radio", self.queue))
         self.workers.append(radio_worker)
 
-        #_logger.info("Creating GUI process: gui")
-        #gui_worker = Process(target=display, name="gui", args=())
-        #self.workers.append(gui_worker)
+        if not self.headless:
+            from antikythera.gui import run
+            _logger.info("Creating GUI process: gui")
+            gui_worker = Process(target=run, name="gui", args=())
+            self.workers.append(gui_worker)
+        else:
+            _logger.info("Running in headless mode.")
 
         for worker in self.workers:
             _logger.info("Starting process: {}".format(worker))
