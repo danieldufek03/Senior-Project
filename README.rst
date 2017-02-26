@@ -12,6 +12,19 @@ IMSI Catcher detection, analysis and display.
 Development Environment Setup
 =============================
 
+Optionally just run the setup script ``setup.sh``.
+For manual installation install Cython and Kivy dependancies::
+
+    apt-get --yes update
+    apt-get install deb-multimedia-keyring git build-essential
+    apt-get install ffmpeg libsdl2-dev libsdl2-image-dev 
+    apt-get install libswscale-dev libavformat-dev libavcodec-dev
+    apt-get install zlib1g-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
+
+install tshark::
+
+    apt-get --yes install tshark
+
 Setup a virtual environment to ensure system packages are not used::
 
     mkdir -p ~/.virtualenv/antikythera

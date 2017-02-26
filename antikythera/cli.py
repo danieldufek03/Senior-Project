@@ -38,7 +38,7 @@ def main(args):
 
     """
     parser = create_parser()
-    args = parser.argparse(args)
+    args = parser.parse_args(args)
 
     # Set up logs, default to warning
     if args.loglevel:
@@ -51,12 +51,13 @@ def main(args):
     _logger.info("Threads Requested: {}".format(args.threads))
     if args.capture is not None:
         _logger.info("Input Source: {}".format(args.capture))
+        _logger.info("Setup complete starting program".format(args.interface))
+        anti(args.threads, capturefile=args.capture)
     else:
+        _logger.info("Setup complete starting program".format(args.interface))
         _logger.info("Input Source: {}".format(args.interface))
+        anti(args.threads, interface=args.interface)
 
-    # Start program loop
-    _logger.info("Setup complete starting program".format(args.interface))
-    anti()
     
     _logger.info("All done, shutting down.")
     logging.shutdown()
