@@ -13,7 +13,9 @@ echo "[*] Detected system architecture $ARCH"
 docker_setup()
 {
 
-    # Add repository for ffmpeg package
+   	export DEBIAN_FRONTEND=noninteractive
+
+    #Add repository for ffmpeg package
     echo "deb http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
     echo "deb-src http://www.deb-multimedia.org jessie main non-free" >> /etc/apt/sources.list
 
@@ -24,6 +26,7 @@ docker_setup()
     apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
     apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
     apt-get --yes install zlib1g-dev
+    apt-get --yes --assume-yes --force-yes install tshark
         
     # Install items in requirements.txt in order from top to bottom
     # This is required because the Cython package must be installed

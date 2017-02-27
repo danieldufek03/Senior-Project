@@ -1,6 +1,20 @@
-from kivy.app import App
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+""" gui.py
 
+The GUI for antikythera
+
+"""
+import logging
+
+from kivy.app import App
 from kivy.uix.button import Button
+from kivy.logger import Logger
+
+logging.Logger.manager.root = Logger
+_logger = logging.getLogger(__name__)
+
+_logger = logging.getLogger(__name__)
 
 class MetricDisplay(App):
     def build(self):
@@ -9,5 +23,9 @@ class MetricDisplay(App):
                       background_normal='',
                       font_size=100)
 
-if __name__ == "__main__":
+
+def run():
     MetricDisplay().run()
+
+if __name__ == "__main__":
+    run()
