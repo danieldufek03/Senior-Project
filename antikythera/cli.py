@@ -25,6 +25,7 @@ except ImportError as e:
 __author__= "Finding Ray"
 __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
+
 _logger = logging.getLogger(__name__)
 
 def main(args):
@@ -38,7 +39,14 @@ def main(args):
 
     """
     parser = create_parser()
-    args = parser.argparse(args)
+    args = parser.parse_args(args)
+
+    # Gather args
+    threads = args.threads
+    pcap = args.pcap
+    interface = args.interface
+    qsize = args.qsize
+    headless = args.headless
 
     # Set up logs, default to warning
     if args.loglevel:
@@ -46,17 +54,28 @@ def main(args):
     else:
         setup_logs(logging.WARNING)
 
-    # Save input parameters to logfile
-    _logger.info("Starting main()")
-    _logger.info("Threads Requested: {}".format(args.threads))
-    if args.capture is not None:
-        _logger.info("Input Source: {}".format(args.capture))
+    # Save input parameters to logfile and set them
+    _logger.info("Setting arguments")
+    _logger.info("Threads Requested: {}".format(threads))
+    if pcap is not None:
+        _logger.info("Input Source: {}".format(pcap))
+        if qsize is not None:
+            IMSI_detector = anti(threads, headless, capturefile=pcap, max_qsize=qsize)
+        else:
+            IMSI_detector = anti(threads, headless, capturefile=pcap)
     else:
-        _logger.info("Input Source: {}".format(args.interface))
+        _logger.info("Input Source: {}".format(interface))
+        if args.qsize is not None:
+            IMSI_detector = anti(threads, headless, interface=interface, max_qsize=qsize)
+        else:
+            IMSI_detector = anti(threads, headless, interface=interface)
 
-    # Start program loop
-    _logger.info("Setup complete starting program".format(args.interface))
-    anti()
+    # Start Subprocesses
+    _logger.info("Setup complete starting program")
+    IMSI_detector.start()
+
+    # Wait
+    IMSI_detector.join()
     
     _logger.info("All done, shutting down.")
     logging.shutdown()
@@ -85,9 +104,24 @@ def create_parser():
         nargs='?',
         type=int,
         default=1,
-        const=1,
+        dest="threads",
         help="Number of threads to use.",
         action='store'),
+    parser.add_argument(
+        '-q',
+        '--qsize',
+        nargs='?',
+        type=int,
+        default=None,
+        dest="qsize",
+        help="The maximum queue size for packets waiting to be processed.",
+        action='store'),
+    parser.add_argument(
+        '--headless',
+        default=False,
+        dest="headless",
+        help="Run in headless mode without GUI.",
+        action='store_true'),
     logs.add_argument(
         '-v',
         '--verbose',
@@ -108,6 +142,7 @@ def create_parser():
         nargs='?',
         type=str,
         default=None,
+        dest="pcap",
         help="Path to a capture file to use as input.",
         action='store'),
     source.add_argument(
@@ -116,6 +151,7 @@ def create_parser():
         nargs='?',
         type=str,
         default=None,
+        dest="interface",
         help="The identifier of the network interface to use.",
         action='store')
 
@@ -164,6 +200,17 @@ def run():
     """ Entry point for console_scripts.
 
     """
+    main(sys.argv[1:])
+    return 0
+
+
+def headless():
+    """ Entry point for console_scripts.
+
+    Force headless mode.
+
+    """
+    sys.argv.append('--headless')
     main(sys.argv[1:])
     return 0
 
