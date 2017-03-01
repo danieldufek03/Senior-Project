@@ -70,7 +70,7 @@ test_ubuntu:
     stage: test
     script:
         - apt-get --yes update
-        - apt-get --yes install python3
+        - apt-get --yes install python3 sudo
         - mkdir -p ~/.virtualenv
         - sudo python3 -m venv ~/.virtualenv/antikythera
         - source ~/.virtualenv/antikythera/bin/activate
