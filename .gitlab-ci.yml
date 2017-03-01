@@ -69,7 +69,7 @@ test_ubuntu:
     image: ubuntu
     stage: test
     script:
-        - apt-cache search python3
+        - apt-get update
         - apt-get install python3
         - mkdir -p ~/.virtualenv
         - python3 -m venv ~/.virtualenv/antikythera
