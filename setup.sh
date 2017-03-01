@@ -3,13 +3,8 @@
 # Setup script for installing the Cython and 
 # Kivy dependencies, and in the correct order.
 
-ARCH="$(uname -m)"
 
-echo "[*] Detected system architecture $ARCH"
-
-#
 # Assumes the python:latest image is used
-#
 docker_setup()
 {
 
@@ -37,11 +32,10 @@ docker_setup()
 
 }
 
-#
+
+
 # Shell executer from a Debian environment
-#
 # All installation and configureation done server side.
-#
 shell_setup()
 {
 
@@ -54,6 +48,23 @@ shell_setup()
 
 }
 
+
+# Exit script if any statement returns non-true value
+# Trace ERR through pipes
+set -e
+set -o pipefail
+
+
+# Check if ARM or x86
+ARCH="$(uname -m)"
+echo "[*] Detected system architecture $ARCH"
+
+
+# Check for root
+if (( $EUID != 0 )); then
+    echo "[*] Please run with sudo or as root."
+    exit 1
+fi
 
 if [ $ARCH = "x86_64" ]; then
 
