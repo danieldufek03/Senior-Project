@@ -64,6 +64,24 @@ test_rpi:
         - docker
 
 
+# Test Ubuntu
+test_x86:
+    image: ubuntu
+    stage: test
+    script:
+        - mkdir -p ~/.virtualenv
+        - python -m venv ~/.virtualenv/antikythera
+        - source ~/.virtualenv/antikythera/bin/activate
+        - bash setup.sh
+        - pip install -r test-requirements.txt
+        - python setup.py test
+        - python setup.py docs
+        - python setup.py install
+    tags:
+        - docker
+        - x86
+
+
 #####################
 # Build Sphinx Docs #
 #####################
