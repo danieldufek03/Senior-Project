@@ -11,7 +11,8 @@ antikythera
 Description
 ===========
 
-IMSI Catcher detection, analysis and display.
+IMSI Catcher detector, for detailed documentation see
+`finding-ray.gitlab.io/antikythera <https://finding-ray.gitlab.io/antikythera>`_.
 
 Usage
 -----
