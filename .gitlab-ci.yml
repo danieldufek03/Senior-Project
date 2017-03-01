@@ -65,7 +65,7 @@ test_rpi:
 
 
 # Test Ubuntu
-test_x86:
+test_ubuntu:
     image: ubuntu
     stage: test
     script:
