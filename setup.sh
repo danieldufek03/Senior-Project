@@ -34,7 +34,7 @@ debian_setup()
 
 
 # Assumes the python:latest image is used
-debian_setup()
+ubuntu_setup()
 {
 
    	export DEBIAN_FRONTEND=noninteractive
