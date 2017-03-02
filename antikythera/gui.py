@@ -25,6 +25,8 @@ class MetricDisplay(App):
 
 
 def run():
+    parser = create_parser()
+    args = parser.parse_args(args)
     MetricDisplay().run()
 
 if __name__ == "__main__":
