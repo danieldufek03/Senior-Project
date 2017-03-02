@@ -40,7 +40,6 @@ ubuntu_setup()
    	export DEBIAN_FRONTEND=noninteractive
 
     # Install Kivy / Cython dependencies
-    apt-get --yes update && apt-get --assume-yes --force-yes install deb-multimedia-keyring
     apt-get --yes update && apt-get --yes install git build-essential
     apt-get --yes install ffmpeg libsdl2-dev libsdl2-image-dev
     apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
