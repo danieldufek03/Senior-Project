@@ -33,7 +33,7 @@ debian_setup()
 }
 
 
-# Assumes the python:latest image is used
+# Assumes the ubuntu:latest image is used
 ubuntu_setup()
 {
 
@@ -45,6 +45,7 @@ ubuntu_setup()
     apt-get --yes install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
     apt-get --yes install libswscale-dev libavformat-dev libavcodec-dev
     apt-get --yes install zlib1g-dev
+    apt-get --yes install python3-dev
     apt-get --yes --assume-yes --force-yes install tshark
         
     # Install items in requirements.txt in order from top to bottom
