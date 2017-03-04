@@ -26,10 +26,10 @@ def radio(process_id, q):
             p = "Packet {}".format(i)
             i+=1
             q.put(p, block=True, timeout=10)
-            _logger.debug("Process {} produced packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
+            _logger.trace("Process {} produced packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
             sleep(random())
         except Full:
-            _logger.warning("Process {} cannot write to full Queue.".format(process_id))
+            _logger.info("Process {} cannot write to full Queue.".format(process_id))
             sleep(1)
 
 
