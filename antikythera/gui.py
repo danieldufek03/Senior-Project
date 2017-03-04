@@ -78,11 +78,9 @@ def run():
     args = parser.parse_args(sys.argv[1:])
 
     if args.loglevel:
-        _logger.warning("Setting log level to warning")
         Logger.setLevel(level=args.loglevel)
     else:
         #loglevel = LOG_LEVELS.get(Config.get(['kivy', 'log_level']))
-        _logger.warning("Setting log level to warning")
         Logger.setLevel(level=logging.WARNING)
 
     _logger.debug("Passing args to detector")
