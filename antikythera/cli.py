@@ -27,6 +27,11 @@ __license__ = "GNU GPLv3+"
 
 _logger = logging.getLogger(__name__)
 
+# Define numerical value for a logging level
+# that is one numerical value lower than DEBUG
+logging.TRACE = 9
+
+
 def main(args):
     """Main entry point allowing external calls.
 
@@ -80,7 +85,6 @@ def main(args):
     logging.shutdown()
 
 
-
 def setup_logs(loglevel):
     """ Set up logger to be used between all modules.
 
@@ -94,6 +98,7 @@ def setup_logs(loglevel):
             for more information.
 
     """
+    # Setup Logging Directory
     logdir = appdirs.user_log_dir(__name__, __author__)
     if not os.path.exists(logdir):
         try:
@@ -102,6 +107,10 @@ def setup_logs(loglevel):
             print("{}".format(e))
     logfile = logdir + ".txt"
     print("[*] Logfile: {}".format(logfile))
+
+    # Add logging level TRACE
+    logging.addLevelName(logging.TRACE, "TRACE")
+    logging.Logger.trace = trace # Set Logger.trace to the trace function
 
     # Convert `logging' string to a level that can be set
     logging.basicConfig(level=loglevel, filename=logfile, filemode='w')
@@ -119,21 +128,19 @@ def setup_logs(loglevel):
     _logger.addHandler(ch)
 
 
+def trace(self, message, *args, **kws):
+    """ Define trace logging level
+
+    Yes, logger takes its '*args' as 'args'.
+
+    """
+    self._log(logging.TRACE, message, args, **kws) 
+
+
 def run():
     """ Entry point for console_scripts.
 
     """
-    main(sys.argv[1:])
-    return 0
-
-
-def headless():
-    """ Entry point for console_scripts.
-
-    Force headless mode.
-
-    """
-    sys.argv.append('--headless')
     main(sys.argv[1:])
     return 0
 
