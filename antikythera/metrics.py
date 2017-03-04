@@ -23,10 +23,10 @@ def metrics(process_id, q):
     while True:
         try:
             p = q.get(block=True, timeout=10)
-            _logger.debug("Process {} consumed packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
+            _logger.trace("Process {} consumed packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
             sleep(random()+2)
         except Empty:
-            _logger.warning("Process {} Queue empty.".format(process_id))
+            _logger.info("Process {} Queue empty.".format(process_id))
             sleep(1)
 
 if __name__ == "__main__":
