@@ -1,6 +1,3 @@
-pathos
-multiprocess
-dill
 appdirs
 pyshark
 sphinx
