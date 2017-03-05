@@ -20,7 +20,7 @@ except ImportError as e:
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_DELAY = 2
+DEFAULT_DELAY = 0.2
 
 
 class Capture():
@@ -40,13 +40,13 @@ class Capture():
 
         """
         sleep(2)
-        _logger.info("Capture: worker process {} started".format(self.process_id))
+        _logger.debug("{}: Process started successfully".format(self.process_id))
         if self.interface != None:
             self.radio_capture()
         elif self.capturefile != None:
             self.pcap_capture()
         else:
-            _logger.critical("Capture: no capture method supplied aborting!")
+            _logger.critical("{}: no capture method supplied aborting!".format(self.process_id))
 
 
     def radio_capture(self):
@@ -57,9 +57,9 @@ class Capture():
         for packet in capture.sniff_continuously():
             try:
                 self.q.put(packet, timeout=10)
-                _logger.trace("Capture: process {} produced packet {} Queue size is now {}".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
+                _logger.trace("{}: produced packet {} Queue size is now {}".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
             except Full:
-                _logger.warning("Capture: process {} cannot write to full Queue".format(self.process_id))
+                _logger.warning("{}: cannot write to full Queue".format(self.process_id))
                 sleep(1)
 
 
@@ -68,17 +68,17 @@ class Capture():
 
         """
         if self.delay == None:
-            _logger.warning("Capture: no delay specified setting to default {}".format(DEFAULT_DELAY))
+            _logger.warning("{}: no delay specified setting to default {}".format(self.process_id, DEFAULT_DELAY))
             self.delay = DEFAULT_DELAY
 
         capture = pyshark.FileCapture(self.capturefile)
         for packet in capture:
             try:
                 self.q.put(packet, block=True, timeout=10)
-                _logger.trace("Capture: process {} produced packet {} Queue size is now {}".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
+                _logger.trace("{}: produced packet {} Queue size is now {}".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
                 sleep(self.delay) # simulate wait
             except Full:
-                _logger.warning("Capture: process {} cannot write to full Queue".format(self.process_id))
+                _logger.warning("{}: cannot write to full Queue".format(self.process_id))
 
 
 if __name__ == "__main__":
