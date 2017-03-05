@@ -2,32 +2,32 @@
 # -*- coding: utf-8 -*-
 """ metrics.py
 
-Analysis of the recieved packets.
+Implementation of the metrics that detect IMSI Catchers
 
 """
 import logging
 
-from random import random
 from time import sleep
-from queue import Queue, Empty
 
 _logger = logging.getLogger(__name__)
 
-
-def metrics(process_id, q):
-    """ Perform analyasis of the packets.
+class Metrics():
+    """ The metrics
 
     """
-    _logger.info("Metrics: worker process {} started".format(process_id))
 
-    while True:
-        try:
-            p = q.get(timeout=10)
-            _logger.trace("Metrics: Process {} consumed packet {} Queue size is now {}".format(process_id, p['gsmtap'].frame_nr, q.qsize()))
-            sleep(1)
-        except Empty:
-            _logger.info("Metrics: Process {} Queue empty".format(process_id))
-            sleep(1)
+    def __init__(self, process_id):
+        """
+
+        """
+        self.process_id = process_id
+        _logger.debug("{}: Process started successfully".format(self.process_id))
+
+    def metrics(self):
+        while True:
+            _logger.trace("{}: doing metrics stuff".format(self.process_id))
+            sleep(3)
+
 
 if __name__ == "__main__":
-    metrics()
+    decoder()
