@@ -35,7 +35,7 @@ def test_cli_threadsHigh():
 def test_cli_capturePath():
     test_parser = create_parser()
     args = test_parser.parse_args(['-c ../data/mycapturefile.pcap'])
-    assert args.capture == ' ../data/mycapturefile.pcap'
+    assert args.pcap == ' ../data/mycapturefile.pcap'
 
 def test_cli_interface():
     test_parser = create_parser()
