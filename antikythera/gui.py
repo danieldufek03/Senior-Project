@@ -5,43 +5,12 @@
 The GUI for antikythera
 
 """
-####################################################
-#                                                  #
-#             Magic Happens Here                   #
-#                 Don't Touch                      #
-#                                                  #
-####################################################
-# Fix Kivy's logger so it is compatible with modules
-# using the standard python logger, this must remain
-# in the same order and be at the top of the entry
-# point module for the application.
-TRACE = 9
-def trace(self, message, *args, **kws):
-    """ Define trace logging level
-
-    Yes, logger takes its '*args' as 'args'.
-
-    """
-    self._log(TRACE, message, args, **kws) 
-
-# Add logging level TRACE
-import logging
-logging.addLevelName(TRACE, "TRACE") 
-
-# Set kivy logger as root logger
-from kivy.logger import Logger
-logging.Logger.manager.root = Logger
-
-# Set Logger.trace to the trace function
-# This must be set up -exactly- the same as
-# in the Kivy logging module or it will not work
-from functools import partial
-logging.Logger.trace = partial(Logger.log, logging.TRACE)
-
-
-################### </magic> ######################
-
 import sys
+import logging
+
+# Fix kivy's logging
+import antikythera.kivylogs
+from kivy.logger import Logger
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -84,7 +53,7 @@ def run():
         Logger.setLevel(level=logging.WARNING)
 
     _logger.debug("Passing args to detector")
-    IMSI_detector = anti(args.threads, args.headless, interface=args.interface, max_qsize=args.qsize)
+    IMSI_detector = anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
     _logger.info("Starting detector")
     IMSI_detector.start()
 
