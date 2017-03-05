@@ -10,10 +10,13 @@ import logging
 import argparse
 import appdirs
 
-from multiprocessing import Manager, Process, Pool, Queue
+from multiprocessing import Process, Queue
 
-from antikythera.radio import radio
-from antikythera.metrics import metrics
+import antikythera.pysharkpatch
+
+from antikythera.capture import Capture
+from antikythera.decoder import Decoder
+from antikythera.metrics import Metrics
 
 _logger = logging.getLogger(__name__)
 
@@ -59,18 +62,33 @@ class anti():
 
         """
         for i in range(self.NUMBER_OF_PROCESSES):
-            name = "metric-" + str(i)
-            _logger.info("Creating metric process: {}".format(name))
-            metric_worker = Process(target=metrics, name=name, daemon=True, args=(name, self.queue))
-            self.workers.append(metric_worker)
+            name = "decoder-" + str(i)
+            decoder = Decoder(name, self.queue)
+            _logger.info("Anti: Creating decoder process {}".format(name))
+            decoder_worker = Process(target=decoder.decode, name=name, daemon=True, args=())
+            self.workers.append(decoder_worker)
 
-        _logger.info("Creating radio process: radio")
-        radio_worker = Process(target=radio, name="radio", daemon=True, args=("radio", self.queue))
-        self.workers.append(radio_worker)
+        cap = Capture("capture", self.queue, capturefile=self.capturefile)
+
+        _logger.info("Anti: Creating capture process capture")
+        if self.interface != None:
+            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
+        elif self.capturefile != None:
+            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
+        else:
+            _logger.critical("Anti: no capture method supplied aborting!")
+
+        self.workers.append(cap_worker)
+
+        metrics = Metrics("metrics")
+        metrics_worker = Process(target=metrics.metrics, name="metrics", daemon=True, args=())
+        self.workers.append(metrics_worker)
 
         for worker in self.workers:
-            _logger.info("Starting process: {}".format(worker))
+            _logger.info("Anti: Starting process {}".format(worker))
             worker.start()
+
+        _logger.info("Anti: successfully started")
 
 
     def join(self):
@@ -78,7 +96,7 @@ class anti():
 
         """
         for worker in self.workers:
-            _logger.info("Joining process: {}".format(worker))
+            _logger.info("Anti: Joining process {}".format(worker))
             worker.join()
     
 
