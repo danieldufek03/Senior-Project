@@ -84,7 +84,7 @@ def run():
         Logger.setLevel(level=logging.WARNING)
 
     _logger.debug("Passing args to detector")
-    IMSI_detector = anti(args.threads, args.headless, interface=args.interface, max_qsize=args.qsize)
+    IMSI_detector = anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
     _logger.info("Starting detector")
     IMSI_detector.start()
 
