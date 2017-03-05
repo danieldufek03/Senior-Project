@@ -7,7 +7,9 @@ antikythera
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
     :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
 
-This is the documentation of **antikythera**.
+This is the documentation of **antikythera**, the portable 
+:abbr:`IMSI (International Mobile Subscribers Identity)` catcher detector
+`gitlab.com/finding-ray/antikythera <https://gitlab.com/finding-ray/antikythera>`_.
 
 :abbr:`GUI (Graphical User Interface)` dependancies Debian::
 
