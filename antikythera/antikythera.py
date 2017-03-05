@@ -10,10 +10,13 @@ import logging
 import argparse
 import appdirs
 
-from multiprocess import Process, Queue
+from multiprocessing import Process, Queue
+
+import antikythera.pysharkpatch
 
 from antikythera.capture import Capture
-from antikythera.metrics import metrics
+from antikythera.decoder import Decoder
+from antikythera.metrics import Metrics
 
 _logger = logging.getLogger(__name__)
 
@@ -59,22 +62,27 @@ class anti():
 
         """
         for i in range(self.NUMBER_OF_PROCESSES):
-            name = "metric-" + str(i)
-            _logger.info("Anti: Creating metric process {}".format(name))
-            metric_worker = Process(target=metrics, name=name, daemon=True, args=(name, self.queue))
-            self.workers.append(metric_worker)
+            name = "decoder-" + str(i)
+            decoder = Decoder(name, self.queue)
+            _logger.info("Anti: Creating decoder process {}".format(name))
+            decoder_worker = Process(target=decoder.decode, name=name, daemon=True, args=())
+            self.workers.append(decoder_worker)
 
-        cap = Capture("radio", self.queue, capturefile=self.capturefile)
+        cap = Capture("capture", self.queue, capturefile=self.capturefile)
 
-        _logger.info("Anti: Creating radio process radio")
+        _logger.info("Anti: Creating capture process capture")
         if self.interface != None:
-            cap_worker = Process(target=cap.capture, name="radio", daemon=True, args=())
+            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
         elif self.capturefile != None:
-            cap_worker = Process(target=cap.capture, name="radio", daemon=True, args=())
+            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
         else:
             _logger.critical("Anti: no capture method supplied aborting!")
 
         self.workers.append(cap_worker)
+
+        metrics = Metrics("metrics")
+        metrics_worker = Process(target=metrics.metrics, name="metrics", daemon=True, args=())
+        self.workers.append(metrics_worker)
 
         for worker in self.workers:
             _logger.info("Anti: Starting process {}".format(worker))
