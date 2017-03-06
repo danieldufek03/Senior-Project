@@ -9,8 +9,11 @@ import os
 import logging
 import argparse
 import appdirs
+import multiprocessing as mp
 
+from time import sleep
 from multiprocessing import Process, Queue
+from sqlitedict import SqliteDict
 
 import antikythera.pysharkpatch
 
@@ -25,22 +28,25 @@ __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
 
 
-class anti():
-    """ Start the worker processes.
+class Anti(Process):
+    """ Start and monitor the worker processes.
 
     """
     def __init__(self, num_processes, headless, interface=None,
-                 capturefile=None, max_qsize=100000):
+                 capturefile=None, max_qsize=100000, *args, **kwargs):
         """
 
         """
+        super(Anti, self).__init__(*args, **kwargs)
         self.MAX_QUEUE_SIZE = max_qsize
-        self.queue = Queue(self.MAX_QUEUE_SIZE)
+        self.pkt_queue = Queue(self.MAX_QUEUE_SIZE)
+        self.error_queue = Queue()
         self.NUMBER_OF_PROCESSES = num_processes
         self.workers = []
         self.interface = interface
         self.capturefile = capturefile
         self.headless = headless
+        self.exit = mp.Event()
         #_logger.info(self)
 
     def __str__(self):
@@ -57,48 +63,76 @@ class anti():
         return s
 
 
-    def start(self):
+    def run(self):
         """
 
         """
+        try:
+            cpus = mp.cpu_count()
+            _logger.info("Anti: system has {} CPUs available".format(cpus))
+        except NotImplementedError as e:
+            _logger.info("Anti: could not get number of available CPUs")
+
         for i in range(self.NUMBER_OF_PROCESSES):
             name = "decoder-" + str(i)
-            decoder = Decoder(name, self.queue)
             _logger.info("Anti: Creating decoder process {}".format(name))
-            decoder_worker = Process(target=decoder.decode, name=name, daemon=True, args=())
+            decoder_worker = Decoder(name, self.pkt_queue, name=name, daemon=True)
             self.workers.append(decoder_worker)
-
-        cap = Capture("capture", self.queue, capturefile=self.capturefile)
 
         _logger.info("Anti: Creating capture process capture")
         if self.interface != None:
-            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
+            capture_worker = Capture("capture", self.pkt_queue, interface=self.interface, name="decoder", daemon=True)
         elif self.capturefile != None:
-            cap_worker = Process(target=cap.capture, name="capture", daemon=True, args=())
+            cap_worker = Capture("capture", self.pkt_queue, capturefile=self.capturefile, name="decoder", daemon=True)
         else:
             _logger.critical("Anti: no capture method supplied aborting!")
 
         self.workers.append(cap_worker)
 
-        metrics = Metrics("metrics")
-        metrics_worker = Process(target=metrics.metrics, name="metrics", daemon=True, args=())
+        metrics_worker = Metrics("metrics", name="metrics", daemon=True)
         self.workers.append(metrics_worker)
 
         for worker in self.workers:
             _logger.info("Anti: Starting process {}".format(worker))
             worker.start()
 
+        _logger.info("Anti: spawned {} child processes".format(len(mp.active_children())))
         _logger.info("Anti: successfully started")
+
+        self.join()
+
+    def shutdown(self):
+        _logger.info("Anti: received shutdown command")
+        self.exit.set()
 
 
     def join(self):
         """
 
         """
+        while not self.exit.is_set():
+            sleep(1)
+        
+        _logger.debug("Anti: Active children {}".format(mp.active_children()))
+        _logger.info("Anti: shutting down child processes")
         for worker in self.workers:
-            _logger.info("Anti: Joining process {}".format(worker))
-            worker.join()
-    
+            _logger.debug("Anti: shutting down {}".format(worker))
+            worker.shutdown()
+
+        sleep(10)
+        for worker in self.workers:
+            if worker.is_alive():
+                _logger.warning("Anti: process {} still alive".format(worker.process_id))
+
+        _logger.info("Anti: Exiting")
+
+
+    def create_db():
+        """ Create the database if needed.
+
+        """
+        pass
+
 
 def create_parser():
     """ Parse command line parameters.

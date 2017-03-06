@@ -13,19 +13,21 @@ import sys
 import logging
 
 from antikythera import __version__
-from antikythera.antikythera import anti, create_parser
+from antikythera.antikythera import Anti, create_parser
+
+_logger = logging.getLogger(__name__)
 
 try:
     import appdirs
 except ImportError as e:
-    print("{}\nMaybe try `pip install -r requirements.txt'".format(e))
+    _logger.error("CLI: {}".format(e))
+    _logger.info("CLI: Maybe try `pip install -r requirements.txt'")
     sys.exit(1)
 
 __author__= "Finding Ray"
 __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
 
-_logger = logging.getLogger(__name__)
 
 # Define numerical value for a logging level
 # that is one numerical value lower than DEBUG
