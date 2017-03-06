@@ -31,5 +31,7 @@ logging.Logger.manager.root = Logger
 # Set Logger.trace to the trace function
 # This must be set up -exactly- the same as
 # in the Kivy logging module or it will not work
+# partial() call returns Logger.log function
+# with loggin.TRACE as baked in parameter
 from functools import partial
-logging.Logger.trace = partial(Logger.log, logging.TRACE)
+logging.Logger.trace = partial(Logger.log, logging.TRACE) 
