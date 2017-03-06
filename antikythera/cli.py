@@ -13,7 +13,7 @@ import sys
 import logging
 
 from antikythera import __version__
-from antikythera.antikythera import anti, create_parser
+from antikythera.antikythera import Anti, create_parser
 
 _logger = logging.getLogger(__name__)
 
