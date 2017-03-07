@@ -167,15 +167,12 @@ class MetricDisplay(App):
         """
 
         """
-        _logger.info("GUI: Sending shutdown signal to Anti")
-        self.IMSI_detector.shutdown()
-        sleep(30)
-        _logger.info("GUI: Active children {}".format(mp.active_children()))
         if self.IMSI_detector.is_alive():
-            _logger.warning("GUI: Anti process still alive")
-        else:
-            _logger.info("GUI: Successfully terminated child processes")
-
+            _logger.info("GUI: Sending shutdown signal to Anti")
+            self.IMSI_detector.shutdown()
+            _logger.info("GUI: Joining Anti process {}".format(self.IMSI_detector.pid))
+            self.IMSI_detector.join()
+        _logger.info("GUI: Shutdown successfully".format(self.IMSI_detector.pid))
 
 
 def run():
@@ -183,7 +180,7 @@ def run():
 
     """
     _logger.info("GUI: Starting GUI App")
-    display = MetricDisplay().run()
+    MetricDisplay().run()
 
 
 if __name__ == "__main__":
