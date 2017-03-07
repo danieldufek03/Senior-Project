@@ -10,7 +10,6 @@ import multiprocessing as mp
 
 
 from random import random
-from time import sleep
 from queue import Empty
 from multiprocessing import Process, Queue
 
@@ -47,10 +46,8 @@ class Decoder(Process):
                 _logger.debug("{}: Consumed packet Queue size is now {}".format(self.process_id, self.q.qsize()))
                 self.decode_packet(packet)
                 self.store_packet(packet)
-                sleep(1)
             except Empty:
                 _logger.info("{}: Queue empty".format(self.process_id))
-                sleep(1)
         _logger.info("{}: Exiting".format(self.process_id))
 
 
@@ -75,5 +72,7 @@ class Decoder(Process):
         self.exit.set()
 
 
+
+
 if __name__ == "__main__":
-    decoder()
+    Decoder()

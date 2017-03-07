@@ -22,7 +22,6 @@ class Metrics(Process):
         super(Metrics, self).__init__(*args, **kwargs)
         self.process_id = process_id
         _logger.debug("{}: Process started successfully".format(self.process_id))
-        self.exc_info = None
         self.exit = mp.Event()
 
 

@@ -12,6 +12,7 @@ from random import random
 from time import sleep
 from queue import Full
 from multiprocessing import Process, Queue
+from queue import Empty
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +31,9 @@ class Capture(Process):
 
     """
 
-    def __init__(self, process_id, q, interface=None, capturefile=None, delay=None, *args, **kwargs):
+    def __init__(self, process_id, q, *args, interface=None, capturefile=None,
+                 delay=None, **kwargs):
+
         super(Capture, self).__init__(*args, **kwargs)
         self.process_id = process_id
         self.q = q
@@ -44,15 +47,28 @@ class Capture(Process):
         """
 
         """
-        sleep(2)
-        _logger.debug("{}: Process started successfully".format(self.process_id))
-        # Todo: use exception, maybe in init
-        if self.interface != None:
-            self.radio_capture()
-        elif self.capturefile != None:
-            self.pcap_capture()
-        else:
-            _logger.critical("{}: no capture method supplied aborting!".format(self.process_id))
+        try:
+
+            sleep(2)
+
+            _logger.debug("{}: Process started successfully".format(self.process_id))
+            # Todo: use exception, maybe in init
+            if self.interface != None:
+                self.radio_capture()
+            elif self.capturefile != None:
+                self.pcap_capture()
+            else:
+                _logger.critical("{}: no capture method supplied aborting!".format(self.process_id))
+
+
+            if self.exit.is_set():
+                self.flush_queue()
+
+            self.q.close()
+                
+        except Exception as e:
+            _logger.error("{}: Exception in pid {}\n{}".format(self.process_id, self.pid, e))
+
         _logger.info("{}: Exiting".format(self.process_id))
 
 
@@ -80,9 +96,11 @@ class Capture(Process):
 
         capture = pyshark.FileCapture(self.capturefile)
         for packet in capture:
+            if self.exit.is_set():
+                _logger.debug("{}: Exit set aborting capture".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
+                break
+
             try:
-                if self.exit.is_set():
-                    break
                 self.q.put(packet, block=True, timeout=10)
                 _logger.debug("{}: produced packet {} Queue size is now {}".format(self.process_id, packet['gsmtap'].frame_nr, self.q.qsize()))
                 sleep(self.delay) # simulate wait
@@ -93,9 +111,20 @@ class Capture(Process):
 
 
     def shutdown(self):
-        _logger.info("{}: Recieved shutdown command".format(self.process_id))
+        _logger.info("Anti: received shutdown command")
         self.exit.set()
 
 
+    def flush_queue(self):
+        _logger.debug("{}: Flushing the Queue".format(self.process_id))
+        while True:
+            try:
+                self.q.get_nowait()
+            except Empty:
+                _logger.debug("{}: Queue empty".format(self.process_id))
+                return
+
+
+
 if __name__ == "__main__":
-    radio()
+    Capture()
