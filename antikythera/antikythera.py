@@ -81,13 +81,15 @@ class Anti(Process):
 
         _logger.info("Anti: Creating capture process capture")
         if self.interface != None:
-            capture_worker = Capture("capture", self.pkt_queue, interface=self.interface, name="decoder", daemon=True)
+            _logger.debug("Anti: Creating capture process with network interface")
+            capture_worker = Capture("capture", self.pkt_queue, interface=self.interface, name="capture", daemon=True)
         elif self.capturefile != None:
-            cap_worker = Capture("capture", self.pkt_queue, capturefile=self.capturefile, name="decoder", daemon=True)
+            _logger.debug("Anti: Creating capture process with capture file")
+            capture_worker = Capture("capture", self.pkt_queue, capturefile=self.capturefile, name="capture", daemon=True)
         else:
             _logger.critical("Anti: no capture method supplied aborting!")
 
-        self.workers.append(cap_worker)
+        self.workers.append(capture_worker)
 
         metrics_worker = Metrics("metrics", name="metrics", daemon=True)
         self.workers.append(metrics_worker)
@@ -99,30 +101,56 @@ class Anti(Process):
         _logger.info("Anti: spawned {} child processes".format(len(mp.active_children())))
         _logger.info("Anti: successfully started")
 
-        self.join()
+        self.wait()
 
     def shutdown(self):
         _logger.info("Anti: received shutdown command")
         self.exit.set()
 
 
-    def join(self):
+    def exit_process(self, p):
         """
 
         """
+        _logger.debug("Anti: shutting down {} pid {}".format(p, p.pid))
+        p.shutdown()
+        _logger.info("Anti: waiting for process {} pid {}".format(p.process_id, p.pid))
+        p.join(60)
+        if p.is_alive():
+            _logger.warning("Anti: process {} pid {} still alive calling terminate()".format(p.process_id, p.pid))
+            p.terminate()
+            if p.is_alive():
+                _logger.critical("Anti: could not terminate process {} pid {}".format(p.process_id, p.pid))
+
+
+    def wait(self):
+        """
+
+        """
+        _logger.info("Anti: waiting for shutdown")
         while not self.exit.is_set():
             sleep(1)
         
-        _logger.debug("Anti: Active children {}".format(mp.active_children()))
         _logger.info("Anti: shutting down child processes")
-        for worker in self.workers:
-            _logger.debug("Anti: shutting down {}".format(worker))
-            worker.shutdown()
+        _logger.debug("Anti: Active children {}".format(mp.active_children()))
 
-        sleep(10)
-        for worker in self.workers:
-            if worker.is_alive():
-                _logger.warning("Anti: process {} still alive".format(worker.process_id))
+        for p in mp.active_children():
+            if p.name == "capture":
+                self.exit_process(p)
+
+        for p in mp.active_children():
+            if p.name == "decoder-0":
+                self.exit_process(p)
+
+        for p in mp.active_children():
+            if p.name == "metrics":
+                self.exit_process(p)
+
+        _logger.debug("Anti: Active children {}".format(mp.active_children()))
+        for p in mp.active_children():
+            p.terminate()
+            _logger.critical("Anti: waiting forever on process {} pid {}".format(p.process_id, p.pid))
+            p.join()
 
         _logger.info("Anti: Exiting")
 
