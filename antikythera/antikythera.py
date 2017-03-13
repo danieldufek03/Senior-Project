@@ -5,34 +5,49 @@
 The main program manager.
 
 """
+import os
 import logging
 import argparse
+import appdirs
+import multiprocessing as mp
 
-from multiprocessing import Manager, Process, Pool, Queue
+from time import sleep
+from multiprocessing import Process, Queue
+from sqlitedict import SqliteDict
 
-from antikythera.radio import radio
-from antikythera.metrics import metrics
+import antikythera.pysharkpatch
+
+from antikythera.capture import Capture
+from antikythera.decoder import Decoder
+from antikythera.metrics import Metrics
 
 _logger = logging.getLogger(__name__)
 
+__author__= "Finding Ray"
+__copyright__ = "Finding Ray"
+__license__ = "GNU GPLv3+"
 
-class anti():
-    """ Start the worker processes.
+
+class Anti(Process):
+    """ Start and monitor the worker processes.
 
     """
     def __init__(self, num_processes, headless, interface=None,
-                 capturefile=None, max_qsize=100000):
+                 capturefile=None, max_qsize=100000, *args, **kwargs):
         """
 
         """
+        super(Anti, self).__init__(*args, **kwargs)
         self.MAX_QUEUE_SIZE = max_qsize
-        self.queue = Queue(self.MAX_QUEUE_SIZE)
+        self.pkt_queue = Queue(self.MAX_QUEUE_SIZE)
+        self.error_queue = Queue()
         self.NUMBER_OF_PROCESSES = num_processes
         self.workers = []
         self.interface = interface
         self.capturefile = capturefile
         self.headless = headless
-        _logger.info(self)
+        self.exit = mp.Event()
+        #_logger.info(self)
 
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
@@ -48,40 +63,103 @@ class anti():
         return s
 
 
-    def start(self):
+    def run(self):
         """
 
         """
+        try:
+            cpus = mp.cpu_count()
+            _logger.info("Anti: system has {} CPUs available".format(cpus))
+        except NotImplementedError as e:
+            _logger.info("Anti: could not get number of available CPUs")
+
         for i in range(self.NUMBER_OF_PROCESSES):
-            name = "metric-" + str(i)
-            _logger.info("Creating metric process: {}".format(name))
-            metric_worker = Process(target=metrics, name=name, args=(name, self.queue))
-            self.workers.append(metric_worker)
+            name = "decoder-" + str(i)
+            _logger.info("Anti: Creating decoder process {}".format(name))
+            decoder_worker = Decoder(name, self.pkt_queue, name=name, daemon=True)
+            self.workers.append(decoder_worker)
 
-        _logger.info("Creating radio process: radio")
-        radio_worker = Process(target=radio, name="radio", args=("radio", self.queue))
-        self.workers.append(radio_worker)
-
-        if not self.headless:
-            from antikythera.gui import run
-            _logger.info("Creating GUI process: gui")
-            gui_worker = Process(target=run, name="gui", args=())
-            self.workers.append(gui_worker)
+        _logger.info("Anti: Creating capture process capture")
+        if self.interface != None:
+            _logger.debug("Anti: Creating capture process with network interface")
+            capture_worker = Capture("capture", self.pkt_queue, interface=self.interface, name="capture", daemon=True)
+        elif self.capturefile != None:
+            _logger.debug("Anti: Creating capture process with capture file")
+            capture_worker = Capture("capture", self.pkt_queue, capturefile=self.capturefile, name="capture", daemon=True)
         else:
-            _logger.info("Running in headless mode.")
+            _logger.critical("Anti: no capture method supplied aborting!")
+
+        self.workers.append(capture_worker)
+
+        metrics_worker = Metrics("metrics", name="metrics", daemon=True)
+        self.workers.append(metrics_worker)
 
         for worker in self.workers:
-            _logger.info("Starting process: {}".format(worker))
+            _logger.info("Anti: Starting process {}".format(worker))
             worker.start()
 
+        _logger.info("Anti: spawned {} child processes".format(len(mp.active_children())))
+        _logger.info("Anti: successfully started")
 
-    def join(self):
+        self.wait()
+
+    def shutdown(self):
+        _logger.info("Anti: received shutdown command")
+        self.exit.set()
+
+
+    def exit_process(self, p):
         """
 
         """
-        for worker in self.workers:
-            _logger.info("Joining process: {}".format(worker))
-            worker.join()
+        _logger.debug("Anti: shutting down {} pid {}".format(p, p.pid))
+        p.shutdown()
+        _logger.info("Anti: waiting for process {} pid {}".format(p.process_id, p.pid))
+        p.join(60)
+        if p.is_alive():
+            _logger.warning("Anti: process {} pid {} still alive calling terminate()".format(p.process_id, p.pid))
+            p.terminate()
+            if p.is_alive():
+                _logger.critical("Anti: could not terminate process {} pid {}".format(p.process_id, p.pid))
+
+
+    def wait(self):
+        """
+
+        """
+        _logger.info("Anti: waiting for shutdown")
+        while not self.exit.is_set():
+            sleep(1)
+        
+        _logger.info("Anti: shutting down child processes")
+        _logger.debug("Anti: Active children {}".format(mp.active_children()))
+
+        for p in mp.active_children():
+            if p.name == "capture":
+                self.exit_process(p)
+
+        for p in mp.active_children():
+            if p.name == "decoder-0":
+                self.exit_process(p)
+
+        for p in mp.active_children():
+            if p.name == "metrics":
+                self.exit_process(p)
+
+        _logger.debug("Anti: Active children {}".format(mp.active_children()))
+        for p in mp.active_children():
+            p.terminate()
+            _logger.critical("Anti: waiting forever on process {} pid {}".format(p.process_id, p.pid))
+            p.join()
+
+        _logger.info("Anti: Exiting")
+
+
+    def create_db():
+        """ Create the database if needed.
+
+        """
+        pass
 
 
 def create_parser():
@@ -130,14 +208,21 @@ def create_parser():
         dest="loglevel",
         help="set loglevel to INFO",
         action='store_const',
-        const=logging.INFO)
+        const=logging.INFO),
     logs.add_argument(
         '-vv',
         '--very-verbose',
         dest="loglevel",
         help="set loglevel to DEBUG",
         action='store_const',
-        const=logging.DEBUG)
+        const=logging.DEBUG),
+    logs.add_argument(
+        '-vvv',
+        '--trace',
+        dest="loglevel",
+        help="set loglevel to TRACE",
+        action='store_const',
+        const=logging.TRACE),
     source.add_argument(
         '-c',
         '--capture',
