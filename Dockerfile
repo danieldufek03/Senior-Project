@@ -6,7 +6,7 @@ COPY test-requirements.txt .
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
-        apt-get --yes install --no-install-recommends \
+    &&  apt-get --yes install \
             lsb-release \
     && apt-get clean \
     && rm -rf /var/lib/{apt,dpkg,cache,log}
