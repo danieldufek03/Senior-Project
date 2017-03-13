@@ -12,26 +12,39 @@ IMSI Catcher detection, analysis and display.
 Development Environment Setup
 =============================
 
+Windows
+-------
+
+Wireshark must be installed for the ``pyshark`` library to have
+access to the packet dissectors it needs. See the 
+`Wireshark Documentation <https://www.wireshark.org/docs/wsug_html_chunked/ChBuildInstallWinInstall.html>`_
+for details.
+
+Linux
+-----
+
 Setup a virtual environment to ensure system packages are not used::
 
     mkdir -p ~/.virtualenv/antikythera
     python3 -m venv ~/.virtualenv/antikythera
     source ~/.virtualenv/antikythera/bin/activate
 
-Install dependencies, because pip has no way to properly install the
-dependencies in the correct order they are listed in the order which
-they should be installed from top to bottom. The command below is a
-workaround to this which automates the install::
+.. note::
 
-    cat requirements.txt | xargs -n 1 -L 1 pip install
+    The command ``source ~/.virtualenv/antikythera/bin/activate`` must
+    be reran for each new shell instance. When activated the name of the
+    virtual environment should appear somewhere on the prompt such as::
+
+        (antikythera) user@hostname:~$
+
+Then for Debian or Ubuntu based distributions just run the setup
+script ``sudo bash setup.sh``. The documentation can be built
+locally by running ``python setup.py docs`` and to run the tests::
+
     pip install -r test-requirements.txt
+    python setup.py test
 
-Then the program can be installed and ran as follows::
+The program can be installed and ran as follows::
 
     python setup.py install
-    sonar [options]
-
-Description
-===========
-
-Add details.
+    anti
