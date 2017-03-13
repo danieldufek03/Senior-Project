@@ -7,24 +7,7 @@ antikythera
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
     :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
 
-
-Description
-===========
-
-IMSI Catcher detector, for detailed documentation see
-`finding-ray.gitlab.io/antikythera <https://finding-ray.gitlab.io/antikythera>`_.
-
-Usage
------
-
-To run with GUI::
-
-    anti [kivy args] -- [non-kivy args]
-
-To run headless::
-
-    anti-cli
-
+IMSI Catcher detection, analysis and display.
 
 Development Environment Setup
 =============================
