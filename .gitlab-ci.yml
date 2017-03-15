@@ -130,6 +130,7 @@ package:
         - x86
     only:
         - master
+        - dev
 
 
 build_env:
@@ -145,6 +146,7 @@ build_env:
         - dind
     only:
         - master    
+        - dev
 
 
 ##########
