@@ -14,7 +14,7 @@ build_env:
     image: alpine
     stage: test
     script:
-        - apt-get --yes update && apt-get --yes install curl
+        - apk add --update curl
         - "curl --request POST --form token='PRIVATE_TOKEN: ${ANTI_ARM_ENV_TOKEN}' --form ref=master --form variables[DEV_BRANCH]=true https://gitlab.com/api/v3/projects/2905142/trigger/builds"
     only:
         - dev
@@ -101,7 +101,7 @@ package:
     image: python
     stage: package 
     script:
-        - apt-get --yes update && apt-get --yes install lsb-release
+        - apk add --update curl
         - bash setup.sh
         - python setup.py sdist bdist_wheel
     artifacts:
