@@ -87,7 +87,6 @@ package:
     image: python
     stage: package 
     script:
-        - apk add --update curl
         - bash setup.sh
         - python setup.py sdist bdist_wheel
     artifacts:
