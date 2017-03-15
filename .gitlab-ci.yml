@@ -11,11 +11,15 @@ stages:
 
 # Trigger Docker Environment Builds
 build_env:
+    image: alpine
     stage: test
     script:
         - "curl --request POST --form token='PRIVATE_TOKEN: ${ANTI_ARM_ENV_TOKEN}' --form ref=master --form variables[DEV_BRANCH]=true https://gitlab.com/api/v3/projects/2905142/trigger/builds"
     only:
         - dev
+    tags:
+        - docker
+        - x86
 
 test_x86:
     image: python
@@ -116,11 +120,15 @@ package:
 
 # Deploy docker:latest
 release_env:
+    image: alpine
     stage: deploy
     script:
         - "curl --request POST --form token='PRIVATE_TOKEN: ${ANTI_ARM_ENV_TOKEN}' --form ref=master https://gitlab.com/api/v3/projects/2905142/trigger/builds"
     only:
         - master
+    tags:
+        - docker
+        - x86
 
 
 #####################
