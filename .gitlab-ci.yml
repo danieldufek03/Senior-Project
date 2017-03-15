@@ -47,19 +47,6 @@ test_armv7l:
     allow_failure: true
 
 
-# Raspberry Pi Test
-#
-# registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
-# is an image base on the resin/raspberrypi2-python
-# image with all project dependencies baked into it,
-# this image is build in staging and deployed in the
-# deploy stage.
-#
-# This is required to have Raspberry Pi tests complete
-# in less than two hours, and creates a feedback loop
-# where new dependencies must only be installed once
-# before being baked in.
-#
 test_rpi:
     image: registry.gitlab.com/finding-ray/antikythera:latest
     stage: test
@@ -112,6 +99,7 @@ package:
         - x86
     only:
         - master
+        - dev
 
 
 ##########
