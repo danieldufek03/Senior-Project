@@ -2,9 +2,11 @@
 Changelog
 =========
 
-Version 0.1
-===========
+Version 0.0.0
+=============
 
-- Feature A added
-- FIX: nasty bug #1729 fixed
-- add your changes here!
+- Parallelized program execution
+- Added minimal GUI interface
+- Added packet input from ``.pcap`` files
+- Added GUI entrypoint
+- Added CLI entrypoint
