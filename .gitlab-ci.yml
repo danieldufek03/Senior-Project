@@ -15,7 +15,7 @@ build_env:
     stage: test
     script:
         - apk add --update curl
-        - "curl --request POST --form token='PRIVATE_TOKEN: ${ANTI_ARM_ENV_TOKEN}' --form ref=dev --form variables[DEV_BRANCH]=true https://gitlab.com/api/v4/projects/2905142/trigger/builds"
+        - "curl --request POST --header token='PRIVATE_TOKEN: ${ANTI_ARM_ENV_TOKEN}' --form ref=dev --form variables[DEV_BRANCH]=true https://gitlab.com/api/v4/projects/2905142/trigger/builds"
     only:
         - dev
     tags:
