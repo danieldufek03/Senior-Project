@@ -2,32 +2,43 @@
 # -*- coding: utf-8 -*-
 """ metrics.py
 
-Analysis of the recieved packets.
+Implementation of the metrics that detect IMSI Catchers
 
 """
 import logging
+import multiprocessing as mp
 
-from random import random
 from time import sleep
-from queue import Queue, Empty
+from multiprocessing import Process, Queue
 
 _logger = logging.getLogger(__name__)
 
-
-def metrics(process_id, q):
-    """ Perform analyasis of the packets.
+class Metrics(Process):
+    """ The metrics
 
     """
-    _logger.info("Metrics worker process {} starting.".format(process_id))
 
-    while True:
-        try:
-            p = q.get(block=True, timeout=10)
-            _logger.debug("Process {} consumed packet {}: Queue size is now {}.".format(process_id, p, q.qsize()))
-            sleep(random()+2)
-        except Empty:
-            _logger.warning("Process {} Queue empty.".format(process_id))
-            sleep(1)
+    def __init__(self, process_id, *args, **kwargs):
+        super(Metrics, self).__init__(*args, **kwargs)
+        self.process_id = process_id
+        _logger.debug("{}: Process started successfully".format(self.process_id))
+        self.exit = mp.Event()
+
+
+    def run(self):
+        """
+
+        """
+        while not self.exit.is_set():
+            _logger.debug("{}: doing metrics stuff".format(self.process_id))
+            sleep(3)
+        _logger.info("{}: Exiting".format(self.process_id))
+
+
+    def shutdown(self):
+        _logger.info("{}: Recieved shutdown command".format(self.process_id))
+        self.exit.set()
+
 
 if __name__ == "__main__":
-    metrics()
+    decoder()
