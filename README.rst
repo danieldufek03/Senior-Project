@@ -5,22 +5,14 @@ antikythera
 .. |badge| image:: https://gitlab.com/finding-ray/antikythera/badges/master/build.svg
     :target: https://gitlab.com/finding-ray/antikythera/pipelines
     :scale: 100 %
-    :align: center
-    :align: middle
 .. |badge2| image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
     :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
     :scale: 100 %
-    :align: center
-    :align: middle
 .. |badge3| image:: https://badge.fury.io/py/antikythera.svg
     :target: https://pypi.python.org/pypi/antikythera
     :scale: 100 %
-    :align: center
-    :align: middle
 .. |badge4| image:: https://img.shields.io/badge/Development-Alpha-ff2052.svg
     :scale: 100 %
-    :align: center
-    :align: middle
 
 +----------+------------+------------+------------+
 | |badge|  +  |badge2|  +  |badge3|  +  |badge4|  +
