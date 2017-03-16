@@ -6,6 +6,8 @@ antikythera
     :target: https://gitlab.com/finding-ray/antikythera/pipelines
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
     :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
+.. image:: https://badge.fury.io/py/antikythera.svg
+    :target: https://pypi.python.org/pypi/antikythera
 
 IMSI Catcher detection, analysis and display.
 

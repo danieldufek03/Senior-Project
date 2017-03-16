@@ -1,18 +1,25 @@
 stages:
     - test
-    - pages
-    - staging
+    - package 
     - deploy
-
-
-variables:
-    CONTAINER_TEST_IMAGE: registry.gitlab.com/finding-ray/antikythera:$CI_BUILD_REF_NAME
-    CONTAINER_RELEASE_IMAGE: registry.gitlab.com/finding-ray/antikythera:latest
+    - pages
 
 
 ########
 # Test #
 ########
+
+# Trigger Docker Environment Builds
+build_env:
+    image: registry.gitlab.com/finding-ray/docker-alpine-curl:latest
+    stage: test
+    script:
+        - "curl --request POST --form token=${ANTI_ARM_ENV_TOKEN} --form ref=master --form variables[DEV_BRANCH]=true https://gitlab.com/api/v4/projects/2905142/trigger/builds"
+    only:
+        - dev
+    tags:
+        - docker
+        - x86
 
 test_x86:
     image: python
@@ -40,19 +47,6 @@ test_armv7l:
     allow_failure: true
 
 
-# Raspberry Pi Test
-#
-# registry.gitlab.com/finding-ray/rpi2-gnuradio:latest
-# is an image base on the resin/raspberrypi2-python
-# image with all project dependencies baked into it,
-# this image is build in staging and deployed in the
-# deploy stage.
-#
-# This is required to have Raspberry Pi tests complete
-# in less than two hours, and creates a feedback loop
-# where new dependencies must only be installed once
-# before being baked in.
-#
 test_rpi:
     image: registry.gitlab.com/finding-ray/antikythera:latest
     stage: test
@@ -85,6 +79,46 @@ test_ubuntu:
         - x86
 
 
+###########
+# Package #
+###########
+
+package:
+    image: python
+    stage: package 
+    script:
+        - apt-get --yes update && apt-get --yes install lsb-release
+        - bash setup.sh
+        - python setup.py sdist bdist_wheel
+    artifacts:
+        name: "${CI_PROJECT_NAME}_${CI_PIPELINE_ID}"
+        paths:
+            - dist/
+    tags:
+        - docker
+        - x86
+    only:
+        - master
+        - dev
+
+
+##########
+# Deploy #
+##########
+
+# Deploy docker:latest
+release_env:
+    image: registry.gitlab.com/finding-ray/docker-alpine-curl:latest
+    stage: deploy
+    script:
+        - "curl --request POST --form token=${ANTI_ARM_ENV_TOKEN} --form ref=master https://gitlab.com/api/v4/projects/2905142/trigger/builds"
+    only:
+        - master
+    tags:
+        - docker
+        - x86
+
+
 #####################
 # Build Sphinx Docs #
 #####################
@@ -108,60 +142,3 @@ pages:
         - public
     only:
         - master
-
-
-###########
-# Staging #
-###########
-
-package:
-    image: python
-    stage: staging
-    script:
-        - apt-get --yes update && apt-get --yes install lsb-release
-        - bash setup.sh
-        - python setup.py sdist bdist_wheel
-    artifacts:
-        name: "${CI_PROJECT_NAME}_${CI_PIPELINE_ID}"
-        paths:
-            - dist/
-    tags:
-        - docker
-        - x86
-    only:
-        - master
-
-
-build_env:
-    stage: staging
-    image: janeczku/docker-armhf:latest
-    script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
-        - docker build -t $CONTAINER_TEST_IMAGE .
-        - docker push $CONTAINER_TEST_IMAGE
-    tags:
-        - docker
-        - rpi
-        - dind
-    only:
-        - master    
-
-
-##########
-# Deploy #
-##########
-
-release_env:
-    stage: deploy
-    image: janeczku/docker-armhf:latest
-    script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN -e email@domain.net registry.gitlab.com
-        - docker pull $CONTAINER_TEST_IMAGE
-        - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
-        - docker push $CONTAINER_RELEASE_IMAGE
-    tags:
-        - docker
-        - rpi
-        - dind
-    only:
-        - master    
