@@ -10,9 +10,14 @@ antikythera
     :target: https://pypi.python.org/pypi/antikythera
 .. |badge4| image:: https://img.shields.io/badge/Development-Alpha-ff2052.svg
 
-.. centered::
-
-    |badge| |badge2| |badge3| |badge4|
+<p align="center">
+  <a target="_blank" href="https://gitlab.com/finding-ray/antikythera/pipelines"><img src="https://gitlab.com/finding-ray/antikythera/badges/master/build.svg
+"></a>
+  <a target="_blank" href="https://finding-ray.gitlab.io/antikythera/htmlcov/index.html"><img src="https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg"></a>
+  <a target="_blank" href="https://pypi.python.org/pypi/antikythera"><img src="https://badge.fury.io/py/antikythera.svg"></a>
+  <a target="_blank" href="https://hosted.weblate.org/projects/aimsicd/strings/"><img src="https://hosted.weblate.org/widgets/aimsicd/-/svg-badge.svg"></a>
+  <a target="_blank" href="#"><img src="https://img.shields.io/badge/Development-Alpha-ff2052.svg"></a>
+</p>
 
 
 ``antikythera`` is the software component of the IMSI-Catcher Detector device Finding Ray. It is built with Python to catch `IMSI-Catchers <https://en.wikipedia.org/wiki/IMSI-catcher>`_, also known as Stingrays, Dirtboxes, or malicious base stations. IMSI-Catchers are used globally by many police departments to spy on citizens, organizations for corporate espionage, and other malicious actors seeking to Man-in-The-Middle (MiTM) cellular communications.
