@@ -12,7 +12,7 @@ antikythera
 
 .. class:: center
 
-    |badge||badge2||badge3||badge4|
+    |badge| |badge2| |badge3| |badge4|
 
 ``antikythera`` is the software component of the IMSI-Catcher Detector device Finding Ray. It is built with Python to catch `IMSI-Catchers <https://en.wikipedia.org/wiki/IMSI-catcher>`_, also known as Stingrays, Dirtboxes, or malicious base stations. IMSI-Catchers are used globally by many police departments to spy on citizens, organizations for corporate espionage, and other malicious actors seeking to Man-in-The-Middle (MiTM) cellular communications.
 
