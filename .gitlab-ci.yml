@@ -87,6 +87,7 @@ package:
     image: python
     stage: package 
     script:
+        - apt-get --yes update && apt-get --yes install lsb-release
         - bash setup.sh
         - python setup.py sdist bdist_wheel
     artifacts:
