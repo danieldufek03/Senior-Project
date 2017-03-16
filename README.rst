@@ -2,6 +2,7 @@
 antikythera
 ===========
 
+.. class:: center
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/build.svg
     :target: https://gitlab.com/finding-ray/antikythera/pipelines
     :align: center
