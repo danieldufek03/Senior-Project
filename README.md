@@ -1,4 +1,4 @@
-<h1 align="center"><i class="fa fa-search" aria-hidden="true"></i> antikythera</h1>
+<h1 align="center">antikythera</h1>
 
 <p align="center">
   <a target="_blank" href="https://gitlab.com/finding-ray/antikythera/pipelines"><img src="https://gitlab.com/finding-ray/antikythera/badges/master/build.svg"></a>
@@ -9,7 +9,7 @@
 
 ---
 
-### <i class="fa fa-gears" aria-hidden="true"></i> About
+### About
 
 ``antikythera`` is the software component of the IMSI-Catcher Detector device Finding Ray. It is built with Python to catch [IMSI-Catchers](https://en.wikipedia.org/wiki/IMSI-catcher), also known as Stingrays, Dirtboxes, or malicious base stations. IMSI-Catchers are used globally by many police departments to spy on citizens, organizations for corporate espionage, and other malicious actors seeking to Man-in-The-Middle (MiTM) cellular communications.
 
@@ -23,21 +23,21 @@ Antikythera :
 But most importantly it is not yet as advanced or reliable as [SnoopSnitch](https://opensource.srlabs.de/projects/snoopsnitch) and [AIMSICD](https://github.com/CellularPrivacy/Android-IMSI-Catcher-Detector). Both of which have also provided invaluable documentation allowing for this project to exist and attempt to provide an IMSI-Catcher detector that is not required to be a phone. And if you need real protection you should use one of them for now.
 
 
-### <i class="fa fa-download" aria-hidden="true"></i> Quick Install
+### Quick Install
 
 To install first ensure Tshark the command line utility for Wireshark is installed, see the [wireshark documentation](https://www.wireshark.org/docs/wsug_html_chunked/ChBuildInstallWinInstall.html) for information on Windows setup or run ``apt-get install tshark`` on Linux. Then install with pip:
 
     pip install antikythera
 
 
-### <i class="fa fa-terminal" aria-hidden="true"></i> Development Environment Setup
+### Development Environment Setup
 
-##### <i class="fa fa-windows" aria-hidden="true"></i> Windows
+##### Windows
 
 Wireshark must be installed for the ``pyshark`` library to have access to the packet dissectors it needs. See the [Wireshark Documentation](https://www.wireshark.org/docs/wsug_html_chunked/ChBuildInstallWinInstall.html) for details.
 
 
-##### <i class="fa fa-linux" aria-hidden="true"></i> Linux
+##### Linux
 
 Setup a virtual environment to ensure system packages are not used::
 
