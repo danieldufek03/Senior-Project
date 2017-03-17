@@ -3,8 +3,9 @@
 <p align="center">
   <a target="_blank" href="https://gitlab.com/finding-ray/antikythera/pipelines"><img src="https://gitlab.com/finding-ray/antikythera/badges/master/build.svg"></a>
   <a target="_blank" href="https://finding-ray.gitlab.io/antikythera/htmlcov/index.html"><img src="https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg"></a>
-  <a target="_blank" href="https://pypi.python.org/pypi/antikythera"><img src="https://badge.fury.io/py/antikythera.svg"></a>
-  <a target="_blank" href="#"><img src="https://img.shields.io/badge/Development-Alpha-ff2052.svg"></a>
+  <a target="_blank" href="https://pypi.org/project/antikythera"><img src="https://img.shields.io/pypi/v/antikythera.svg"></a>
+  <a target="_blank" href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/pypi/l/antikythera.svg"></a>
+  <a target="_blank" href="#"><img src="https://img.shields.io/pypi/status/antikythera.svg"></a>
 </p>
 
 ---
