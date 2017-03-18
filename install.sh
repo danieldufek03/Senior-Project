@@ -9,19 +9,95 @@ export DEBIAN_FRONTEND=noninteractive
 #   'wget -qO- https://finding-ray.gitlab.io/install.sh | sh'
 #
 
+# System Config
 DOCKER_IMAGE=""
 PKG_MANAGER=""
 ARCH=""
 OS=""
 
-# run command with privileges
+# Variable Functions
 sh_c=""
+
+# Colors
+RED=$(tput setaf 1)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+NORMAL=$(tput sgr0)
+
+
+#
+## Utility Functions
+#
+
+_banner()
+{
+    printf "${CYAN}"
+    echo '            __  _ __        __  __                '
+    echo ' ___ ____  / /_(_) /____ __/ /_/ /  ___ _______ _ '
+    echo "/ _ \`/ _ \\/ __/ /  '_/ // / __/   \\/ -_) __/ _ \`/ "
+    echo '\_,_/_//_/\__/_/_/\_\\_, /\__/_//_/\__/_/  \_,_/  '
+    echo '                    /___/                         '
+    printf "${NORMAL}"
+}
+
+_greeting()
+{
+    _banner
+    echo '' 
+    echo '' 
+    echo 'This script will install the antikythera program. It will'
+    echo 'attempt to detect your system configuration to install and'
+    echo 'configure a antiktyhera for your environment. This script'
+    echo 'will install the program globally on the system for all users.'
+    echo '' 
+    echo '' 
+    echo 'If that is not what you want press CTRL+C to exit,' 
+    echo -n 'otherwise you may safely ignore this message.  '
+
+    local -a frames=( '/' '-' '\' '|' )
+    for x in `seq 1 15`; do 
+        echo -ne "${frames[i++ % ${#frames[@]}]}"
+        sleep 1
+        echo -ne "\b"
+    done
+
+    echo ''
+}
+
+_error()
+{
+    printf "${RED}[*] Error: ${NORMAL}$1"
+    echo ""
+}
+
+_warning()
+{
+    printf "${YELLOW}[*] Error: ${NORMAL}$1"
+    echo ""
+}
+
+_info()
+{
+    printf "${CYAN}[*] Info: ${NORMAL}$1"
+    echo ""
+}
+
+## Print a horizontal rule
+_rule ()
+{
+    printf -v _hr "%*s" $(tput cols) && echo ${_hr// /${1--}}
+}
+
 
 command_exists()
 {
     command -v "$@" > /dev/null 2>&1
 }
 
+
+#
+## System Detection
+#
 
 found_os()
 {
@@ -42,8 +118,7 @@ check_pkgmanager()
     found_os ZYPPER "SUSE" && return
 
     [[ -z "$PKG_MANAGER" ]] || return
-    echo "[*] Error: Can't detect OS from /etc/issue"
-    echo "[*] Attempting fallback"
+    _warning "Can't detect OS from /etc/issue... attempting fallback"
 
     if [[ -x "/usr/bin/pacman" ]]; then
         grep -q "$FUNCNAME" '/usr/bin/pacman' >/dev/null 2>&1
@@ -71,6 +146,7 @@ check_pkgmanager()
 check_distro()
 {
     check_pkgmanager # attempt package manager detection
+    _info "Found Package Manager "$PKG_MANAGER""
     if [ -f /.dockerenv ]; then
         # We are inside a docker container!
         # Might not have lsb_release in a minimal install.
@@ -78,6 +154,7 @@ check_distro()
         if ! command_exists lsb_release; then
             # TODO: support other package managers
             # install lsb_release
+            _info "Command lsb_release not found attempting install"
             $sh_c 'sleep 3; apt-get --yes -qq update'
             case "$PKG_MANAGER" in
                 DPKG)
@@ -95,6 +172,7 @@ check_distro()
                     exit 1
                 ;;
             esac
+            _info "Command lsb_release successfully installed"
         fi
     fi
 
@@ -115,43 +193,28 @@ check_distro()
     OS="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 }
 
-
-pip_install()
-{
-    echo "[*] Installing antikythera"
-
-    # Setup to install
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip curl' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
-
-    # Can't let pip handle install order of dependancies
-    # It always tries to install kivy before it's cython
-    # dependency. `requirements.txt` has the depends listed
-    # in order from top to bottom to support this.
-    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 -q install' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
-}
-
+#
+## Dependencies
+#
 
 # add missing ffmpeg repository
 # it is no longer in debian default repos
 # and it is a kivy dependency
 prepare_ffmpeg()
 {
-    echo "[*] Configuring ffmpeg for insatll"
+    _info "Configuring ffmpeg for insatll"
 
     ffmpeg_repo='deb http://www.deb-multimedia.org jessie main non-free'
     ffmpeg_src='deb-src http://www.deb-multimedia.org jessie main non-free'
 
     if ! grep -q -F "$ffmpeg_repo" /etc/apt/sources.list; then
         $sh_c "sleep 3; echo 'deb http://www.deb-multimedia.org jessie main non-free' >> /etc/apt/sources.list" \
-        && echo "[*] Added repository: $ffmpeg_repo"
+        && _info "Added repository: $ffmpeg_repo"
     fi
 
     if ! grep -q -F "$ffmpeg_src" /etc/apt/sources.list; then
         $sh_c "sleep 3; echo 'deb-src http://www.deb-multimedia.org jessie main non-free' >> /etc/apt/sources.list" \
-        && echo "[*] Added repository: $ffmpeg_src"
+        && _info "Added repository: $ffmpeg_src"
     fi
 
     if [ "$DOCKER_IMAGE" = true ]; then
@@ -167,7 +230,7 @@ prepare_ffmpeg()
 # Install Cython and Kivy requirements
 depends_install()
 {
-    echo "[*] Installing Dependencies"
+    _info "[*] Installing Dependencies"
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install git build-essential' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libav-tools' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install ffmpeg libsdl2-dev libsdl2-image-dev' )
@@ -179,9 +242,36 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
 }
 
+#
+## Actual Install
+#
+
+pip_install()
+{
+    _info "[*] Installing antikythera"
+
+    # Setup to install
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip curl' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
+
+    # Can't let pip handle install order of dependancies
+    # It always tries to install kivy before it's cython
+    # dependency. `requirements.txt` has the depends listed
+    # in order from top to bottom to support this.
+    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 -q install' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
+}
+
+
+#
+## Main
+#
 
 install()
 {
+    _greeting
+    _rule
     user="$(id -un 2>/dev/null || true)"
 
     sh_c='sh -c'
@@ -206,11 +296,11 @@ install()
     case $ARCH in
         # Supported
         x86_64|armv7l)
-            echo "[*] Detected supported system architecture $ARCH."
+            _info "Detected supported system architecture $ARCH."
             ;;
         # Not Supported
         *)
-            echo "[*] Error: $ARCH is not a supported platform"
+            _error "Error: $ARCH is not a supported platform"
             exit 1
             ;;
     esac
@@ -222,27 +312,27 @@ install()
     case $OS in
         # Supported
         debian|raspbian)
-            echo "[*] Detected supported Linux distribution $OS"
-            echo "[*] Updating Packages"
+            _info "Detected supported Linux distribution $OS"
+            _info "Updating Packages"
             $sh_c 'sleep 3; apt-get --yes -qq update'
             prepare_ffmpeg
             depends_install
             pip_install
-            echo "[*] Setup successful"
+            _info "Setup successful"
             exit 0
         ;;
         ubuntu)
-            echo "[*] Detected supported Linux distribution $OS"
-            echo "[*] Updating Packages..."
+            _info "Detected supported Linux distribution $OS"
+            _info "Updating Packages..."
             $sh_c 'sleep 3; apt-get --yes -qq update'
             depends_install
             pip_install
-            echo "[*] Setup successful"
+            _info "Setup successful"
             exit 0
         ;;
         # Unsupported
         *)
-            echo "[*] Error: $OS is not supported"
+            _error "Error: $OS is not supported"
             exit 1
         ;;
     esac 
