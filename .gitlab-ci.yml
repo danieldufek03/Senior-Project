@@ -81,7 +81,7 @@ test_install_debian_x86:
         - x86
 
 
-test_install_rpi:
+test_install_rpi_3.5.1:
     image: resin/raspberrypi2-python:3.5.1
     stage: test
     script:
@@ -89,6 +89,16 @@ test_install_rpi:
     tags:
         - rpi
         - docker
+
+test_install_rpi_3.4.4:
+    image: resin/raspberrypi2-python:3.4.4
+    stage: test
+    script:
+        - bash install.sh
+    tags:
+        - rpi
+        - docker
+
 
 
 # Test Ubuntu
