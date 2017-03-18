@@ -137,12 +137,12 @@ prepare_ffmpeg()
     ffmpeg_src='deb-src http://www.deb-multimedia.org jessie main non-free'
 
     if ! grep -q -F "$ffmpeg_repo" /etc/apt/sources.list; then
-        $sh_c "sleep 3; echo "$ffmpeg_repo" >> /etc/apt/sources.list" \
+        $sh_c "sleep 3; echo 'deb http://www.deb-multimedia.org jessie main non-free' >> /etc/apt/sources.list" \
         && echo "[*] Added repository: $ffmpeg_repo"
     fi
 
     if ! grep -q -F "$ffmpeg_src" /etc/apt/sources.list; then
-        $sh_c "sleep 3; echo "$ffmpeg_src" >> /etc/apt/sources.list" \
+        $sh_c "sleep 3; echo 'deb-src http://www.deb-multimedia.org jessie main non-free' >> /etc/apt/sources.list" \
         && echo "[*] Added repository: $ffmpeg_src"
     fi
 
