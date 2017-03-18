@@ -9,17 +9,7 @@ stages:
 # Test #
 ########
 
-# Trigger Docker Environment Builds
-build_env:
-    image: registry.gitlab.com/finding-ray/docker-alpine-curl:latest
-    stage: test
-    script:
-        - "curl --request POST --form token=${ANTI_ARM_ENV_TOKEN} --form ref=master --form variables[DEV_BRANCH]=true https://gitlab.com/api/v4/projects/2905142/trigger/builds"
-    only:
-        - dev
-    tags:
-        - docker
-        - x86
+### Test Python ###
 
 test_x86:
     image: python
@@ -79,6 +69,39 @@ test_ubuntu:
         - x86
 
 
+### Test Install Script ###
+
+test_install_debian_x86:
+    image: debian
+    stage: test
+    script:
+        - bash install.sh
+    tags:
+        - docker
+        - x86
+
+
+test_install_rpi:
+    image: resin/raspberrypi2-python:3.5.1
+    stage: test
+    script:
+        - bash install.sh
+    tags:
+        - rpi
+        - docker
+
+
+# Test Ubuntu
+test_install_ubuntu_x86:
+    image: ubuntu
+    stage: test
+    script:
+        - bash install.sh
+    tags:
+        - docker
+        - x86
+
+
 ###########
 # Package #
 ###########
@@ -100,6 +123,19 @@ package:
     only:
         - master
         - dev
+
+
+# Trigger Docker Environment Builds
+build_env:
+    image: registry.gitlab.com/finding-ray/docker-alpine-curl:latest
+    stage: package
+    script:
+        - "curl --request POST --form token=${ANTI_ARM_ENV_TOKEN} --form ref=master --form variables[DEV_BRANCH]=true https://gitlab.com/api/v4/projects/2905142/trigger/builds"
+    only:
+        - dev
+    tags:
+        - docker
+        - x86
 
 
 ##########
@@ -134,6 +170,8 @@ pages:
         - python setup.py docs
         - mv htmlcov public/
         - mv docs/_build/html/* public/
+        - cp install.sh public/
+        - cp requirements.txt public/
     tags:
         - docker
         - x86
