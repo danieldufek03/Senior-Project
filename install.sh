@@ -146,7 +146,7 @@ prepare_ffmpeg()
         && echo "[*] Added repository: $ffmpeg_src"
     fi
 
-    if ! [ "$DOCKER_IMAGE" = true ]; then
+    if [ "$DOCKER_IMAGE" = true ]; then
         cat /etc/apt/sources.list
     fi
 
