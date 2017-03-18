@@ -48,4 +48,4 @@ Run with very-verbose logging, a queue size of 1000 for incoming packets, and us
 
 ### For Developers
 
-See [the development documentation](http://finding-ray.gitlab.io/antikythera/) hosted on GitLab.
+See [the development documentation](http://finding-ray.gitlab.io/antikythera/pages/development.html) hosted on GitLab for information on setting up a development environment.

@@ -13,16 +13,16 @@ Setup a virtual environment to ensure system packages are not used::
     python3 -m venv ~/.virtualenv/antikythera
     source ~/.virtualenv/antikythera/bin/activate
 
-Note that the command ``source ~/.virtualenv/antikythera/bin/activate`` must be reran for each new shell instance. When activated the name of the virtual environment should appear somewhere on the prompt such as:
+Note that the command ``source ~/.virtualenv/antikythera/bin/activate`` must be reran for each new shell instance. When activated the name of the virtual environment should appear somewhere on the prompt such as::
 
     (antikythera) user@hostname:~$
 
-Then for Debian or Ubuntu based distributions just run the setup script ``sudo bash setup.sh``. The documentation can be built locally by running ``python setup.py docs`` and to run the tests:
+Then for Debian or Ubuntu based distributions just run the setup script ``sudo bash setup.sh``. The documentation can be built locally by running ``python setup.py docs`` and to run the tests::
 
     pip install -r test-requirements.txt
     python setup.py test
 
-The program can be installed and ran as follows:
+The program can be installed and ran as follows::
 
     python setup.py install
     anti
@@ -31,4 +31,4 @@ The program can be installed and ran as follows:
 Windows
 -------
 
-Wireshark must be installed for the ``pyshark`` library to have access to the packet dissectors it needs. See the [Wireshark Documentation](https://www.wireshark.org/docs/wsug_html_chunked/ChBuildInstallWinInstall.html) for details.
+Wireshark must be installed for the ``pyshark`` library to have access to the packet dissectors it needs. See the `Wireshark Documentation <https://www.wireshark.org/docs/wsug_html_chunked/ChBuildInstallWinInstall.html>`_ for details.
