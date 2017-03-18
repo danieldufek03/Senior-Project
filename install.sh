@@ -145,6 +145,10 @@ prepare_ffmpeg()
         && echo "[*] Added repository: $ffmpeg_src"
     fi
 
+    if ! [ -z "$DOCKER_IMAGE" ]; then
+        cat /etc/apt/sources.list
+    fi
+
     $sh_c 'sleep 3; apt-get --yes -qq update' \
         && ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq install deb-multimedia-keyring' ) \
         && $sh_c 'sleep 3; apt-get --yes -qq update'
