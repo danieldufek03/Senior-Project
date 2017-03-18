@@ -119,10 +119,18 @@ check_distro()
 pip_install()
 {
     echo "[*] Installing antikythera"
+
+    # Setup to install
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
-    ( set -x; $sh_c 'sleep 3; pip3 install antikythera' )
+
+    # Can't let pip handle install order of dependancies
+    # It always tries to install kivy before it's cython
+    # dependency. `requirements.txt` has the depends listed
+    # in order from top to bottom to support this.
+    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 install' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
 }
 
 
