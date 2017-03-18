@@ -121,6 +121,7 @@ pip_install()
     echo "[*] Installing antikythera"
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
 }
 
@@ -145,7 +146,7 @@ prepare_ffmpeg()
         && echo "[*] Added repository: $ffmpeg_src"
     fi
 
-    if ! [[ -z "$DOCKER_IMAGE" ]]; then
+    if ! [ "$DOCKER_IMAGE" = true ]; then
         cat /etc/apt/sources.list
     fi
 
