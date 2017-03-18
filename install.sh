@@ -39,6 +39,7 @@ fi
 
 _banner()
 {
+    clear
     printf "${CYAN}"
     echo '            __  _ __        __  __                '
     echo ' ___ ____  / /_(_) /____ __/ /_/ /  ___ _______ _ '
@@ -69,6 +70,7 @@ _greeting()
         echo -ne "\b"
     done
 
+    echo ''
     echo ''
     _rule
     echo ''
@@ -264,7 +266,7 @@ pip_install()
     _info "[*] Installing antikythera"
 
     # Setup to install
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip curl' )
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip curl' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
 
@@ -272,8 +274,10 @@ pip_install()
     # It always tries to install kivy before it's cython
     # dependency. `requirements.txt` has the depends listed
     # in order from top to bottom to support this.
-    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 -q install' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
+    version=$(python3 --version)
+    _info "Installing with $version"
+    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 install' )
+    ( set -x; $sh_c 'sleep 3; pip3 install antikythera' )
 }
 
 
