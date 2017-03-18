@@ -122,7 +122,7 @@ pip_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install antikythera' )
+    ( set -x; $sh_c 'sleep 3; pip3 install antikythera' )
 }
 
 
