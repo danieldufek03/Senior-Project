@@ -66,7 +66,7 @@ _greeting()
     echo -n 'otherwise you may safely ignore this message.  '
 
     local -a frames=( '/' '-' '\' '|' )
-    for x in `seq 1 15`; do 
+    for x in `seq 1 16`; do 
         echo -ne "${frames[i++ % ${#frames[@]}]}"
         sleep 1
         echo -ne "\b"
@@ -168,6 +168,7 @@ check_distro()
         # We are inside a docker container!
         # Might not have lsb_release in a minimal install.
         DOCKER_IMAGE=true
+        _info "Running inside a docker container"
         if ! command_exists lsb_release; then
             # TODO: support other package managers
             # install lsb_release
