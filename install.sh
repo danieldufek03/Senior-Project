@@ -19,10 +19,11 @@ OS=""
 sh_c=""
 
 # Colors
-RED=$(tput setaf 1)
-YELLOW=$(tput setaf 3)
-CYAN=$(tput setaf 6)
-NORMAL=$(tput sgr0)
+# Only run `tput` if session is interactive and TTY is assigned
+RED=$(tty -s && tput setaf 1)
+YELLOW=$(tty -s && tput setaf 3)
+CYAN=$(tty -s && tput setaf 6)
+NORMAL=$(tty -s && tput sgr0)
 
 
 #
