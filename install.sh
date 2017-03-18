@@ -70,6 +70,8 @@ _greeting()
     done
 
     echo ''
+    _rule
+    echo ''
 }
 
 _error()
@@ -90,10 +92,13 @@ _info()
     echo ""
 }
 
-## Print a horizontal rule
+# Print a horizontal rule
+# Only if TTY is set
 _rule ()
 {
-    printf -v _hr "%*s" $(tput cols) && echo ${_hr// /${1--}}
+    if test -t 1; then
+        printf -v _hr "%*s" $(tput cols) && echo ${_hr// /${1--}}
+    fi
 }
 
 
@@ -279,7 +284,6 @@ pip_install()
 install()
 {
     _greeting
-    _rule
     user="$(id -un 2>/dev/null || true)"
 
     sh_c='sh -c'
