@@ -81,7 +81,7 @@ check_distro()
             $sh_c 'sleep 3; apt-get --yes -qq update'
             case "$PKG_MANAGER" in
                 DPKG)
-                    ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq install lsb-release' ) \
+                    ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install lsb-release' ) \
                 ;;
                 YUM)
                     ( set -x; $sh_c 'sleep 3; yum --assumeyes -qq redhat-lsb' ) \
@@ -145,7 +145,7 @@ prepare_ffmpeg()
         && echo "[*] Added repository: $ffmpeg_src"
     fi
 
-    if ! [ -z "$DOCKER_IMAGE" ]; then
+    if ! [[ -z "$DOCKER_IMAGE" ]]; then
         cat /etc/apt/sources.list
     fi
 
