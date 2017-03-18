@@ -39,7 +39,9 @@ fi
 
 _banner()
 {
-    clear
+    if test -t 1; then
+        clear
+    fi
     printf "${CYAN}"
     echo '            __  _ __        __  __                '
     echo ' ___ ____  / /_(_) /____ __/ /_/ /  ___ _______ _ '
