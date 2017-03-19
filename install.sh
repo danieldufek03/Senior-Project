@@ -256,6 +256,10 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev curl' )
 
+    if ! command_exists pip; then
+        ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip' )
+    fi
+
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
 }
@@ -275,7 +279,6 @@ pip_install()
     if (( pip_python_major_version == 3 )); then
         pip_env='pip'
     elif (( pip_python_major_version == 2 )); then
-        ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip' )
         pip_env='pip3'
     else
         _warning "No pip version detected attempting to use pip3"
