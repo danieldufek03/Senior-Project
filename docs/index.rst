@@ -6,60 +6,36 @@ antikythera
     :target: https://gitlab.com/finding-ray/antikythera/pipelines
 .. image:: https://gitlab.com/finding-ray/antikythera/badges/master/coverage.svg
     :target: https://finding-ray.gitlab.io/antikythera/htmlcov/index.html
-
-This is the documentation of **antikythera**, the portable 
-:abbr:`IMSI (International Mobile Subscribers Identity)` catcher detector
-`gitlab.com/finding-ray/antikythera <https://gitlab.com/finding-ray/antikythera>`_.
-
-:abbr:`GUI (Graphical User Interface)` dependancies Debian::
-
-    sudo apt-get update -y && sudo apt-get install -y \
-        python-pip \
-        build-essential \
-        git \
-        python \
-        python-dev \
-        ffmpeg \
-        libsdl2-dev \
-        libsdl2-image-dev \
-        libsdl2-mixer-dev \
-        libsdl2-ttf-dev \
-        libportmidi-dev \
-        libswscale-dev \
-        libavformat-dev \
-        libavcodec-dev \
-        zlib1g-dev
-
-:abbr:`GUI (Graphical User Interface)` dependancies ARM::
-
-    sudo apt-get update
-    sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-       pkg-config libgl1-mesa-dev libgles2-mesa-dev \
-       python-setuptools libgstreamer1.0-dev git-core \
-       gstreamer1.0-plugins-{bad,base,good,ugly} \
-       gstreamer1.0-{omx,alsa} python-dev cython
+.. image:: https://img.shields.io/pypi/v/antikythera.svg
+    :target: https://pypi.org/project/antikythera
+.. image:: https://img.shields.io/pypi/l/antikythera.svg
+    :target: https://www.gnu.org/licenses/gpl-3.0.en.html
+.. image:: https://img.shields.io/pypi/status/antikythera.svg
+    :target: #
 
 
-Quick development setup::
+This is the documentation for `antikythera <https://gitlab.com/finding-ray/antikythera/>`_, part of the overall `Finding Ray <https://gitlab.com/finding-ray/>`_ project.
 
-    apt-get install python3
-    mkdir -p ~/.virtualenv
-    python3 -m venv ~/.virtualenv/antikythera
-    source ~/.virtualenv/antikythera/bin/activate
-    cat requirements.txt | xargs -n 1 -L 1 pip install
-    pip install -r test-requirements.txt
-    pip install -U setuptools
+----
+
+**antikythera** is an `IMSI-Catcher <https://en.wikipedia.org/wiki/IMSI-catcher>`_ detector and the software component of the *Finding Ray* device. It is built to catch IMSI-Catchers, also known as Stingrays, Dirtboxes, or malicious base stations. IMSI-Catchers are used to perform Man-in-The-Middle (MiTM) attacks on cellular phones. The primary goal the Finding Ray project is to prove the feasibility of a low cost, portable, and zero configuration required IMSI-Catcher detector. There are already IMSI-Catcher detectors available but they either have some drawbacks or cost as much as a car which inspired the development of a new solution. 
+
 
 Contents
 ========
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   License <license>
-   Authors <authors>
-   Changelog <changes>
-   Module Reference <api/modules>
+    FAQ <pages/faq>
+    Install <pages/install>
+    Usage <pages/usage>
+    Hardware <pages/hardware>
+    Development <pages/development>
+    License <license>
+    Authors <authors>
+    Changelog <changes>
+    Module Reference <api/modules>
 
 
 Indices and tables
