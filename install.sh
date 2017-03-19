@@ -202,9 +202,9 @@ check_distro()
     fi
     [ -z "$lsb_dist" ] && [ -r /etc/debian_version ] && lsb_dist='debian'
     [ -z "$lsb_dist" ] && [ -r /etc/fedora-release ] && lsb_dist='fedora'
-    [ -z "$lsb_dist" ] && [ -r /etc/centos-release] && lsb_dist='centos'
-    [ -z "$lsb_dist" ] && [ -r /etc/redhat-release] && lsb_dist='redhat'
-    if [ -z "$lsb_dist" ] && [ -r /etc/os-release]; then
+    [ -z "$lsb_dist" ] && [ -r /etc/centos-release ] && lsb_dist='centos'
+    [ -z "$lsb_dist" ] && [ -r /etc/redhat-release ] && lsb_dist='redhat'
+    if [ -z "$lsb_dist" ] && [ -r /etc/os-release ]; then
         lsb_dist=$(. /etc/os-release && echo "$ID")
     fi
 
@@ -254,11 +254,7 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install ffmpeg libsdl2-dev libsdl2-image-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev curl' )
-
-    if ! command_exists pip; then
-        ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip' )
-    fi
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev curl' )
 
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
@@ -270,6 +266,14 @@ depends_install()
 
 pip_install()
 {
+    if ! command_exists pip; then
+        _info "\`pip\` command not found installing"
+        ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip' )
+    fi
+
+    # Ubuntu needs python3-dev
+    [[ $OS  == "ubuntu" ]] && ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3-dev' )
+
     _info "Checking default pip major python version"
 
     local pip_env=''
