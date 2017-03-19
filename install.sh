@@ -277,8 +277,8 @@ pip_install()
     elif (( pip_python_major_version == 2 )); then
         pip_env='pip3'
     else
-        _error "pip version not supported"
-        exit 1
+        _warning "No pip version detected attempting to use pip3"
+        pip_env='pip3'
     fi
 
     # Setup to install
