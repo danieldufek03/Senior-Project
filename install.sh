@@ -254,7 +254,7 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install ffmpeg libsdl2-dev libsdl2-image-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev python3 python3-pip curl' )
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev curl' )
 
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
@@ -275,6 +275,7 @@ pip_install()
     if (( pip_python_major_version == 3 )); then
         pip_env='pip'
     elif (( pip_python_major_version == 2 )); then
+        ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip' )
         pip_env='pip3'
     else
         _warning "No pip version detected attempting to use pip3"
@@ -285,6 +286,7 @@ pip_install()
     _info "Using command $pip_env"
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade pip" )
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
+    ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade virtualenv" )
 
     # Can't let pip handle install order of dependancies
     # It always tries to install kivy before it's cython
