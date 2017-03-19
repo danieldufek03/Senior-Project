@@ -284,17 +284,20 @@ pip_install()
         pip_env='pip'
     elif (( pip_python_major_version == 2 )); then
         pip_env='pip3'
+        ( set -x; $sh_c "sleep 3; $pip_env -q install setuptools" )
+        ( set -x; $sh_c "sleep 3; $pip_env show setuptools" )
+        ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
     else
         _warning "No pip version detected attempting to use pip3"
         pip_env='pip3'
+        ( set -x; $sh_c "sleep 3; $pip_env -q install setuptools" )
+        ( set -x; $sh_c "sleep 3; $pip_env show setuptools" )
+        ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
     fi
 
     # Setup to install
     _info "Using command $pip_env"
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade pip" )
-    ( set -x; $sh_c "sleep 3; $pip_env -q install setuptools" )
-    ( set -x; $sh_c "sleep 3; $pip_env show setuptools" )
-    ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
 
     # Can't let pip handle install order of dependancies
     # It always tries to install kivy before it's cython
