@@ -270,6 +270,8 @@ pip_install()
 
     local pip_env=''
     local pip_python_major_version=$(pip --version | cut -d ' ' -f 6 | cut -d '.' -f 1)
+    _info "pip version $(pip --version)"
+    _info "Detected major version $pip_python_major_version"
     if (( pip_python_major_version == 3 )); then
         pip_env='pip'
     elif (( pip_python_major_version == 2 )); then
