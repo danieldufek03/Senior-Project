@@ -293,6 +293,7 @@ pip_install()
     _info "Using command $pip_env"
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade pip" )
     ( set -x; $sh_c "sleep 3; $pip_env -q install setuptools" )
+    ( set -x; $sh_c "sleep 3; $pip_env show setuptools" )
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
 
     # Can't let pip handle install order of dependancies
