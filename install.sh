@@ -58,8 +58,8 @@ _greeting()
     echo '' 
     echo 'This script will install the antikythera program. It will'
     echo 'attempt to detect your system configuration to install and'
-    echo 'configure a antiktyhera for your environment. This script'
-    echo 'will install the program globally on the system for all users.'
+    echo 'configure antiktyhera for your environment. This script will'
+    echo 'install the program globally on the system for all users.'
     echo '' 
     echo '' 
     echo 'If that is not what you want press CTRL+C to exit,' 
@@ -266,20 +266,32 @@ depends_install()
 
 pip_install()
 {
-    _info "Installing antikythera"
+    _info "Checking default pip major python version"
+
+    local pip_env=''
+    local pip_python_major_version=$(pip --version | cut -d ' ' -f 6 | cut -d '.' -f 1)
+    if (( pip_python_major_version == 3 )); then
+        pip_env='pip'
+    elif (( pip_python_major_version == 2 )); then
+        pip_env='pip3'
+    else
+        _error "pip version not supported"
+        exit 1
+    fi
 
     # Setup to install
-    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
+    _info "Using command $pip_env"
+    ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade pip" )
+    ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
 
     # Can't let pip handle install order of dependancies
     # It always tries to install kivy before it's cython
     # dependency. `requirements.txt` has the depends listed
     # in order from top to bottom to support this.
     version=$(python3 --version)
-    _info "Installing with $version"
-    ( set -x; $sh_c 'sleep 3; curl -sSL "https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt" | xargs -n 1 -L 1 pip3 install' )
-    ( set -x; $sh_c 'sleep 3; pip3 install antikythera' )
+    _info "Installing antikythera with $version"
+    ( set -x; $sh_c "sleep 3; curl -sSL 'https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt' | xargs -n 1 -L 1 $pip_env install" )
+    ( set -x; $sh_c "sleep 3; $pip_env install --no-deps antikythera" )
 }
 
 
