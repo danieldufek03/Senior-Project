@@ -285,8 +285,8 @@ pip_install()
     # Setup to install
     _info "Using command $pip_env"
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade pip" )
+    ( set -x; $sh_c "sleep 3; $pip_env -q install setuptools" )
     ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade setuptools" )
-    ( set -x; $sh_c "sleep 3; $pip_env -q install --upgrade virtualenv" )
 
     # Can't let pip handle install order of dependancies
     # It always tries to install kivy before it's cython
