@@ -248,13 +248,13 @@ prepare_ffmpeg()
 # Install Cython and Kivy requirements
 depends_install()
 {
-    _info "[*] Installing Dependencies"
+    _info "Installing Dependencies"
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install git build-essential' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libav-tools' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install ffmpeg libsdl2-dev libsdl2-image-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev' )
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev python3-dev python3 python3-pip curl' )
 
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
@@ -266,12 +266,11 @@ depends_install()
 
 pip_install()
 {
-    _info "[*] Installing antikythera"
+    _info "Installing antikythera"
 
     # Setup to install
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install python3 python3-pip curl' )
-    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
     ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade setuptools' )
+    ( set -x; $sh_c 'sleep 3; pip3 -q install --upgrade pip' )
 
     # Can't let pip handle install order of dependancies
     # It always tries to install kivy before it's cython
