@@ -86,7 +86,7 @@ _error()
 
 _warning()
 {
-    printf "${YELLOW}[*] Error: ${NORMAL}$1"
+    printf "${YELLOW}[*] Warning: ${NORMAL}$1"
     echo ""
 }
 
