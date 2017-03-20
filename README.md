@@ -28,7 +28,7 @@ antikythera is not yet as advanced or reliable as [SnoopSnitch](https://opensour
 
 To install on Linux simply copy and paste this command into a shell:
 
-    curl -sSL finding-ray.gitlab.io/install.sh | sh
+    curl -sSL finding-ray.gitlab.io/antikythera/install.sh | bash
 
 &nbsp;
 ### Usage

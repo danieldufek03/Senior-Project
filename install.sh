@@ -4,9 +4,9 @@ set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 #
 # This script is meant for quick & easy install via:
-#   'curl -sSL https://finding-ray.gitlab.io/install.sh | sh'
+#   'curl -sSL https://finding-ray.gitlab.io/antikythera/install.sh | sh'
 # or:
-#   'wget -qO- https://finding-ray.gitlab.io/install.sh | sh'
+#   'wget -qO- https://finding-ray.gitlab.io/antikythera/install.sh | sh'
 #
 
 # System Config
