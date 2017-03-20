@@ -19,8 +19,8 @@
 
 antikythera is not yet as advanced or reliable as [SnoopSnitch](https://opensource.srlabs.de/projects/snoopsnitch) and [AIMSICD](https://github.com/CellularPrivacy/Android-IMSI-Catcher-Detector). Both of which have also provided invaluable documentation allowing for this project to exist and attempt to provide an IMSI-Catcher detector that is not required to be a phone. And if you need real protection you should use one of them for now, preferably SnoopSnitch as it is the best tested currently. For a detailed description of the other options see the FAQ:
 
-*   [Is it ready?](http://finding-ray.gitlab.io/antikythera/faq.html#is-it-ready)
-*   [Why another IMSI-Catcher Detector?](http://finding-ray.gitlab.io/antikythera/faq.html#why-another-imsi-catcher-detector)
+*   [Is it ready?](http://finding-ray.gitlab.io/antikythera/pages/faq.html#is-it-ready)
+*   [Why another IMSI-Catcher Detector?](http://finding-ray.gitlab.io/antikythera/pages/faq.html#why-another-imsi-catcher-detector)
 
 &nbsp;
 ### Install
@@ -33,7 +33,7 @@ To install on Linux simply copy and paste this command into a shell:
 &nbsp;
 ### Usage
 
-Although antikythera is designed to run on Windows, Linux, and OSX currently automated install is only available for Debian based Linux distributions. It will run on both x86 and ARM architectures (PCs, Android, iPhone, RaspberryPi, etc.) and is built to work well without a lot of resources in an embedded environment. It is possible to read data from a capture ([pcap file](https://en.wikipedia.org/wiki/Pcap)) file but it requires an interface to a radio for live capture and both a software defined radio or hardware radio can be used, but it must provide data in the [GSMTAP](http://osmocom.org/projects/baseband/wiki/GSMTAP) format. For more info on the radio requirements see the [hardware documentation](http://finding-ray.gitlab.io/antikythera/hardware.html).
+Although antikythera is designed to run on Windows, Linux, and OSX currently automated install is only available for Debian based Linux distributions. It will run on both x86 and ARM architectures (PCs, Android, iPhone, RaspberryPi, etc.) and is built to work well without a lot of resources in an embedded environment. It is possible to read data from a capture ([pcap file](https://en.wikipedia.org/wiki/Pcap)) file but it requires an interface to a radio for live capture and both a software defined radio or hardware radio can be used, but it must provide data in the [GSMTAP](http://osmocom.org/projects/baseband/wiki/GSMTAP) format. For more info on the radio requirements see the [hardware documentation](http://finding-ray.gitlab.io/antikythera/pages/hardware.html).
 
 &nbsp;
 Kivy arguments come first then antikythera's with ``--`` separating them:
