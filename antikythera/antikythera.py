@@ -156,11 +156,23 @@ class Anti(Process):
 
 
     def create_db():
-        """ Create the database if needed.
-
+        """ Create the database if needed
         """
-        pass
-
+        import sqlite3
+        conn = sqlite3.connect(debianData.db)
+        if not (os.path.exists(debianData.db)) :
+            print "oh no"
+        """sqlite3 CREATE TABLE packets (
+            DT     TEXT PRIMARY KEY,
+            TMSI   TEXT,
+            IMSI   TEXT,
+            LAC    TEXT,
+            CID    TEXT,
+            ARFCN  TEXT,
+            MCC    TEXT,
+            MNC    TEXT,
+            IMEISV TEXT
+            )"""
 
 def create_parser():
     """ Parse command line parameters.
