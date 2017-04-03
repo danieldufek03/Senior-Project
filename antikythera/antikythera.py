@@ -161,7 +161,7 @@ class Anti(Process):
         import sqlite3
         conn = sqlite3.connect(debianData.db)
         if not (os.path.exists(debianData.db)) :
-            print "oh no"
+            print("oh no")
         """sqlite3 CREATE TABLE packets (
             DT     TEXT PRIMARY KEY,
             TMSI   TEXT,
