@@ -1,0 +1,49 @@
+<AnimWidget@Widget>:
+    canvas:
+        Color:
+            rgba: 13/255, 134/255, 178/255, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    size_hint: None, None
+    size: 400, 30
+
+
+<RootWidget>:
+    cols: 1
+
+    canvas:
+        Color:
+            rgba: 24/255, 27/255, 30/255, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    anim_box: anim_box
+    detect_button: detect_button
+    status: status
+    defcon: defcon
+
+    Button:
+        id: detect_button
+        font_size: 30
+        background_color: 255/255, 32/255, 82/255, 1
+        background_normal: ''
+        text: 'Find a Stingray!'
+        on_press: app.start()
+
+    Label:
+        id: status
+        font_size: 30
+        color: 13/255, 134/255, 178/255, 1
+        text_size: self.width, None
+        halign: 'center'
+
+    AnchorLayout:
+        id: anim_box
+
+    Label:
+        id: defcon
+        font_size: 100
+        color: 178/255, 5/255, 44/255, 1
+        text: '5'
