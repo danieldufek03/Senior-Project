@@ -1,5 +1,5 @@
-sqlitedict
 appdirs
+logbook
 pyshark
 sphinx
 sphinx_rtd_theme
