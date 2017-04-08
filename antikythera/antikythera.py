@@ -23,7 +23,8 @@ from antikythera.metrics import Metrics
 
 _logger = logging.getLogger(__name__)
 
-__author__= "Finding Ray"
+__projectname__ = "Finding Ray"
+__author__ = "Team Awesome"
 __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
 

@@ -1,3 +1,119 @@
+# Kivy 1.9.1
+
+# Color palette (RGBA)
+#:set color_awesome [0xFF/255, 0x20/255, 0x52/255, 1]
+#:set color_defcon5 [0x5D/255, 0xBC/255, 0xD2/255, 1] # Blue
+#:set color_defcon4 [0x70/255, 0xB2/255, 0x48/255, 1] # Green
+#:set color_defcon3 [0xFE/255, 0xD9/255, 0x66/255, 1] # Yellow
+#:set color_defcon2 [0xFF/255, 0x64/255, 0x65/255, 1] # Red
+#:set color_defcon1 [0xFF/255, 0xFF/255, 0xFF/255, 1] # White
+#:set color_black [0, 0, 0, 1]
+#:set color_grey [0x34/255, 0x3E/255, 0x48/255, 1]
+
+#:set fontsize_small 30
+#:set padding [10, 10, 10, 10]
+#:set spacing [10, 10]
+
+# Title - GridLayout
+<Title@GridLayout>:
+    rows: 1
+    cols: 3
+
+    size_hint: [fontsize_small + 10, None]
+    spacing: spacing # Space between children
+
+    button_scan: button_scan
+    button_config: button_config
+
+    Label:
+        font_size: fontsize_small
+        #background_color: color_awesome
+        color: color_defcon1
+
+        text: "TEAM AWESOME"
+        text_size: self.width, None
+        halign: 'center'
+    
+    Button:
+        id: button_scan
+        font_size: fontsize_small
+        background_color: color_awesome
+        background_normal: ''
+        text: "Start Scan"
+        on_press: app.start()
+
+    Button:
+        id: button_config
+        font_size: fontsize_small
+        background_color: color_awesome
+        background_normal: ''
+        text: "Configuration"
+
+<Scanner>:
+    cols: 1
+    rows: 5
+    
+    canvas:
+        Color:
+            rgba: color_defcon1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    DefconLevel:
+        id: defconLevel1
+        color: color_defcon1
+    DefconLevel:
+        id: defconLevel2
+        color: color_defcon2
+    DefconLevel:
+        id: defconLevel3
+        color: color_defcon3
+    DefconLevel:
+        id: defconLevel4
+        color: color_defcon4
+    DefconLevel:
+        id: defconLevel5
+        color: color_defcon5
+
+<DefconLevel@GridLayout>:
+    cols: 1
+    rows: 1
+    padding: padding
+
+    #color2: canvas.color
+    color: color_black
+    
+    canvas:
+        Color:
+            rgba: color_defcon1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# Main - GridLayout
+<RootWidget>:
+    cols: 1
+    rows: 3
+    padding: padding
+    spacing: spacing # Space between children
+
+    title: title
+
+    canvas:
+        Color:
+            #rgba: 24/255, 27/255, 30/255, 1
+            rgba: color_grey
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Title:
+        id: title
+
+    Scanner:
+        id: scanner
+
 <AnimWidget@Widget>:
     canvas:
         Color:
@@ -8,13 +124,17 @@
     size_hint: None, None
     size: 400, 30
 
-
-<RootWidget>:
+# Main screen
+<RootWidget2>:
+#    rows: 1
     cols: 1
+    padding: [10, 10, 10, 10]
+    spacing: [10, 10] # Space between children
 
     canvas:
         Color:
-            rgba: 24/255, 27/255, 30/255, 1
+            #rgba: 24/255, 27/255, 30/255, 1
+            rgba: color_grey
         Rectangle:
             pos: self.pos
             size: self.size
@@ -24,10 +144,10 @@
     status: status
     defcon: defcon
 
-    Button:
+    Button: # Start scan
         id: detect_button
         font_size: 30
-        background_color: 255/255, 32/255, 82/255, 1
+        background_color: color_awesome
         background_normal: ''
         text: 'Find a Stingray!'
         on_press: app.start()
