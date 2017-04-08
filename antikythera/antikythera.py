@@ -8,7 +8,6 @@ The main program manager.
 import os
 import logging
 import argparse
-import appdirs
 import multiprocessing as mp
 
 from time import sleep
