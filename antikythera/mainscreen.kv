@@ -51,45 +51,59 @@
 
 <Scanner>:
     cols: 1
-    rows: 5
+    rows: 6
     
+    anim_box: anim_box
+
     canvas:
         Color:
-            rgba: color_defcon1
+            rgba: color_black
         Rectangle:
             pos: self.pos
             size: self.size
+    
+    AnchorLayout:
+        id: anim_box
+        size_hint: [fontsize_small + 10, None]
 
     DefconLevel:
         id: defconLevel1
         color: color_defcon1
+        text: "DEFCON 1"
     DefconLevel:
         id: defconLevel2
         color: color_defcon2
+        text: "DEFCON 2"
     DefconLevel:
         id: defconLevel3
         color: color_defcon3
+        text: "DEFCON 3"
     DefconLevel:
         id: defconLevel4
         color: color_defcon4
+        text: "DEFCON 4"
     DefconLevel:
         id: defconLevel5
         color: color_defcon5
+        text: "DEFCON 5"
 
-<DefconLevel@GridLayout>:
+<DefconLevel>:
     cols: 1
     rows: 1
     padding: padding
-
-    #color2: canvas.color
-    color: color_black
     
-    canvas:
-        Color:
-            rgba: color_defcon1
-        Rectangle:
-            pos: self.pos
-            size: self.size
+    label: label
+
+    Label:
+        id: label
+        font_size: fontsize_small
+        #background_color: color_awesome
+        color: color_black
+
+        text: "DEFCON X"
+        text_size: self.width, None
+        halign: 'center'
+        
 
 # Main - GridLayout
 <RootWidget>:
@@ -99,12 +113,14 @@
     spacing: spacing # Space between children
 
     title: title
+    scanner: scanner
 
     canvas:
         Color:
             #rgba: 24/255, 27/255, 30/255, 1
             rgba: color_grey
         Rectangle:
+            #source: "image.png"
             pos: self.pos
             size: self.size
     
