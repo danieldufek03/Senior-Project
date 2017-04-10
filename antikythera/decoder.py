@@ -56,11 +56,13 @@ class Decoder(Process):
         self.c.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
             UnixTime REAL,
             PeopleTime TEXT,
+            CHANNEL TEXT,
+            DBM TEXT,
+            ARFCN TEXT,
             TMSI TEXT,
             IMSI TEXT,
             LAC TEXT,
             CID TEXT,
-            ARFCN TEXT,
             MCC TEXT,
             MNC TEXT,
             IMEISV TEXT,
@@ -88,15 +90,26 @@ class Decoder(Process):
         self.c = self.conn.cursor()
         _logger.debug("{}: Decoding packet {}".format(self.process_id,
             packet['gsmtap'].frame_nr))
+
         packet_data = {}
+
         # Prevent collisions when running multiple times on same capture file
         packet_data.update({"hash" : hash((packet.__hash__(), time.time()))})
+
+        # Layer common to all packets
         packet_data.update({"frame_nr" : float(packet['gsmtap'].frame_nr)})
+        packet_data.update({"channel" : float(packet['gsmtap'].chan_type)})
+        packet_data.update({"signal_dbm" : float(packet['gsmtap'].signal_dbm)})
+        packet_data.update({"arfcn" : float(packet['gsmtap'].arfcn)})
         packet_data.update({"timestamp" : float(packet.sniff_timestamp)})
         packet_data.update({"datetime" :
             str(datetime.datetime.fromtimestamp(
                     packet_data['timestamp']).strftime('%Y-%m-%d%H:%M:%S')
                 )})
+
+        # Detect packet type and extract needed data
+        
+
         return packet_data
 
 
@@ -110,26 +123,30 @@ class Decoder(Process):
             """INSERT INTO PACKETS(
                 UnixTime,
                 PeopleTime,
+                CHANNEL,
+                DBM,
+                ARFCN,
                 TMSI,
                 IMSI,
                 LAC,
                 CID,
-                ARFCN,
                 MCC,
                 MNC,
                 IMEISV,
                 FrameNumber,
                 HASH
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 packet_data['timestamp'],
                 packet_data['datetime'],
+                packet_data['channel'],
+                packet_data['signal_dbm'],
+                packet_data['arfcn'],
                 '123456789012345',
                 '324345566767899',
                 '303',
                 '151515',
                 '131313',
-                '232',
                 '02',
                 '1234567891234567',
                 packet_data['frame_nr'],

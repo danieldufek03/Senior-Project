@@ -17,26 +17,70 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.animation import Animation
 from kivy.clock import Clock, mainthread
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.properties import NumericProperty, ReferenceListProperty
+from kivy.graphics import *
 from multiprocessing import Queue
 from time import sleep
 
 
 from antikythera import __version__
+from antikythera.antikythera import __projectname__, __author__, __copyright__, __license__
 from antikythera.antikythera import Anti, create_parser
 
 _logger = logging.getLogger(__name__)
 
-__author__= "Finding Ray"
-__copyright__ = "Finding Ray"
-__license__ = "GNU GPLv3+"
-
-
 # Loads main from design file
 Builder.load_file("mainscreen.kv")
 
+class DefconLevel(GridLayout):
+    pass
+
+class Scanner(GridLayout):
+    def __init__(self, *args, **kwargs):
+        super(Scanner, self).__init__(*args, **kwargs)
+
+        '''
+        self.canvas.add(Color(rgba=self.color))
+        self.canvas.add(Rectangle(pos=self.pos, size=self.size))
+        '''
+
+    # Called whenever itself or children are updated
+    def do_layout(self, *args):
+        super(Scanner, self).do_layout(*args)
+        for child in self.children:
+            if type(child) is not DefconLevel:
+                continue
+
+            # Creates new canvas
+            child.canvas.before.clear()
+
+            with child.canvas.before:
+                Color(rgba=child.color)
+                Rectangle(pos=child.pos, size=child.size)
+
+            #child.canvas.add(rgba=child.color)
+            #child.canvas.add(Rectangle(pos=child.pos, size=child.size))
+
+            # Creates new label
+            '''
+            child.children.clear()
+            
+            with Label() as label:
+                label.text = child.text
+            '''
+
+            child.label.text = child.text
+            
+            pass
+            
+            
+
+        
 
 class RootWidget(GridLayout):
     """
@@ -54,17 +98,38 @@ class RootWidget(GridLayout):
         """
 
         """
+        # TODO: Add stop scan functionality
+        self.title.button_scan.text = "Stop Scan"
+        self.title.button_scan.disabled = True
+        
+        '''
         # Remove start button and add status
         self.remove_widget(self.detect_button)
         self.status.text = ('Looking for a stingray...')
+        '''
+
+        xMax = self.scanner.anim_box.width * 0.8
+        xMin = xMax * 0.3
 
         # Spinny Widget
         action_bar = Factory.AnimWidget()
-        self.anim_box.add_widget(action_bar)
-        animation = Animation(opacity=0.3, width=10, duration=0.6)
-        animation += Animation(opacity=1, width=400, duration=0.8)
+        self.scanner.anim_box.add_widget(action_bar)
+        animation = Animation(opacity=0.3, width=xMin, duration=0.6)
+        animation += Animation(opacity=1, width= xMax, duration=0.8)
         animation.repeat = True
         animation.start(action_bar)
+        
+        '''
+        # Scanning Label
+        label = Label()
+        self.scanner.anim_box.add_widget(action_bar)
+        
+        with label:
+            font_size = 30
+            text = "Scanning"
+            color = [1, 1, 1, 1]
+            halign = "center"
+        '''
 
 
     def update_defcon(self, new_text):
@@ -75,13 +140,13 @@ class RootWidget(GridLayout):
         self.status.text = new_text
 
 
-
 class MetricDisplay(App):
     """
 
     """
 
     def __init__(self, *args, **kwargs):
+        self.title = __projectname__
         super(MetricDisplay, self).__init__(*args, **kwargs)
         self.IMSI_detector = None
 
@@ -131,6 +196,11 @@ def run():
     """
     _logger.info("GUI: Starting GUI App")
     MetricDisplay().run()
+    return
+    try:
+        MetricDisplay().run()
+    except Exception as e:
+        _logger.info("GUI: Exception was thrown\n" + str(e))
 
 
 if __name__ == "__main__":
