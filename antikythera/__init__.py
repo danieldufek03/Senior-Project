@@ -6,6 +6,6 @@ try:
     __author__   = "TeamAwesome"
     self.datadir = appdirs.user_data_dir(__name__, __author__)
     
-    self.datadir.configure('PRAGMA busy_timeout', 60000)
+    self.datadir.run('PRAGMA busy_timeout', 60000)
 except:
     __version__ = 'unknown'
