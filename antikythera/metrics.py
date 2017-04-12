@@ -72,8 +72,8 @@ class Metrics(Process):
         set(self.packetList)
         newSizeOfPacketList = len(self.packetList)
         _logger.trace("{}: Length of 'set' packetList {}".format(self.process_id, newSizeOfPacketList))
+        _logger.trace("{}: Packet list content {}".format(self.process_id, self.packetList))
         
-        print(self.packetList)
         _logger.info("{}: Exiting".format(self.process_id))
 
 
