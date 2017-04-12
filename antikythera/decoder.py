@@ -39,7 +39,7 @@ class Decoder(Process):
         self.q = q
         self.exit = mp.Event()
 
-        self.datadir = appdirs.user_data_dir(__name__, __author__)
+        self.datadir = appdirs.user_data_dir("anti.sqlite3", "anything")
         self.conn = None
         self.c = None
 

@@ -24,9 +24,10 @@ class Metrics(Process):
     def __init__(self, process_id, *args, **kwargs):
         super(Metrics, self).__init__(*args, **kwargs)
         self.process_id = process_id
-        self.datadir = appdirs.user_data_dir(__name__, __author__)
+        self.datadir = appdirs.user_data_dir("anti.sqlite3", "anything")
         self.conn = None
         self.c = None
+        self.packetList = []
         _logger.debug("{}: Process started successfully".format(self.process_id))
         self.exit = mp.Event()
 
@@ -54,18 +55,25 @@ class Metrics(Process):
             )'''
     	)
         self.conn.close()
-
         while not self.exit.is_set():
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
             sleep(3)
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
+
             self.c.execute("SELECT * FROM PACKETS")
-            _logger.debug("{}: Number of Rows... {}".format(self.process_id, len(self.c.fetchall())))
-            _logger.debug("{}: Data...{}".format(self.process_id, self.c.fetchall()))
             for row in self.c.fetchall():   
-            	_logger.debug("{}: {}".format(self.process_id, row))
+            	_logger.trace("{}: {}".format(self.process_id, row))
+            	self.packetList.append(row)
             self.conn.close()
+        
+        sizeOfPacketList = len(self.packetList)
+        _logger.trace("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
+        set(self.packetList)
+        newSizeOfPacketList = len(self.packetList)
+        _logger.trace("{}: Length of 'set' packetList {}".format(self.process_id, newSizeOfPacketList))
+        
+        print(self.packetList)
         _logger.info("{}: Exiting".format(self.process_id))
 
 
