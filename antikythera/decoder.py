@@ -10,6 +10,7 @@ import time
 import logging
 import sqlite3
 import datetime
+import random
 import multiprocessing as mp
 from multiprocessing import Process
 from queue import Empty
@@ -138,8 +139,8 @@ class Decoder(Process):
                 packet_data['arfcn'],
                 '123456789012345',
                 '324345566767899',
-                '303',
-                '151515',
+                random.randint(1,200),
+                random.randint(1,200),
                 '131313',
                 '02',
                 '1234567891234567',

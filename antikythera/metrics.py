@@ -28,6 +28,7 @@ class Metrics(Process):
         self.conn = None
         self.c = None
         self.packetList = []
+        self.areaCidList = []
         _logger.debug("{}: Process started successfully".format(self.process_id))
         self.exit = mp.Event()
 
@@ -57,6 +58,7 @@ class Metrics(Process):
         self.conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
+            self.sameAreaAndCellId()
             sleep(3)
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
@@ -68,16 +70,36 @@ class Metrics(Process):
             self.conn.close()
         
         sizeOfPacketList = len(self.packetList)
-        _logger.trace("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
-        set(self.packetList)
-        newSizeOfPacketList = len(self.packetList)
-        _logger.trace("{}: Length of 'set' packetList {}".format(self.process_id, newSizeOfPacketList))
+        _logger.debug("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
+
         _logger.trace("{}: Packet list content {}".format(self.process_id, self.packetList))
         
         _logger.info("{}: Exiting".format(self.process_id))
 
 
+    """
+    The following sql query will find packets that share the same Location Area Code and Cell ID, but have different frequencies.
+    """
+    def sameAreaAndCellId(self):
+        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        self.c = self.conn.cursor()
+
+        self.c.execute("""SELECT A.*
+            FROM PACKETS A
+            INNER JOIN (SELECT LAC, CID, ARFCN
+                        FROM PACKETS
+                        GROUP BY LAC, CID
+                        HAVING COUNT(*) > 1) B
+            ON A.LAC = B.LAC AND A.CID = B.CID AND A.ARFCN <> B.ARFCN""")
+        for row in self.c.fetchall():
+            _logger.trace("{}: {}".format(self.process_id, row))
+            self.areaCidList.append(row)
+        sizeOfAreaCidList = len(self.areaCidList)
+        _logger.trace("{}: Length of areaCidList {}".format(self.process_id, sizeOfAreaCidList))
+        self.conn.close()
+
     def shutdown(self):
+
         _logger.info("{}: Recieved shutdown command".format(self.process_id))
         self.exit.set()
 
