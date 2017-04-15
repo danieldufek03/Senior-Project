@@ -8,9 +8,11 @@ Implementation of the metrics that detect IMSI Catchers
 import logging
 import sqlite3
 import appdirs
+import datetime
 import multiprocessing as mp
 
 from time import sleep
+from datetime import timedelta
 from multiprocessing import Process, Queue
 
 _logger = logging.getLogger(__name__)
@@ -29,7 +31,7 @@ class Metrics(Process):
         self.c = None
         self.packetList = []
         self.areaCidList = []
-        self.inconLACList = []
+        self.inconsistentAreaCodeList = []
         _logger.debug("{}: Process started successfully".format(self.process_id))
         self.exit = mp.Event()
 
@@ -57,15 +59,15 @@ class Metrics(Process):
             )'''
     	)
 
-        self.c.execute('''CREATE TABLE IF NOT EXISTS INCON_LAC(
+        self.c.execute('''CREATE TABLE IF NOT EXISTS INCONSISTENT_AREA_CODE(
             LAC TEXT,
             PeopleTime TEXT
             )'''
         )
 
-        self.c.execute('''CREATE TABLE IF NOT EXISTS TEST_LAC(
+        self.c.execute('''CREATE TABLE IF NOT EXISTS TEMP_INCONSISTENT_AREA_CODE(
             LAC TEXT,
-            PeopleTime TEXT
+            PreviousTime TEXT
             )'''
         )
 
@@ -73,11 +75,10 @@ class Metrics(Process):
         while not self.exit.is_set():
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
             self.sameAreaAndCellId()
-            self.incon_LAC()
+            self.inconsistentAreaCode()
             sleep(3)
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
-
             self.c.execute("SELECT * FROM PACKETS")
             for row in self.c.fetchall():   
             	_logger.trace("{}: {}".format(self.process_id, row))
@@ -96,6 +97,8 @@ class Metrics(Process):
     The following sql query will find packets that share the same Location Area Code and Cell ID, but have different frequencies.
     """
     def sameAreaAndCellId(self):
+        #PrevTime = datetime.datetime.now() - datetime.timedelta(days = 730, minutes=5)
+
         self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
         self.c = self.conn.cursor()
 
@@ -114,33 +117,35 @@ class Metrics(Process):
         self.conn.close()
 
     """
-    The following sql query pull LAC that differ by PeopleTime.
+    The following sql query pull the area code that differs by datetime minus 5 minutes
+    and places it into a seperate table INCONSISTENT_AREA_CODE.
     """
-    def incon_LAC(self):
+    def inconsistentAreaCode(self):
+        PrevTime = datetime.datetime.now() - datetime.timedelta(days = 730, minutes=5)
         self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
         self.c = self.conn.cursor()
 
-        self.c.execute("INSERT INTO INCON_LAC SELECT LAC, PeopleTime FROM PACKETS")
+        self.c.execute("INSERT INTO INCONSISTENT_AREA_CODE SELECT LAC, PeopleTime FROM PACKETS")
         self.c.execute(
-            """INSERT INTO TEST_LAC(
+            """INSERT INTO TEMP_INCONSISTENT_AREA_CODE(
             LAC,
-            PeopleTime
+            PreviousTime
             ) VALUES (?, ?)
             """, (
                 '757',
-                '2015-07-2007:30:00'
+                PrevTime
                 )
             )
-            #self.c.execute("SELECT * FROM INCON_LAC")
-            #self.c.execute("SELECT * FROM TEST_LAC")
-        self.c.execute("""SELECT LAC FROM INCON_LAC
-             WHERE PeopleTime != 
-            (SELECT PeopleTime FROM TEST_LAC)""")
+        #self.c.execute("SELECT * FROM INCON_LAC")
+        #self.c.execute("SELECT * FROM TEMP_INCONSISTENT_AREA_CODE")
+        self.c.execute("""SELECT LAC, PeopleTime FROM INCONSISTENT_AREA_CODE
+             WHERE PeopleTime > 
+            (SELECT PreviousTime FROM TEMP_INCONSISTENT_AREA_CODE)""")
         for row in self.c.fetchall():
-            _logger.trace("{}: {}".format(self.process_id, row))
-            self.inconLACList.append(row)
-        sizeOfinconLACList = len(self.inconLACList)
-        _logger.trace("{}: Length of inconLACList {}".format(self.process_id, sizeOfinconLACList))
+            _logger.debug("{}: {}".format(self.process_id, row))
+            self.inconsistentAreaCodeList.append(row)
+        sizeOfinconsistentAreaCodeList = len(self.inconsistentAreaCodeList)
+        _logger.trace("{}: Length of inconsistentAreaCodeList {}".format(self.process_id, sizeOfinconsistentAreaCodeList))
         self.conn.close()
 
     def shutdown(self):
