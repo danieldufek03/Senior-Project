@@ -55,6 +55,19 @@ class Metrics(Process):
             HASH TEXT PRIMARY KEY
             )'''
     	)
+
+        self.c.execute('''CREATE TABLE IF NOT EXISTS INCON_LAC(
+            LAC TEXT,
+            PeopleTime TEXT
+            )'''
+        )
+
+        self.c.execute('''CREATE TABLE IF NOT EXISTS TEST_LAC(
+            LAC TEXT,
+            PeopleTime TEXT
+            )'''
+        )
+
         self.conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
@@ -97,6 +110,30 @@ class Metrics(Process):
         sizeOfAreaCidList = len(self.areaCidList)
         _logger.trace("{}: Length of areaCidList {}".format(self.process_id, sizeOfAreaCidList))
         self.conn.close()
+
+    """
+    The following sql query pull LAC that differ by PeopleTime.
+    """
+    def incon_LAC(self):
+        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        self.c = self.conn.cursor()
+
+        self.c.execute("INSERT INTO INCON_LAC SELECT LAC, PeopleTime FROM PACKETS")
+        self.c.execute(
+            """INSERT INTO TEST_LAC(
+            LAC,
+            PeopleTime
+            ) VALUES (?, ?)
+            """, (
+                '757',
+                '2015-07-2007:30:00'
+                )
+            )
+            #self.c.execute("SELECT * FROM INCON_LAC")
+            #self.c.execute("SELECT * FROM TEST_LAC")
+        self.c.execute("""SELECT LAC FROM INCON_LAC
+             WHERE PeopleTime != 
+            (SELECT PeopleTime FROM TEST_LAC)""")
 
     def shutdown(self):
 
