@@ -29,6 +29,7 @@ class Metrics(Process):
         self.c = None
         self.packetList = []
         self.areaCidList = []
+        self.inconLACList = []
         _logger.debug("{}: Process started successfully".format(self.process_id))
         self.exit = mp.Event()
 
@@ -72,6 +73,7 @@ class Metrics(Process):
         while not self.exit.is_set():
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
             self.sameAreaAndCellId()
+            self.incon_LAC()
             sleep(3)
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
@@ -134,6 +136,12 @@ class Metrics(Process):
         self.c.execute("""SELECT LAC FROM INCON_LAC
              WHERE PeopleTime != 
             (SELECT PeopleTime FROM TEST_LAC)""")
+        for row in self.c.fetchall():
+            _logger.trace("{}: {}".format(self.process_id, row))
+            self.inconLACList.append(row)
+        sizeOfinconLACList = len(self.inconLACList)
+        _logger.trace("{}: Length of inconLACList {}".format(self.process_id, sizeOfinconLACList))
+        self.conn.close()
 
     def shutdown(self):
 
