@@ -13,6 +13,7 @@
 #:set fontsize_small 30
 #:set padding [10, 10, 10, 10]
 #:set spacing [10, 10]
+#:set iconPath "assets/icons/" # Memes
 
 # Title - GridLayout
 <Title@GridLayout>:
@@ -78,26 +79,31 @@
         level: 1
         color: color_defcon1
         text: "DEFCON 1"
+        icon: iconPath + "defcon1.png"
     DefconLevel:
         id: defconLevel2
         level: 2
         color: color_defcon2
         text: "DEFCON 2"
+        icon: iconPath + "defcon2.png"
     DefconLevel:
         id: defconLevel3
         level: 3
         color: color_defcon3
         text: "DEFCON 3"
+        icon: iconPath + "defcon3.png"
     DefconLevel:
         id: defconLevel4
         level: 4
         color: color_defcon4
         text: "DEFCON 4"
+        icon: iconPath + "defcon4.png"
     DefconLevel:
         id: defconLevel5
         level: 5
         color: color_defcon5
         text: "DEFCON 5"
+        icon: iconPath + "defcon5.png"
 
 <DefconLevel>:
     cols: 1
