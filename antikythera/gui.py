@@ -101,13 +101,6 @@ class Scanner(GridLayout):
                     # Meme icon
                     Color(rgba=[1, 1, 1, 1])
                     Rectangle(source=child.icon, pos=iconPos, size=iconSize)
-<<<<<<< HEAD
-                
-=======
-
-                _logger.info("GUI: Updated threat level to {}".format(child.level))
-
->>>>>>> b534a64ae29aa4dcf7701d6936c4fce4acda7d71
             pass
 
     def update_defcon(self, level):
@@ -123,7 +116,6 @@ class Scanner(GridLayout):
 
         _logger.info("GUI: Updated threat level to {}".format(level))
         pass
-
 
 
 class RootWidget(GridLayout):
