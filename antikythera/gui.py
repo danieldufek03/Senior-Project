@@ -41,12 +41,15 @@ Builder.load_file("mainscreen.kv")
 color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
 
 class DefconLevel(GridLayout):
-    pass
+
+    def setHighlight(self, toggle):
+        self.highlight = toggle
 
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
-
+        self.defconLevel = 5
+        
         '''
         self.canvas.add(Color(rgba=self.color))
         self.canvas.add(Rectangle(pos=self.pos, size=self.size))
@@ -58,7 +61,7 @@ class Scanner(GridLayout):
         for child in self.children:
             if not isinstance(child, DefconLevel):
                 continue
-
+            
             # Creates new canvas
             child.canvas.before.clear()
             child.canvas.after.clear()
@@ -82,7 +85,7 @@ class Scanner(GridLayout):
             child.label.text = child.text
             child.label.color = [0, 0, 0, 1]
 
-            if (child.highlight):
+            if (child.level == self.defconLevel):
                 # Changes text color
                 child.label.color = [1, 1, 1, 1]
 
@@ -104,13 +107,20 @@ class Scanner(GridLayout):
         if (level is None or not isinstance(level, int) or level < 0 or level > 5):
             return
         
+        self.defconLevel = level
+
+        '''
+        print("")
         for i in range(1, 6): # 1-5
             dLevel = eval("self.defconLevel" + str(level))
-            dLevel.highlight = (i == level)
+            #dLevel.highlight = (i == level)
+            dLevel.setHighlight(i == level)
 
             if (i == level):
+                #dLevel.highlight = True
                 print("Set threat level", i)
-
+        '''
+        
         self.do_layout() # Re-draws GUI
 
         # _logger.info("GUI: Updated threat level")
