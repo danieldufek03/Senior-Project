@@ -49,7 +49,7 @@ class DefconLevel(GridLayout):
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
-        self.defconLevel = 5
+        self.defconLevel = 0
 
         '''
         self.canvas.add(Color(rgba=self.color))
@@ -71,6 +71,11 @@ class Scanner(GridLayout):
                 Color(rgba=child.color)
                 Rectangle(pos=child.pos, size=child.size)
 
+                if (child.level == self.defconLevel):
+                    # Highlights
+                    Color(rgba=color_highlight)
+                    Rectangle(pos=child.pos, size=child.size)
+
 
             #child.canvas.add(rgba=child.color)
             #child.canvas.add(Rectangle(pos=child.pos, size=child.size))
@@ -88,19 +93,21 @@ class Scanner(GridLayout):
 
             if (child.level == self.defconLevel):
                 # Changes text color
-                child.label.color = [1, 1, 1, 1]
+                #child.label.color = [1, 1, 1, 1]
 
-                # Highlights
+                iconSize = [child.height, child.height]
+                iconPos = [child.pos[0] + (child.size[0] - child.height), child.pos[1]]
+
                 with child.canvas.after:
-                    Color(rgba=color_highlight)
-                    Rectangle(pos=child.pos, size=child.size)
-
-
-
+                    # Meme icon
+                    Color(rgba=[1, 1, 1, 1])
+                    Rectangle(source=child.icon, pos=iconPos, size=iconSize)
+                
+                _logger.info("GUI: Updated threat level to {}".format(child.level))
 
             pass
 
-    def update_level(self, level):
+    def update_defcon(self, level):
         """
         Updates threat level in GUI.
             int : level - Defcon level (1-5)
@@ -180,8 +187,8 @@ class RootWidget(GridLayout):
         '''
 
 
-    def update_defcon(self, new_text):
-        self.defcon.text = new_text
+    def update_defcon(self, level):
+        self.scanner.update_defcon(level)
 
 
     def update_status(self, new_text):
@@ -250,8 +257,7 @@ class MetricDisplay(App):
         if self.timesUpdated > 5:
             self.timesUpdated = 1
 
-        self.root.scanner.update_level(self.timesUpdated)
-        _logger.info("GUI: Updated threat level")
+        self.root.update_defcon(self.timesUpdated)
 
     def build_settings(self, settings):
         print("build_settings executed")
