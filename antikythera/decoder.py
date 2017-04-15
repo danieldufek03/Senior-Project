@@ -51,6 +51,285 @@ class Decoder(Process):
                                                              self.datadir))
         self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
         self.c = self.conn.cursor()
+        self.create_tables()
+        self.conn.close()
+        while not self.exit.is_set():
+
+            try:
+
+                packet = self.q.get(timeout=10)
+                _logger.debug("{}: Consumed packet Queue size is now {}".format(
+                    self.process_id, self.q.qsize()))
+                data = self.decode_packet(packet)
+
+                if packet.__repr__() == '<UDP/GSM_A.CCCH Packet>':
+                    if packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type == '33':
+                        _logger.debug("{}: decoding packet type {}".format(
+                            self.process_id, packet.__repr__()))
+                        self.decode_paging(packet, data)
+                        self.store_paging(packet, data)
+                    else:
+                        _logger.warning("{}: Packet decode not implemted {} Type {}"
+                                      .format(self.process_id,
+                                              packet.__repr__(),
+                                              packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type))
+                else:
+                    if packet.layers[-1].__repr__() == '<GSM_A.DTAP Layer>':
+                        try:
+                            _logger.warning("{}: unimplemented packet type '{}' at index {}".format(
+                                self.process_id, packet['gsm_a.dtap']._all_fields[''], (int(packet.number) - 1)))
+                            self.store_packet(packet, data)
+                        except KeyError:
+                            _logger.warning("{}: unable to get layer type for unimplemented packet type '{}' at index {}".format(
+                                self.process_id, packet.__repr__(), (int(packet.number) - 1)))
+                            self.store_packet(packet, data)
+                    else:
+                        _logger.warning("{}: unimplemented packet type {} at index {}".format(
+                            self.process_id, packet.__repr__(), (int(packet.number) - 1)))
+                        self.store_packet(packet, data)
+
+            except Empty:
+                _logger.info("{}: Queue empty".format(self.process_id))
+        _logger.info("{}: Exiting".format(self.process_id))
+
+    def decode_packet(self, packet):
+        """ Get only the needed attributes from the packet.
+
+        """
+        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        self.c = self.conn.cursor()
+        _logger.debug("{}: Decoding packet {}".format(
+            self.process_id, packet['gsmtap'].frame_nr))
+
+        data = {}
+
+        # Prevent collisions when running multiple times on same capture file
+        data.update({"hash": hash((packet.__hash__(), time.time()))})
+
+        # Layer common to all packets
+        data.update({"frame_nr": float(packet['gsmtap'].frame_nr)})
+        data.update({"channel": float(packet['gsmtap'].chan_type)})
+        data.update({"signal_dbm": float(packet['gsmtap'].signal_dbm)})
+        data.update({"arfcn": float(packet['gsmtap'].arfcn)})
+        data.update({"timestamp": float(packet.sniff_timestamp)})
+        data.update({"datetime":
+                            str(datetime.datetime.fromtimestamp(
+                                data['timestamp']).strftime(
+                                    '%Y-%m-%d%H:%M:%S'))})
+
+
+        # Detect packet type and extract needed data
+        return data
+
+    def store_packet(self, packet, data):
+        """ Put packet into database.
+
+        """
+        _logger.debug("{}: Storing packet {}".format(self.process_id,
+                                                     packet['gsmtap'].frame_nr))
+
+        if packet.__repr__() == '<UDP/GSM_A.CCCH Packet>':
+            self.store_ccch(packet, data)
+        else:
+            self.c.execute(
+                """INSERT INTO PACKETS(
+                    UnixTime,
+                    PeopleTime,
+                    CHANNEL,
+                    DBM,
+                    ARFCN,
+                    TMSI,
+                    IMSI,
+                    LAC,
+                    CID,
+                    MCC,
+                    MNC,
+                    IMEISV,
+                    FrameNumber,
+                    HASH
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    data['timestamp'],
+                    data['datetime'],
+                    data['channel'],
+                    data['signal_dbm'],
+                    data['arfcn'],
+                    '123456789012345',
+                    '324345566767899',
+                    '303',
+                    '151515',
+                    '131313',
+                    '02',
+                    '1234567891234567',
+                    data['frame_nr'],
+                    data['hash']
+                )
+            )
+        self.conn.commit()
+        self.conn.close()
+
+    def shutdown(self):
+        _logger.info("{}: Recieved shutdown command".format(self.process_id))
+        self.exit.set()
+
+    def decode_paging(self, packet, data):
+        """ Decode paging packets.
+
+        Adds data only specific to the CCCH packets.
+
+        Pyshark codes:
+            * Page Mode:
+                * 0 = Normal
+            * Channel Request One/Two
+                * 0 = Unspecified
+            * Mobile ID Type
+                * 0 = Unspecified
+            * Message Type
+                * 33 = Page Mode One
+
+        """
+        # Mobile ID Type
+        data.update({"id_type": float(
+            packet['gsm_a.ccch'].gsm_a_ie_mobileid_type)})
+
+        # Message Type
+        data.update({"msg_type": float(
+            packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type)})
+
+        # Page Mode
+        data.update({"mode": float(
+            packet['gsm_a.ccch'].gsm_a_rr_page_mode)})
+
+        # Channel Requests
+        data.update({"chan_req_ch1": float(
+            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch1)})
+        data.update({"chan_req_ch2": float(
+            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch2)})
+
+    def decode_system(self, packet, data):
+        """ Decode system packets.
+
+        Decodes data only data specific to the system packets.
+
+        Abbreviations:
+
+            RXLEV: Reception Level (GSM).
+
+            NCELL: neighboring cell.
+
+            BSIC-NCELL: Abbreviation for Base Station Identity Code of
+                an adjacent CELL. Identifies and decode the BCCH (Broadcast
+                Control Channel) of neighbouring cells so that the MS
+                (Mobile Station) may take measuring reports to facilitate
+                handover, or to allow the MS to make cell selection and
+                reselection calculations.
+
+            NO-NCELL-M: No neighbour cell measurement result. One byte
+                unsigned integer representing the number of neighbour
+                cells.
+
+            FULL vs. SUB Values:
+                In GSM, there are two types of values presented for RxQual,
+                namely RxQual Full and RxQual Sub. RxLev, the parameter
+                representing the signal strength, also has similar Full
+                and Sub values. The FULL values are based upon all frames
+                on the SACCH multiframe, whether they have been transmitted
+                from the base station or not. This means that if DTX DL has
+                been used, the FULL values will be invalid for that period
+                since they include bit-error measurements at periods when
+                nothing has been sent resulting in very high BER. In total,
+                100 bursts (25 blocks) will be used for the FULL values.
+
+                The SUB values are based on the mandatory frames on the SACCH
+                multiframe. These frames must always be transmitted. There
+                are two frames fulfilling that criteria and that is the
+                SACCH block (A bursts in Figure 7) and the block holding
+                the SID frame. If DTX DL is not in use, the SID frame will
+                contain an ordinary speech frame and then this is included
+                instead. In total, 12 bursts (two blocks) will be used for
+                the SUB values (four bursts SACCH and eight half bursts
+                [or speech] information).
+
+            Further Reference:
+
+                https://www.google.com/patents/US8619608
+                http://www.sharetechnote.com/html/BasicCallPacket_GSM.html#Step_15
+
+        ===========================================
+
+        # Mobile ID Type
+        data.update({"id_type": float(
+            packet['gsm_a.ccch'].gsm_a_ie_mobileid_type)})
+
+        # Message Type
+        data.update({"msg_type": float(
+            packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type)})
+
+        # Page Mode
+        data.update({"mode": float(
+            packet['gsm_a.ccch'].gsm_a_rr_page_mode)})
+
+        # Channel Requests
+        data.update({"chan_req_ch1": float(
+            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch1)})
+        data.update({"chan_req_ch2": float(
+            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch2)})
+        """
+        pass
+
+    def store_paging(self, packet, data):
+        """ Decode GSM_A.CCCH packets.
+
+        Unique Inserts:
+            * id_type
+            * msg_type
+            * mode
+            * chan_req_ch1
+            * chan_req_ch2
+
+        """
+        self.c.execute(
+            """INSERT INTO PAGE(
+                HASH,
+                UnixTime,
+                PeopleTime,
+                CHANNEL,
+                DBM,
+                ARFCN,
+                FrameNumber,
+                idType,
+                msgType,
+                MODE,
+                reqChanOne,
+                reqChanTwo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                data['hash'],
+                data['timestamp'],
+                data['datetime'],
+                data['channel'],
+                data['signal_dbm'],
+                data['arfcn'],
+                data['frame_nr'],
+                data['id_type'],
+                data['msg_type'],
+                data['mode'],
+                data['chan_req_ch1'],
+                data['chan_req_ch2']
+            )
+        )
+
+    def create_tables(self):
+        """ Create packet tables.
+
+        Unique entries:
+            * id_type
+            * msg_type
+            * mode
+            * chan_req_ch1
+            * chan_req_ch2
+
+        """
         self.c.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
                             UnixTime REAL,
                             PeopleTime TEXT,
@@ -67,93 +346,21 @@ class Decoder(Process):
                             FrameNumber TEXT,
                             HASH TEXT PRIMARY KEY
                             )''')
-        self.conn.close()
-        while not self.exit.is_set():
-            try:
-                packet = self.q.get(timeout=10)
-                _logger.debug("{}: Consumed packet Queue size is now {}".format(
-                    self.process_id, self.q.qsize()))
-                packet_data = self.decode_packet(packet)
-                self.store_packet(packet_data, packet)
-            except Empty:
-                _logger.info("{}: Queue empty".format(self.process_id))
-        _logger.info("{}: Exiting".format(self.process_id))
 
-    def decode_packet(self, packet):
-        """ Get only the needed attributes from the packet.
-
-        """
-        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
-        self.c = self.conn.cursor()
-        _logger.debug("{}: Decoding packet {}".format(
-            self.process_id, packet['gsmtap'].frame_nr))
-
-        packet_data = {}
-
-        # Prevent collisions when running multiple times on same capture file
-        packet_data.update({"hash": hash((packet.__hash__(), time.time()))})
-
-        # Layer common to all packets
-        packet_data.update({"frame_nr": float(packet['gsmtap'].frame_nr)})
-        packet_data.update({"channel": float(packet['gsmtap'].chan_type)})
-        packet_data.update({"signal_dbm": float(packet['gsmtap'].signal_dbm)})
-        packet_data.update({"arfcn": float(packet['gsmtap'].arfcn)})
-        packet_data.update({"timestamp": float(packet.sniff_timestamp)})
-        packet_data.update({"datetime":
-                            str(datetime.datetime.fromtimestamp(
-                                packet_data['timestamp']).strftime(
-                                    '%Y-%m-%d%H:%M:%S'))})
-
-        # Detect packet type and extract needed data
-        return packet_data
-
-    def store_packet(self, packet_data, packet):
-        """ Put packet into database.
-
-        """
-        _logger.debug("{}: Storing packet {}".format(self.process_id,
-                                                     packet['gsmtap'].frame_nr))
-        self.c.execute(
-            """INSERT INTO PACKETS(
-                UnixTime,
-                PeopleTime,
-                CHANNEL,
-                DBM,
-                ARFCN,
-                TMSI,
-                IMSI,
-                LAC,
-                CID,
-                MCC,
-                MNC,
-                IMEISV,
-                FrameNumber,
-                HASH
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                packet_data['timestamp'],
-                packet_data['datetime'],
-                packet_data['channel'],
-                packet_data['signal_dbm'],
-                packet_data['arfcn'],
-                '123456789012345',
-                '324345566767899',
-                '303',
-                '151515',
-                '131313',
-                '02',
-                '1234567891234567',
-                packet_data['frame_nr'],
-                packet_data['hash']
-            )
-        )
-        self.conn.commit()
-        self.conn.close()
-
-    def shutdown(self):
-        _logger.info("{}: Recieved shutdown command".format(self.process_id))
-        self.exit.set()
-
+        self.c.execute('''CREATE TABLE IF NOT EXISTS PAGE(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            idType TEXT,
+                            msgType TEXT,
+                            MODE TEXT,
+                            reqChanOne TEXT,
+                            reqChanTwo TEXT
+                            )''')
 
 if __name__ == "__main__":
     Decoder(0, 0)
