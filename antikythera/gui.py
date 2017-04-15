@@ -27,6 +27,7 @@ from kivy.graphics import *
 from multiprocessing import Queue
 from time import sleep
 
+from kivy.uix.settings import SettingsWithTabbedPanel
 
 from antikythera import __version__
 from antikythera.antikythera import __projectname__, __author__, __copyright__, __license__
@@ -49,7 +50,7 @@ class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
         self.defconLevel = 5
-        
+
         '''
         self.canvas.add(Color(rgba=self.color))
         self.canvas.add(Rectangle(pos=self.pos, size=self.size))
@@ -61,7 +62,7 @@ class Scanner(GridLayout):
         for child in self.children:
             if not isinstance(child, DefconLevel):
                 continue
-            
+
             # Creates new canvas
             child.canvas.before.clear()
             child.canvas.after.clear()
@@ -69,15 +70,15 @@ class Scanner(GridLayout):
             with child.canvas.before:
                 Color(rgba=child.color)
                 Rectangle(pos=child.pos, size=child.size)
-            
-            
+
+
             #child.canvas.add(rgba=child.color)
             #child.canvas.add(Rectangle(pos=child.pos, size=child.size))
 
             # Creates new label
             '''
             child.children.clear()
-            
+
             with Label() as label:
                 label.text = child.text
             '''
@@ -93,12 +94,12 @@ class Scanner(GridLayout):
                 with child.canvas.after:
                     Color(rgba=color_highlight)
                     Rectangle(pos=child.pos, size=child.size)
-                
-                
 
-            
+
+
+
             pass
-            
+
     def update_level(self, level):
         """
         Updates threat level in GUI.
@@ -106,7 +107,7 @@ class Scanner(GridLayout):
         """
         if (level is None or not isinstance(level, int) or level < 0 or level > 5):
             return
-        
+
         self.defconLevel = level
 
         '''
@@ -120,13 +121,13 @@ class Scanner(GridLayout):
                 #dLevel.highlight = True
                 print("Set threat level", i)
         '''
-        
+
         self.do_layout() # Re-draws GUI
 
         # _logger.info("GUI: Updated threat level")
         pass
 
-        
+
 
 class RootWidget(GridLayout):
     """
@@ -147,7 +148,7 @@ class RootWidget(GridLayout):
         # TODO: Add stop scan functionality
         self.title.button_scan.text = "Stop Scan"
         self.title.button_scan.disabled = True
-        
+
         '''
         # Remove start button and add status
         self.remove_widget(self.detect_button)
@@ -164,13 +165,13 @@ class RootWidget(GridLayout):
         animation += Animation(opacity=1, width= xMax, duration=0.8)
         animation.repeat = True
         animation.start(action_bar)
-        
-        
+
+
         '''
         # Scanning Label
         label = Label()
         self.scanner.anim_box.add_widget(action_bar)
-        
+
         with label:
             font_size = 30
             text = "Scanning"
@@ -236,7 +237,7 @@ class MetricDisplay(App):
             _logger.info("GUI: Joining Anti process {}".format(self.IMSI_detector.pid))
             self.IMSI_detector.join()
         _logger.info("GUI: Shutdown successfully".format(self.IMSI_detector.pid))
-    
+
     def open_config(self):
         """
         Button - Open configuration settings
@@ -244,13 +245,54 @@ class MetricDisplay(App):
 
         # Updates threat level
         self.timesUpdated += 1
-        
+
         if self.timesUpdated > 5:
             self.timesUpdated = 1
 
         self.root.scanner.update_level(self.timesUpdated)
         _logger.info("GUI: Updated threat level")
 
+    def build_settings(self, settings):
+        print("build_settings executed")
+        json = '''
+        [
+            {
+                "type": "string",
+                "title": "Label caption",
+                "desc": "Choose the text that appears in the label",
+                "section": "My Label",
+                "key": "text"
+            },
+            {
+                "type": "numeric",
+                "title": "Label font size",
+                "desc": "Choose the font size the label",
+                "section": "My Label",
+                "key": "font_size"
+            }
+        ]
+        '''
+        json2 = '''
+        [
+            {
+                "type": "string",
+                "title": "Label font size",
+                "desc": "Choose the font size the label",
+                "section": "My other Label",
+                "key": "text"
+            }
+        ]
+        '''
+        settings.add_json_panel('My Label', self.config, data=json)
+        settings.add_json_panel('My other Label', self.config, data=json2)
+
+    def build_config(self, config):
+        """
+        Set the default values for the configs sections.
+        """
+        config.setdefaults('My Label', {'text': 'Hello', 'font_size': 20})
+        config.setdefaults('My other Label', {'text': 'Hello', 'font_size': 20})
+        
 def run():
     """
 

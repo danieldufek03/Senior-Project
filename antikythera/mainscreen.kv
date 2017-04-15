@@ -33,7 +33,7 @@
         text: "TEAM AWESOME"
         text_size: self.width, None
         halign: 'center'
-    
+
     Button:
         id: button_scan
         font_size: fontsize_small
@@ -49,11 +49,12 @@
         background_normal: ''
         text: "Configuration"
         on_press: app.open_config()
+        on_release: app.open_settings()
 
 <Scanner>:
     cols: 1
     rows: 6
-    
+
     anim_box: anim_box
     defconLevel1: defconLevel1
     defconLevel2: defconLevel2
@@ -67,7 +68,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    
+
     AnchorLayout:
         id: anim_box
         size_hint: [fontsize_small + 10, None]
@@ -102,7 +103,7 @@
     cols: 1
     rows: 1
     padding: padding
-    
+
     label: label
     highlight: False
 
@@ -115,7 +116,7 @@
         text: "DEFCON X"
         text_size: self.width, None
         halign: 'center'
-        
+
 
 # Main - GridLayout
 <RootWidget>:
@@ -135,7 +136,7 @@
             #source: "image.png"
             pos: self.pos
             size: self.size
-    
+
     Title:
         id: title
 
