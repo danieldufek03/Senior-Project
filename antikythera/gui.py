@@ -28,6 +28,7 @@ from multiprocessing import Queue
 from time import sleep
 
 from kivy.uix.settings import SettingsWithSidebar
+from kivy.config import Config
 
 from antikythera import __version__
 from antikythera.antikythera import __projectname__, __author__, __copyright__, __license__
@@ -100,7 +101,13 @@ class Scanner(GridLayout):
                     # Meme icon
                     Color(rgba=[1, 1, 1, 1])
                     Rectangle(source=child.icon, pos=iconPos, size=iconSize)
+<<<<<<< HEAD
                 
+=======
+
+                _logger.info("GUI: Updated threat level to {}".format(child.level))
+
+>>>>>>> b534a64ae29aa4dcf7701d6936c4fce4acda7d71
             pass
 
     def update_defcon(self, level):
@@ -243,26 +250,7 @@ class MetricDisplay(App):
         self.root.update_defcon(self.timesUpdated)
 
     def build_settings(self, settings):
-        print("build_settings executed")
         json = '''
-        [
-            {
-                "type": "string",
-                "title": "Capture Interface",
-                "desc": "Something Something Capture blah...",
-                "section": "My Label",
-                "key": "text"
-            },
-            {
-                "type": "numeric",
-                "title": "Label font size",
-                "desc": "Choose the font size the label",
-                "section": "My Label",
-                "key": "font_size"
-            }
-        ]
-        '''
-        json2 = '''
         [
             {
                 "type": "options",
@@ -274,7 +262,7 @@ class MetricDisplay(App):
             }
         ]
         '''
-        settings.add_json_panel('Finding Mr. Ray', self.config, data=json2)
+        settings.add_json_panel('Finding Mr. Ray', self.config, data=json)
 
     def build_config(self, config):
         """
@@ -284,12 +272,12 @@ class MetricDisplay(App):
 
     def on_config_change(self, config, section, key, value):
         if config is self.config:
-            print("config change block entered")
-            token = (section, key)
-            if token == ('Finding Mr. Ray', 'Pcap File'):
+            token = (section, key, value)
+            if token == ("Finding Mr. Ray", "text", "Pcap File"):
                 # Do the Pcap File things
                 print('Capture interface moved to', value)
-            elif token == ('Finding Mr. Ray', 'Network'):
+
+            elif token == ("Finding Mr. Ray", "text", "Network"):
                 # Do the network capture things
                 print('Capture interface moved to', value)
 
