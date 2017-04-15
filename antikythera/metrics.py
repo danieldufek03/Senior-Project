@@ -33,6 +33,7 @@ class Metrics(Process):
         self.areaCidList = []
         self.inconsistentAreaCodeList = []
         self.tempPreviousTimeList = []
+        self.lonelyList = []
         _logger.debug("{}: Process started successfully".format(self.process_id))
         self.exit = mp.Event()
 
@@ -77,6 +78,7 @@ class Metrics(Process):
             _logger.debug("{}: doing metrics stuff".format(self.process_id))
             self.sameAreaAndCellId()
             self.inconsistentAreaCode()
+            self.lonelyCellId()
             sleep(3)
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
@@ -87,7 +89,7 @@ class Metrics(Process):
             self.conn.close()
 
         sizeOfPacketList = len(self.packetList)
-        _logger.debug("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
+        _logger.trace("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
 
         _logger.trace("{}: Packet list content {}".format(self.process_id, self.packetList))
         
@@ -168,8 +170,34 @@ class Metrics(Process):
         sizeOftempPreviousTimeList = len(self.tempPreviousTimeList)
         _logger.trace("{}: Length of tempPreviousTimeList {}".format(self.process_id, sizeOftempPreviousTimeList))
 
-    def shutdown(self):
+    """
+        The location area code should have multiples of the same cell-ID assigned to it. There should not be single unique instance of a cell-ID within a location area. If there are any packets that fall into that criteria, they will be caught with the following function.
+    """
+    def lonelyCellId(self):
+            self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
+            self.c = self.conn.cursor()
+            queryList = []
+            self.c.execute("SELECT DISTINCT LAC FROM PACKETS")
+            for row in self.c.fetchall():
+                queryList.append(row)
+            for LAC in queryList:
+                self.c.execute("""SELECT *
+                    FROM (
+                        SELECT LAC, CID
+                        FROM PACKETS
+                        WHERE PACKETS.LAC = ?
+                        )
+                    GROUP BY CID
+                    HAVING COUNT(CID) = 1""", LAC)
+                for row in self.c.fetchall():
+                    _logger.trace("{}: {}".format(self.process_id, row))
+                    self.lonelyList.append(row)
+            sizeOflonelyList = len(self.lonelyList)
+            _logger.trace("{}: Length of lonelyList {}".format(self.process_id, sizeOflonelyList))
+            self.conn.close()
 
+
+    def shutdown(self):
         _logger.info("{}: Recieved shutdown command".format(self.process_id))
         self.exit.set()
 
