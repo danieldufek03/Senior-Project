@@ -27,7 +27,7 @@ from kivy.graphics import *
 from multiprocessing import Queue
 from time import sleep
 
-from kivy.uix.settings import SettingsWithTabbedPanel
+from kivy.uix.settings import SettingsWithSidebar
 
 from antikythera import __version__
 from antikythera.antikythera import __projectname__, __author__, __copyright__, __license__
@@ -220,6 +220,7 @@ class MetricDisplay(App):
         """
 
         """
+        self.settings_cls = SettingsWithSidebar
         return RootWidget()
 
     def start(self):
@@ -258,8 +259,8 @@ class MetricDisplay(App):
         [
             {
                 "type": "string",
-                "title": "Label caption",
-                "desc": "Choose the text that appears in the label",
+                "title": "Capture Interface",
+                "desc": "Something Something Capture blah...",
                 "section": "My Label",
                 "key": "text"
             },
@@ -275,24 +276,34 @@ class MetricDisplay(App):
         json2 = '''
         [
             {
-                "type": "string",
-                "title": "Label font size",
-                "desc": "Choose the font size the label",
-                "section": "My other Label",
-                "key": "text"
+                "type": "options",
+                "title": "Capture Interface",
+                "desc": "Determines network interface for packet capture",
+                "section": "Finding Mr. Ray",
+                "key": "text",
+                "options": ["Pcap File", "Network"]
             }
         ]
         '''
-        settings.add_json_panel('My Label', self.config, data=json)
-        settings.add_json_panel('My other Label', self.config, data=json2)
+        settings.add_json_panel('Finding Mr. Ray', self.config, data=json2)
 
     def build_config(self, config):
         """
         Set the default values for the configs sections.
         """
-        config.setdefaults('My Label', {'text': 'Hello', 'font_size': 20})
-        config.setdefaults('My other Label', {'text': 'Hello', 'font_size': 20})
-        
+        config.setdefaults('Finding Mr. Ray', {'text': 'Pcap File'})
+
+    def on_config_change(self, config, section, key, value):
+        if config is self.config:
+            print("config change block entered")
+            token = (section, key)
+            if token == ('Finding Mr. Ray', 'Pcap File'):
+                # Do the Pcap File things
+                print('Capture interface moved to', value)
+            elif token == ('Finding Mr. Ray', 'Network'):
+                # Do the network capture things
+                print('Capture interface moved to', value)
+
 def run():
     """
 
