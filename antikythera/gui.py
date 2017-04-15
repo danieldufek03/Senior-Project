@@ -37,6 +37,9 @@ _logger = logging.getLogger(__name__)
 # Loads main from design file
 Builder.load_file("mainscreen.kv")
 
+# Color pallete (RGBA)
+color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
+
 class DefconLevel(GridLayout):
     pass
 
@@ -53,16 +56,18 @@ class Scanner(GridLayout):
     def do_layout(self, *args):
         super(Scanner, self).do_layout(*args)
         for child in self.children:
-            if type(child) is not DefconLevel:
+            if not isinstance(child, DefconLevel):
                 continue
 
             # Creates new canvas
             child.canvas.before.clear()
+            child.canvas.after.clear()
 
             with child.canvas.before:
                 Color(rgba=child.color)
                 Rectangle(pos=child.pos, size=child.size)
-
+            
+            
             #child.canvas.add(rgba=child.color)
             #child.canvas.add(Rectangle(pos=child.pos, size=child.size))
 
@@ -75,10 +80,41 @@ class Scanner(GridLayout):
             '''
 
             child.label.text = child.text
+            child.label.color = [0, 0, 0, 1]
+
+            if (child.highlight):
+                # Changes text color
+                child.label.color = [1, 1, 1, 1]
+
+                # Highlights
+                with child.canvas.after:
+                    Color(rgba=color_highlight)
+                    Rectangle(pos=child.pos, size=child.size)
+                
+                
+
             
             pass
             
-            
+    def update_level(self, level):
+        """
+        Updates threat level in GUI.
+            int : level - Defcon level (1-5)
+        """
+        if (level is None or not isinstance(level, int) or level < 0 or level > 5):
+            return
+        
+        for i in range(1, 6): # 1-5
+            dLevel = eval("self.defconLevel" + str(level))
+            dLevel.highlight = (i == level)
+
+            if (i == level):
+                print("Set threat level", i)
+
+        self.do_layout() # Re-draws GUI
+
+        # _logger.info("GUI: Updated threat level")
+        pass
 
         
 
@@ -119,6 +155,7 @@ class RootWidget(GridLayout):
         animation.repeat = True
         animation.start(action_bar)
         
+        
         '''
         # Scanning Label
         label = Label()
@@ -149,6 +186,7 @@ class MetricDisplay(App):
         self.title = __projectname__
         super(MetricDisplay, self).__init__(*args, **kwargs)
         self.IMSI_detector = None
+        self.timesUpdated = 0
 
     def on_start(self):
         """
@@ -188,7 +226,20 @@ class MetricDisplay(App):
             _logger.info("GUI: Joining Anti process {}".format(self.IMSI_detector.pid))
             self.IMSI_detector.join()
         _logger.info("GUI: Shutdown successfully".format(self.IMSI_detector.pid))
+    
+    def open_config(self):
+        """
+        Button - Open configuration settings
+        """
 
+        # Updates threat level
+        self.timesUpdated += 1
+        
+        if self.timesUpdated > 5:
+            self.timesUpdated = 1
+
+        self.root.scanner.update_level(self.timesUpdated)
+        _logger.info("GUI: Updated threat level")
 
 def run():
     """

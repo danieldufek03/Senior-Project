@@ -48,12 +48,18 @@
         background_color: color_awesome
         background_normal: ''
         text: "Configuration"
+        on_press: app.open_config()
 
 <Scanner>:
     cols: 1
     rows: 6
     
     anim_box: anim_box
+    defconLevel1: defconLevel1
+    defconLevel2: defconLevel2
+    defconLevel3: defconLevel3
+    defconLevel4: defconLevel4
+    defconLevel5: defconLevel5
 
     canvas:
         Color:
@@ -93,6 +99,7 @@
     padding: padding
     
     label: label
+    highlight: False
 
     Label:
         id: label
@@ -140,7 +147,7 @@
     size_hint: None, None
     size: 400, 30
 
-# Main screen
+# Main screen - Origianl design!
 <RootWidget2>:
 #    rows: 1
     cols: 1
