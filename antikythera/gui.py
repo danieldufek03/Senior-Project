@@ -42,9 +42,7 @@ Builder.load_file("mainscreen.kv")
 color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
 
 class DefconLevel(GridLayout):
-
-    def setHighlight(self, toggle):
-        self.highlight = toggle
+    pass
 
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
@@ -103,8 +101,6 @@ class Scanner(GridLayout):
                     Color(rgba=[1, 1, 1, 1])
                     Rectangle(source=child.icon, pos=iconPos, size=iconSize)
                 
-                _logger.info("GUI: Updated threat level to {}".format(child.level))
-
             pass
 
     def update_defcon(self, level):
@@ -112,26 +108,13 @@ class Scanner(GridLayout):
         Updates threat level in GUI.
             int : level - Defcon level (1-5)
         """
-        if (level is None or not isinstance(level, int) or level < 0 or level > 5):
+        if (level is None):
             return
 
         self.defconLevel = level
-
-        '''
-        print("")
-        for i in range(1, 6): # 1-5
-            dLevel = eval("self.defconLevel" + str(level))
-            #dLevel.highlight = (i == level)
-            dLevel.setHighlight(i == level)
-
-            if (i == level):
-                #dLevel.highlight = True
-                print("Set threat level", i)
-        '''
-
         self.do_layout() # Re-draws GUI
 
-        # _logger.info("GUI: Updated threat level")
+        _logger.info("GUI: Updated threat level to {}".format(level))
         pass
 
 
