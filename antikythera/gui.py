@@ -48,7 +48,7 @@ class DefconLevel(GridLayout):
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
-        self.defconLevel = 0
+        self.defconLevel = 5
 
         '''
         self.canvas.add(Color(rgba=self.color))
@@ -237,9 +237,9 @@ class MetricDisplay(App):
         self.timesUpdated += 1
 
         if self.timesUpdated > 5:
-            self.timesUpdated = 1
+            self.timesUpdated = 0
 
-        self.root.update_defcon(self.timesUpdated)
+        self.root.update_defcon(5 - self.timesUpdated)
 
     def build_settings(self, settings):
         json = '''
@@ -260,6 +260,7 @@ class MetricDisplay(App):
         """
         Set the default values for the configs sections.
         """
+        Config.kivy = "Something"
         config.setdefaults('Finding Mr. Ray', {'text': 'Pcap File'})
 
     def on_config_change(self, config, section, key, value):
@@ -267,11 +268,11 @@ class MetricDisplay(App):
             token = (section, key, value)
             if token == ("Finding Mr. Ray", "text", "Pcap File"):
                 # Do the Pcap File things
-                print('Capture interface moved to', value)
+                print('Capture interface changed to', value)
 
             elif token == ("Finding Mr. Ray", "text", "Network"):
                 # Do the network capture things
-                print('Capture interface moved to', value)
+                print('Capture interface changed to', value)
 
 def run():
     """
