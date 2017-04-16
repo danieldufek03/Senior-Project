@@ -15,13 +15,15 @@ Components
 *   `Latching or Toggle switch (~$7) <https://www.amazon.com/WerFamily-Indicator-Waterproof-Stainless-Self-locking/dp/B013ET18X6/ref=sr_1_16?ie=UTF8&qid=1480877707&sr=8-16&keywords=latching%2Bpush%2Bbutton&th=1>`_
 *   `Right-angle Mini GSM/Cellular Quad-Band Antenna - 2dBi SMA Plug ($5) <https://www.adafruit.com/products/1858>`_
 
-::
 
-    Total ~$200
+|    Total ~$200
 
-This cost is not reflective of the cost of a final product, most of the price is
-paying for prototyping convenience. Cheaper and even better hardware exists but
-without such a huge support community and already made tools, 3D models, etc.
+
+.. node::
+
+    The total cost is not reflective of the cost of a final product, most of the price is
+    paying for prototyping convenience. Cheaper and even better hardware exists but
+    without such a huge support community and already made tools, 3D models, etc.
 
 |
 |
