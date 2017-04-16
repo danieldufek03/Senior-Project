@@ -11,10 +11,12 @@ import logging
 import sqlite3
 import datetime
 import appdirs
+import random
 import time
 import multiprocessing as mp
+
+from multiprocessing import Process, Queue
 '''
-# Fix kivy's logging
 import antikythera.kivylogs
 from kivy.logger import Logger
 
@@ -38,37 +40,37 @@ _logger = logging.getLogger(__name__)
 
 __author__= "TeamAwesome"
 
-TMSI   = 1
-IMSI   = 1
-LAC    = 0
-CID    = 1
-MCC    = 0
-MNC    = 1
-IMEISV = 0
+TMSI   = random.randint(0,1)
+IMSI   = random.randint(0,1)
+LAC    = random.randint(0,1)
+CID    = random.randint(0,1)
+MCC    = random.randint(0,1)
+MNC    = random.randint(0,1)
+IMEISV = random.randint(0,1)
 
-#defcon = 0
-
+#class DEFCON_Conditions(process):
+#"""
+#Conditions that need to be meet before a DEFCON level is determined.
+#"""
 def check_defcon(TMSI, IMSI, LAC, CID, MCC, MNC, IMEISV):
 	temp = TMSI + IMSI + LAC + CID + MCC + MNC + IMEISV
-	if  temp > 7:
+	if  temp >= 7:
 		defcon = 1
-	elif  temp > 5 and temp <= 7:
+	elif  temp >= 5 and temp < 7:
 		defcon = 2
-	elif  temp > 3 and temp <= 5:
+	elif  temp >= 3 and temp < 5:
 		defcon = 3
-	elif  temp > 1 and temp <= 3:
+	elif  temp >= 1 and temp < 3:
 		defcon = 4
-	elif  temp <= 1:
+	elif  temp < 1:
 		defcon = 5
 	else:
 		print('Defcon either undetermined or already at lowest level')
 	return defcon
 
-#print (defcon)
-
 def print_defcon(defcon):
 	if defcon == 1:
-		#insert command to flash defcon 1 button gui
+#insert command to flash defcon 1 button gui
 		print("""Defcon level 1 has been set, you are advised turn
 all devices off and vacate the area immediately""")
 	elif defcon == 2:
@@ -86,11 +88,9 @@ immediate danger or threat of a StingRay""")
 	else:
 		print('No Stingrays Detected')
 
-#print_defcon(defcon)
-
 def start():
-	#_logger.info("GUI: Starting GUI App")
-	#MetricDisplay().run()
+#_logger.info("GUI: Starting GUI App")
+#MetricDisplay().run()
 	defcon = check_defcon(TMSI, IMSI, LAC, CID, MCC, MNC, IMEISV)
 	print_defcon(defcon)
 
