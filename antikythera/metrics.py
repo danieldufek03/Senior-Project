@@ -30,7 +30,6 @@ class Metrics(Process):
 
         """
         while not self.exit.is_set():
-            _logger.debug("{}: doing metrics stuff".format(self.process_id))
             sleep(3)
         _logger.info("{}: Exiting".format(self.process_id))
 
