@@ -77,7 +77,7 @@ class Capture(Process):
         for packet in capture.sniff_continuously():
             try:
                 self.q.put(packet, timeout=10)
-                _logger.debug("{}: produced packet {} Queue size is now {}"
+                _logger.trace("{}: produced packet {} Queue size is now {}"
                               .format(self.process_id, packet['gsmtap']
                                       .frame_nr, self.q.qsize()))
             except Full:
@@ -104,7 +104,7 @@ class Capture(Process):
 
             try:
                 self.q.put(packet, block=True, timeout=10)
-                _logger.debug("{}: produced packet {} Queue size is now {}"
+                _logger.trace("{}: produced packet {} Queue size is now {}"
                               .format(self.process_id, packet['gsmtap']
                                       .frame_nr, self.q.qsize()))
                 sleep(self.delay)  # simulate wait

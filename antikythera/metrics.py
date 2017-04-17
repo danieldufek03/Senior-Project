@@ -75,7 +75,7 @@ class Metrics(Process):
 
         self.conn.close()
         while not self.exit.is_set():
-            _logger.debug("{}: doing metrics stuff".format(self.process_id))
+            _logger.trace("{}: metrics loop begin".format(self.process_id))
             self.sameAreaAndCellId()
             self.inconsistentAreaCode()
             self.lonelyCellId()
@@ -83,7 +83,7 @@ class Metrics(Process):
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
             self.c.execute("SELECT * FROM PACKETS")
-            for row in self.c.fetchall():   
+            for row in self.c.fetchall():
             	_logger.trace("{}: {}".format(self.process_id, row))
             	self.packetList.append(row)
             self.conn.close()
@@ -92,7 +92,7 @@ class Metrics(Process):
         _logger.trace("{}: Length of packetList {}".format(self.process_id, sizeOfPacketList))
 
         _logger.trace("{}: Packet list content {}".format(self.process_id, self.packetList))
-        
+
         _logger.info("{}: Exiting".format(self.process_id))
 
 
@@ -110,11 +110,11 @@ class Metrics(Process):
                         GROUP BY LAC, CID
                         HAVING COUNT(*) > 1) B
             ON A.LAC = B.LAC AND A.CID = B.CID AND A.ARFCN <> B.ARFCN""")
-        
+
         #self.c.execute("""SELECT LAC, CID, ARFCN FROM B
-         #   WHERE peopletime > 
+         #   WHERE peopletime >
          #   (SELECT PreviousTime FROM TEMP_PREVIOUS_TIME)""")
-        
+
         for row in self.c.fetchall():
             _logger.trace("{}: {}".format(self.process_id, row))
             self.areaCidList.append(row)
@@ -135,7 +135,7 @@ class Metrics(Process):
 
         self.c.execute("INSERT INTO INCONSISTENT_AREA_CODE SELECT LAC, PeopleTime FROM PACKETS")
         self.c.execute("""SELECT LAC, PeopleTime FROM INCONSISTENT_AREA_CODE
-             WHERE PeopleTime > 
+             WHERE PeopleTime >
             (SELECT PreviousTime FROM TEMP_PREVIOUS_TIME)""")
         for row in self.c.fetchall():
             _logger.trace("{}: {}".format(self.process_id, row))
@@ -145,7 +145,7 @@ class Metrics(Process):
         self.conn.close()
 
     """
-    create a temp table that houses local area code and a preivious time stamp for 
+    create a temp table that houses local area code and a preivious time stamp for
     verification purposes
     """
 
