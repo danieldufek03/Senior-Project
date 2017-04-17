@@ -247,7 +247,7 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev curl' )
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libxml2-dev libxslt1-dev' )
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libxml2 libxml2-dev libxmlsec1-dev libxslt1-dev' )
 
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
