@@ -1,9 +1,16 @@
+# Antikythera .gitignore
+
+# Unimportant {{{
+
 *.bck
 
+# End Unimportant }}}
+# Kivy {{{
 
-##########
-# Python #
-##########
+metricdisplay.ini
+
+# End Kivy }}}
+# Python  {{{
 
 # Temporary and binary files
 *~
@@ -47,10 +54,8 @@ docs/_build/*
 cover/*
 MANIFEST
 
-
-#########
-# Linux #
-#########
+# End Python }}}
+# Linux {{{
 
 *~
 
@@ -66,10 +71,8 @@ MANIFEST
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
 
-
-#######
-# VIM #
-#######
+# End Linux }}}
+# VIM {{{
 
 # swap
 [._]*.s[a-w][a-z]
@@ -81,3 +84,5 @@ Session.vim
 *~
 # auto-generated tag files
 tags
+
+# End VIM }}}
