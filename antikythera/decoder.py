@@ -30,15 +30,13 @@ class Decoder(Process):
     """ Decode and store the packets for analysis.
 
     """
-    def __init__(self, process_id, q, *args, **kwargs):
+    def __init__(self, process_id, queue, *args, **kwargs):
         super(Decoder, self).__init__(*args, **kwargs)
         self.process_id = process_id
-        self.q = q
+        self.queue = queue
         self.exit = mp.Event()
 
-        self.datadir = appdirs.user_data_dir(__name__, __author__)
-        self.conn = None
-        self.c = None
+        self.data_dir = appdirs.user_data_dir(__name__, __author__)
 
     def run(self):
         """ Process main function, program loop.
@@ -47,18 +45,17 @@ class Decoder(Process):
         _logger.debug("{}: Process started successfully".format(
             self.process_id))
         _logger.info("{}: Database storage set to {}".format(self.process_id,
-                                                             self.datadir))
+                                                             self.data_dir))
         self.create_tables()
-        packet_manager = PacketManager(process_id, data_dir)
+        packet_manager = PacketManager(self.process_id, self.data_dir)
         while not self.exit.is_set():
 
             try:
 
-                packet = self.q.get(timeout=10)
-                _logger.debug("{}: Consumed packet Queue size is now {}".format(
-                    self.process_id, self.q.qsize()))
-                packet_manager.insert_packet(self.process_id, packet)
-
+                packet = self.queue.get(timeout=10)
+                _logger.trace("{}: Consumed packet Queue size is now {}".format(
+                    self.process_id, self.queue.qsize()))
+                packet_manager.insert_packet(packet)
 
             except Empty:
                 _logger.info("{}: Queue empty".format(self.process_id))
@@ -79,9 +76,9 @@ class Decoder(Process):
             * chan_req_ch2
 
         """
-        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
-        self.c = self.conn.cursor()
-        self.c.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
                             UnixTime REAL,
                             PeopleTime TEXT,
                             CHANNEL TEXT,
@@ -98,7 +95,7 @@ class Decoder(Process):
                             HASH TEXT PRIMARY KEY
                             )''')
 
-        self.c.execute('''CREATE TABLE IF NOT EXISTS PAGE(
+        cursor.execute('''CREATE TABLE IF NOT EXISTS PAGE(
                             HASH TEXT PRIMARY KEY,
                             UnixTime REAL,
                             PeopleTime TEXT,
@@ -112,14 +109,11 @@ class Decoder(Process):
                             reqChanOne TEXT,
                             reqChanTwo TEXT
                             )''')
-        self.conn.close()
+        conn.close()
 
 
 class PacketManager():
-    """
-
-    GSM_A.CCCH subtype 33:
-        Paging type one
+    """ Manage operations on packets.
 
     """
     def __init__(self, process_id, data_dir):
@@ -132,7 +126,7 @@ class PacketManager():
         }
 
     def insert_packet(self, packet):
-        """
+        """ Insert only needed data into the database for analysis.
 
         """
         self.packet = packet
@@ -140,60 +134,66 @@ class PacketManager():
         data = self.decode_packet(packet_type, packet_subtype)
         self.store(data, packet_type, packet_subtype)
 
-    def get_packet_type(self, process_id, packet):
-        """
+    def get_packet_type(self):
+        """ Get the packet type and subtype information.
+
+        Attributes:
+            _type (str): The name of the unique packet data layer.
+            data_layer: The actual packet data layer object.
+            attributes (list): A list of strings with the names of all valid
+                attributes and methods for the data layer object.
+            index (int): The zero indexed location of the packet. For a live
+                capture it would represent the number of packets received.
+                For a ``.pcap`` file it is the index that the packet is found
+                at if the file is read into a Pyshark object using
+                ``FileCapture``.
+            no_type (str): An error message used when the packet type is not
+                implemented.
+            no_subtype (str): An error message used when the packet type is
+                implemented but not the subtype.
+
+
+        Returns: packet type string and subtype int tuple.
 
         """
-        packet_type = packet.highest_layer
-        if packet_type in self.packet_types.keys():
+        # Get packet properties for sorting
+        _type = self.packet.highest_layer
+        data_layer = self.packet[self.packet.highest_layer.lower()]
+        attributes = self.packet[self.packet.highest_layer.lower()].field_names
+        index = int(self.packet.number) - 1
+        implemented = "{}: found packet type {} at index {} '{}'"
+        no_type = "{}: unimplemented : packet type {} at index {} '{}'"
+        no_subtype = "{}: unimplemented : packet subtype {} at index {} '{}'"
 
-            if 'gsm_a_dtap_msg_rr_type' in packet[packet.highest_layer.lower()]:
-                packet_subtype = int(
-                    packet[packet.highest_layer.lower()].gsm_a_dtap_msg_rr_type
-                )
-            else:
-                _logger.warning("{}: unimplemented packet subtype {} at index {}".format(
-                    self.process_id, packet_type, (int(packet.number) - 1)))
-                return (packet_type, None)
+        if _type in self.packet_types.keys():
+            if 'gsm_a_dtap_msg_rr_type' in attributes:
+                _subtype = int(data_layer.gsm_a_dtap_msg_rr_type)
+                packet_info = data_layer._all_fields['']
+                _logger.debug(implemented.format(
+                    self.process_id, _type, index, packet_info))
+                return (_type, _subtype)
 
-            if packet_subtype in self.packet_types[packet_type]:
-                return (packet_type, packet_subtype)
+            try:
+                packet_info = data_layer._all_fields['']
+                _logger.warning(no_subtype.format(
+                    self.process_id, _type, index, packet_info))
+            except KeyError:
+                packet_info = ''
+                _logger.warning(no_subtype.format(
+                    self.process_id, _type, index, packet_info))
+            return (_type, None)
 
-        else:
-            _logger.warning("{}: unimplemented packet type {} at index {}".format(
-                self.process_id, packet_type, (int(packet.number) - 1)))
-            return (packet_type, None)
-    """
-        if packet.__repr__() == '<UDP/GSM_A.CCCH Packet>':
-            if packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type == '33':
-                _logger.debug("{}: decoding packet type {}".format(
-                    self.process_id, packet.__repr__()))
-                self.decode_paging(packet, data)
-                self.store_paging(packet, data)
-            else:
-                _logger.warning("{}: Packet decode not implemted {} Type {}"
-                                .format(self.process_id,
-                                        packet.__repr__(),
-                                        packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type))
-        else:
-            if packet.layers[-1].__repr__() == '<GSM_A.DTAP Layer>':
-                try:
-                    _logger.warning("{}: unimplemented packet type '{}' at index {}".format(
-                        self.process_id, packet['gsm_a.dtap']._all_fields[''], (int(packet.number) - 1)))
-                    self.store_packet(packet, data)
-                except KeyError:
-                    _logger.warning("{}: unable to get layer type for unimplemented packet type '{}' at index {}".format(
-                        self.process_id, packet.__repr__(), (int(packet.number) - 1)))
-                    self.store_packet(packet, data)
-        return packet_type
-    """
+        _logger.warning(no_type.format(self.process_id, _type, index, ''))
+        return (_type, None)
 
     def decode_packet(self, packet_type, packet_subtype):
         """ Get only the needed attributes from the packet.
 
+        First the GSMTAP layer is handled which is universal across all
+        packets. Then the specific decoder functions for the packets type
+        and subtype are called.
+
         """
-        _logger.debug("{}: Decoding packet {}".format(
-            self.process_id, packet['gsmtap'].frame_nr))
 
         data = {}
 
@@ -206,10 +206,11 @@ class PacketManager():
         data.update({"signal_dbm": float(self.packet['gsmtap'].signal_dbm)})
         data.update({"arfcn": float(self.packet['gsmtap'].arfcn)})
         data.update({"timestamp": float(self.packet.sniff_timestamp)})
-        data.update({"datetime":
-                            str(datetime.datetime.fromtimestamp(
-                                data['timestamp']).strftime(
-                                    '%Y-%m-%d%H:%M:%S'))})
+
+        people_time = str(datetime.datetime.fromtimestamp(data['timestamp'])
+                          .strftime('%Y-%m-%d%H:%M:%S'))
+
+        data.update({"datetime": people_time})
 
         if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
             self.decode_paging(data)
@@ -323,7 +324,7 @@ class PacketManager():
         pass
 
     def store_paging(self, data):
-        """ Decode GSM_A.CCCH packets.
+        """ Store GSM_A.CCCH packets.
 
         Unique Inserts:
             * id_type
@@ -333,9 +334,9 @@ class PacketManager():
             * chan_req_ch2
 
         """
-        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
-        self.c = self.conn.cursor()
-        self.c.execute(
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
             """INSERT INTO PAGE(
                 HASH,
                 UnixTime,
@@ -367,15 +368,15 @@ class PacketManager():
         )
 
     def store_packet(self, data):
-        """ Put packet into database.
+        """ Store unimplemented packets which only have GSMTAP information.
 
         """
-        _logger.debug("{}: Storing packet {}"
+        _logger.trace("{}: Storing packet {}"
                       .format(self.process_id, self.packet['gsmtap'].frame_nr))
 
-        self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
-        self.c = self.conn.cursor()
-        self.c.execute(
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
             """INSERT INTO PACKETS(
                 UnixTime,
                 PeopleTime,
@@ -409,14 +410,19 @@ class PacketManager():
                 data['hash']
             )
         )
-        self.conn.commit()
-        self.conn.close()
+        conn.commit()
+        conn.close()
 
     def store(self, data, packet_type, packet_subtype):
+        """ Store unimplemented packet types.
+
+        Only stores the GSMTAP information common to all packets.
+
+        """
         if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
-            store_paging(data)
+            self.store_paging(data)
         else:
-            store_packet(data)
+            self.store_packet(data)
 
 
 if __name__ == "__main__":
