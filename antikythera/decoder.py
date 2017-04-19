@@ -352,6 +352,8 @@ class PacketManager():
                 data['chan_req_ch2']
             )
         )
+        conn.commit()
+        conn.close()
 
     def store_system(self, data):
         """Store GSM_A.DTAP packets.
@@ -387,6 +389,8 @@ class PacketManager():
                 data['cell_id']
             )
         )
+        conn.commit()
+        conn.close()
 
     def store_packet(self, data):
         """Store unimplemented packets which only have GSMTAP information.
