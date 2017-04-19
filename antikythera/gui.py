@@ -45,6 +45,9 @@ color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
 class DefconLevel(GridLayout):
     pass
 
+class Metric(GridLayout):
+    pass
+
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
@@ -75,7 +78,7 @@ class Scanner(GridLayout):
                 # Defcon color
                 Color(rgba=child.color)
                 Rectangle(pos=insidePos, size=insideSize)
-                
+
                 if (child.level == self.defconLevel):
                     # Highlights
                     Color(rgba=color_highlight)
