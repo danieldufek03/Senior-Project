@@ -38,9 +38,7 @@ class Metrics(Process):
         self.exit = mp.Event()
 
     def run(self):
-        """
 
-        """
         self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
@@ -60,6 +58,33 @@ class Metrics(Process):
             HASH TEXT PRIMARY KEY
             )'''
     	)
+
+        self.c.execute('''CREATE TABLE IF NOT EXISTS PAGE(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            idType TEXT,
+                            msgType TEXT,
+                            MODE TEXT,
+                            reqChanOne TEXT,
+                            reqChanTwo TEXT
+                            )''')
+
+        self.c.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            LAC TEXT,
+                            CID TEXT
+                            )''')
 
         self.c.execute('''CREATE TABLE IF NOT EXISTS INCONSISTENT_AREA_CODE(
             LAC TEXT,
