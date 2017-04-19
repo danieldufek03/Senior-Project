@@ -109,11 +109,24 @@ class Decoder(Process):
                             reqChanOne TEXT,
                             reqChanTwo TEXT
                             )''')
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            LAC TEXT,
+                            CID TEXT
+                            )''')
+
         conn.close()
 
 
 class PacketManager():
-    """ Manage operations on packets.
+    """Manage operations on packets.
 
     """
     def __init__(self, process_id, data_dir):
@@ -121,12 +134,12 @@ class PacketManager():
         self.data_dir = data_dir
 
         self.packet_types = {
-            'GSM_A.CCCH': [33],
-            'GSM_A.DTAP': []
+            'GSM_A.CCCH': ['33'],
+            'GSM_A.DTAP': ['30']
         }
 
     def insert_packet(self, packet):
-        """ Insert only needed data into the database for analysis.
+        """Insert only needed data into the database for analysis.
 
         """
         self.packet = packet
@@ -135,7 +148,7 @@ class PacketManager():
         self.store(data, packet_type, packet_subtype)
 
     def get_packet_type(self):
-        """ Get the packet type and subtype information.
+        """Get the packet type and subtype information.
 
         Attributes:
             _type (str): The name of the unique packet data layer.
@@ -160,34 +173,26 @@ class PacketManager():
         _type = self.packet.highest_layer
         data_layer = self.packet[self.packet.highest_layer.lower()]
         attributes = self.packet[self.packet.highest_layer.lower()].field_names
-        index = int(self.packet.number) - 1
-        implemented = "{}: found packet type {} at index {} '{}'"
-        no_type = "{}: unimplemented : packet type {} at index {} '{}'"
-        no_subtype = "{}: unimplemented : packet subtype {} at index {} '{}'"
 
         if _type in self.packet_types.keys():
             if 'gsm_a_dtap_msg_rr_type' in attributes:
-                _subtype = int(data_layer.gsm_a_dtap_msg_rr_type)
-                packet_info = data_layer._all_fields['']
-                _logger.debug(implemented.format(
-                    self.process_id, _type, index, packet_info))
+                _subtype = data_layer.gsm_a_dtap_msg_rr_type
+                self.get_packet_info(data_layer, _type, _subtype)
                 return (_type, _subtype)
 
-            try:
-                packet_info = data_layer._all_fields['']
-                _logger.warning(no_subtype.format(
-                    self.process_id, _type, index, packet_info))
-            except KeyError:
-                packet_info = ''
-                _logger.warning(no_subtype.format(
-                    self.process_id, _type, index, packet_info))
+            if 'msg_rr_type' in attributes:
+                _subtype = data_layer.msg_rr_type
+                self.get_packet_info(data_layer, _type, _subtype)
+                return (_type, _subtype)
+
+            self.get_packet_info(data_layer, _type, None)
             return (_type, None)
 
-        _logger.warning(no_type.format(self.process_id, _type, index, ''))
+        self.get_packet_info(data_layer, None, None)
         return (_type, None)
 
     def decode_packet(self, packet_type, packet_subtype):
-        """ Get only the needed attributes from the packet.
+        """Get only the needed attributes from the packet.
 
         First the GSMTAP layer is handled which is universal across all
         packets. Then the specific decoder functions for the packets type
@@ -212,14 +217,16 @@ class PacketManager():
 
         data.update({"datetime": people_time})
 
-        if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
+        if packet_type == 'GSM_A.CCCH' and packet_subtype == '33':
             self.decode_paging(data)
+        if packet_type == 'GSM_A.DTAP' and packet_subtype == '30':
+            self.decode_system(data)
 
         # Detect packet type and extract needed data
         return data
 
     def decode_paging(self, data):
-        """ Decode paging packets.
+        """Decode paging packets.
 
         Adds data only specific to the CCCH packets.
 
@@ -252,8 +259,8 @@ class PacketManager():
         data.update({"chan_req_ch2": float(
             self.packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch2)})
 
-    def decode_system(self, packet, data):
-        """ Decode system packets.
+    def decode_system(self, data):
+        """Decode system packets.
 
         Decodes data only data specific to the system packets.
 
@@ -301,30 +308,17 @@ class PacketManager():
                 https://www.google.com/patents/US8619608
                 http://www.sharetechnote.com/html/BasicCallPacket_GSM.html#Step_15
 
-        ===========================================
-
+        """
         # Mobile ID Type
-        data.update({"id_type": float(
-            packet['gsm_a.ccch'].gsm_a_ie_mobileid_type)})
+        data.update({"lac": int(
+            self.packet['gsm_a.dtap'].gsm_a_lac)})
 
         # Message Type
-        data.update({"msg_type": float(
-            packet['gsm_a.ccch'].gsm_a_dtap_msg_rr_type)})
-
-        # Page Mode
-        data.update({"mode": float(
-            packet['gsm_a.ccch'].gsm_a_rr_page_mode)})
-
-        # Channel Requests
-        data.update({"chan_req_ch1": float(
-            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch1)})
-        data.update({"chan_req_ch2": float(
-            packet['gsm_a.ccch'].gsm_a_rr_chnl_needed_ch2)})
-        """
-        pass
+        data.update({"cell_id": int(
+            self.packet['gsm_a.dtap'].gsm_a_bssmap_cell_ci)})
 
     def store_paging(self, data):
-        """ Store GSM_A.CCCH packets.
+        """Store GSM_A.CCCH packets.
 
         Unique Inserts:
             * id_type
@@ -367,8 +361,43 @@ class PacketManager():
             )
         )
 
+    def store_system(self, data):
+        """Store GSM_A.DTAP packets.
+
+        Unique Inserts:
+            * lac
+            * cid
+
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO SYSTEM(
+                HASH,
+                UnixTime,
+                PeopleTime,
+                CHANNEL,
+                DBM,
+                ARFCN,
+                FrameNumber,
+                LAC,
+                CID
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                data['hash'],
+                data['timestamp'],
+                data['datetime'],
+                data['channel'],
+                data['signal_dbm'],
+                data['arfcn'],
+                data['frame_nr'],
+                data['lac'],
+                data['cell_id']
+            )
+        )
+
     def store_packet(self, data):
-        """ Store unimplemented packets which only have GSMTAP information.
+        """Store unimplemented packets which only have GSMTAP information.
 
         """
         _logger.trace("{}: Storing packet {}"
@@ -414,15 +443,59 @@ class PacketManager():
         conn.close()
 
     def store(self, data, packet_type, packet_subtype):
-        """ Store unimplemented packet types.
+        """Store packets.
 
-        Only stores the GSMTAP information common to all packets.
+        Choose the function to store a given packet type.
 
         """
-        if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
+        if packet_type == 'GSM_A.CCCH' and packet_subtype == '33':
             self.store_paging(data)
+        elif packet_type == 'GSM_A.DTAP' and packet_subtype == '30':
+            self.store_system(data)
         else:
             self.store_packet(data)
+
+    def get_packet_info(self, data_layer, _type, _subtype):
+        """Attempt to get a brief description of the packet.
+
+        Arguments:
+            data_layer: the highest layer of a GSMTAP format packet.
+            _type (str): If a type is found a string representation, else None.
+            _subtype (str): If a subtype is found a string representation,
+                else None.
+
+        Returns:
+            packet_info (str): A brief description of the contents
+                of the packet. Empty string if not available.
+
+        """
+        implemented = "{}: found packet type {} at index {} '{}'"
+        no_subtype = "{}: unimplemented : packet subtype {} at index {} '{}'"
+        no_type = "{}: unimplemented : packet type {} at index {} '{}'"
+
+        # Packet location in Pcap or sequential number it was recieved at.
+        index = int(self.packet.number) - 1
+
+        if _type and _subtype:
+            log_lvl = _logger.debug
+            msg = implemented
+        elif _type:
+            log_lvl = _logger.warning
+            msg = no_subtype
+        else:
+            log_lvl = _logger.warning
+            msg = no_type
+
+        try:
+            packet_info = data_layer.get_field('')
+            log_lvl(msg.format(
+                self.process_id, _type, index, packet_info))
+        except KeyError:
+            packet_info = ''
+            log_lvl(msg.format(
+                self.process_id, _type, index, packet_info))
+
+        return packet_info
 
 
 if __name__ == "__main__":
