@@ -177,18 +177,12 @@ class PacketManager():
         if _type in self.packet_types.keys():
             if 'gsm_a_dtap_msg_rr_type' in attributes:
                 _subtype = data_layer.gsm_a_dtap_msg_rr_type
-                self.get_packet_info(data_layer, _type, _subtype)
                 return (_type, _subtype)
-
             if 'msg_rr_type' in attributes:
                 _subtype = data_layer.msg_rr_type
-                self.get_packet_info(data_layer, _type, _subtype)
                 return (_type, _subtype)
-
-            self.get_packet_info(data_layer, _type, None)
             return (_type, None)
 
-        self.get_packet_info(data_layer, None, None)
         return (_type, None)
 
     def decode_packet(self, packet_type, packet_subtype):
@@ -309,11 +303,9 @@ class PacketManager():
                 http://www.sharetechnote.com/html/BasicCallPacket_GSM.html#Step_15
 
         """
-        # Mobile ID Type
         data.update({"lac": int(
             self.packet['gsm_a.dtap'].gsm_a_lac)})
 
-        # Message Type
         data.update({"cell_id": int(
             self.packet['gsm_a.dtap'].gsm_a_bssmap_cell_ci)})
 
@@ -448,14 +440,20 @@ class PacketManager():
         Choose the function to store a given packet type.
 
         """
+
+        data_layer = self.packet[self.packet.highest_layer.lower()]
+
         if packet_type == 'GSM_A.CCCH' and packet_subtype == '33':
+            self.get_packet_info(data_layer, packet_type, packet_subtype, True)
             self.store_paging(data)
         elif packet_type == 'GSM_A.DTAP' and packet_subtype == '30':
+            self.get_packet_info(data_layer, packet_type, packet_subtype, True)
             self.store_system(data)
         else:
+            self.get_packet_info(data_layer, packet_type, packet_subtype, False)
             self.store_packet(data)
 
-    def get_packet_info(self, data_layer, _type, _subtype):
+    def get_packet_info(self, data_layer, _type, _subtype, implemented):
         """Attempt to get a brief description of the packet.
 
         Arguments:
@@ -470,15 +468,19 @@ class PacketManager():
 
         """
         implemented = "{}: found packet type {} at index {} '{}'"
-        no_subtype = "{}: unimplemented : packet subtype {} at index {} '{}'"
-        no_type = "{}: unimplemented : packet type {} at index {} '{}'"
+        unimplemented = "{}: undecoded packet type : {} at index {} '{}'"
+        no_subtype = "{}: missing subtype : type {} at index {} '{}'"
+        no_type = "{}: missing type : type {} at index {} '{}'"
 
         # Packet location in Pcap or sequential number it was recieved at.
         index = int(self.packet.number) - 1
 
-        if _type and _subtype:
+        if _type and _subtype and implemented:
             log_lvl = _logger.debug
             msg = implemented
+        elif _type and _subtype:
+            log_lvl = _logger.warning
+            msg = unimplemented
         elif _type:
             log_lvl = _logger.warning
             msg = no_subtype
