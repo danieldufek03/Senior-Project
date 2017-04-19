@@ -167,7 +167,7 @@ class PacketManager():
 
         if _type in self.packet_types.keys():
             if 'gsm_a_dtap_msg_rr_type' in attributes:
-                _subtype = int(data_layer.gsm_a_dtap_msg_rr_type)
+                _subtype = data_layer.gsm_a_dtap_msg_rr_type
                 packet_info = data_layer._all_fields['']
                 _logger.debug(implemented.format(
                     self.process_id, _type, index, packet_info))
@@ -212,7 +212,7 @@ class PacketManager():
 
         data.update({"datetime": people_time})
 
-        if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
+        if packet_type == 'GSM_A.CCCH' and packet_subtype == '33':
             self.decode_paging(data)
 
         # Detect packet type and extract needed data
@@ -419,7 +419,7 @@ class PacketManager():
         Only stores the GSMTAP information common to all packets.
 
         """
-        if packet_type == 'GSM_A.CCCH' and packet_subtype == 33:
+        if packet_type == 'GSM_A.CCCH' and packet_subtype == '33':
             self.store_paging(data)
         else:
             self.store_packet(data)
