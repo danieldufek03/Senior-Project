@@ -36,7 +36,7 @@ class Decoder(Process):
         self.queue = queue
         self.exit = mp.Event()
 
-        self.data_dir = appdirs.user_data_dir(__name__, __author__)
+        self.data_dir = appdirs.user_data_dir("anti.sqlite3", "anything")
 
     def run(self):
         """ Process main function, program loop.
