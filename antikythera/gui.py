@@ -45,10 +45,13 @@ color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
 class DefconLevel(GridLayout):
     pass
 
+class Metric(GridLayout):
+    pass
+
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
-        self.defconLevel = 0
+        self.defconLevel = 5
 
         '''
         self.canvas.add(Color(rgba=self.color))
@@ -66,9 +69,15 @@ class Scanner(GridLayout):
             child.canvas.before.clear()
             child.canvas.after.clear()
 
+            # Calculates values for border (Optional)
+            border = 0
+            insideSize = [child.size[0] - border, child.size[1] - border]
+            insidePos = [child.pos[0] + (child.size[0] - insideSize[0]) / 2, child.pos[1] + (child.size[1] - insideSize[1]) / 2]
+
             with child.canvas.before:
+                # Defcon color
                 Color(rgba=child.color)
-                Rectangle(pos=child.pos, size=child.size)
+                Rectangle(pos=insidePos, size=insideSize)
 
                 if (child.level == self.defconLevel):
                     # Highlights
@@ -237,9 +246,9 @@ class MetricDisplay(App):
         self.timesUpdated += 1
 
         if self.timesUpdated > 5:
-            self.timesUpdated = 1
+            self.timesUpdated = 0
 
-        self.root.update_defcon(self.timesUpdated)
+        self.root.update_defcon(5 - self.timesUpdated)
 
     def build_settings(self, settings):
         json = '''
@@ -260,6 +269,7 @@ class MetricDisplay(App):
         """
         Set the default values for the configs sections.
         """
+        Config.kivy = "Something"
         config.setdefaults('Finding Mr. Ray', {'text': 'Pcap File'})
 
     def on_config_change(self, config, section, key, value):
@@ -267,11 +277,11 @@ class MetricDisplay(App):
             token = (section, key, value)
             if token == ("Finding Mr. Ray", "text", "Pcap File"):
                 # Do the Pcap File things
-                print('Capture interface moved to', value)
+                print('Capture interface changed to', value)
 
             elif token == ("Finding Mr. Ray", "text", "Network"):
                 # Do the network capture things
-                print('Capture interface moved to', value)
+                print('Capture interface changed to', value)
 
 def run():
     """
