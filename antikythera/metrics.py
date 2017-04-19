@@ -103,18 +103,13 @@ class Metrics(Process):
         self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
         self.c = self.conn.cursor()
 
-        self.c.execute("""SELECT A.*
-            FROM PACKETS A
-            INNER JOIN (SELECT LAC, CID, ARFCN
-                        FROM PACKETS
-                        GROUP BY LAC, CID
-                        HAVING COUNT(*) > 1) B
-            ON A.LAC = B.LAC AND A.CID = B.CID AND A.ARFCN <> B.ARFCN""")
-        
-        #self.c.execute("""SELECT LAC, CID, ARFCN FROM B
-         #   WHERE peopletime > 
-         #   (SELECT PreviousTime FROM TEMP_PREVIOUS_TIME)""")
-        
+        self.c.execute("""SELECT *
+            FROM (
+            SELECT *
+            FROM PACKETS
+            GROUP BY ARFCN)
+            GROUP BY LAC, CID
+            HAVING COUNT(*) > 1""")
         for row in self.c.fetchall():
             _logger.trace("{}: {}".format(self.process_id, row))
             self.areaCidList.append(row)
