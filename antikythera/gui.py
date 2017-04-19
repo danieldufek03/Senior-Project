@@ -66,10 +66,16 @@ class Scanner(GridLayout):
             child.canvas.before.clear()
             child.canvas.after.clear()
 
-            with child.canvas.before:
-                Color(rgba=child.color)
-                Rectangle(pos=child.pos, size=child.size)
+            # Calculates values for border (Optional)
+            border = 0
+            insideSize = [child.size[0] - border, child.size[1] - border]
+            insidePos = [child.pos[0] + (child.size[0] - insideSize[0]) / 2, child.pos[1] + (child.size[1] - insideSize[1]) / 2]
 
+            with child.canvas.before:
+                # Defcon color
+                Color(rgba=child.color)
+                Rectangle(pos=insidePos, size=insideSize)
+                
                 if (child.level == self.defconLevel):
                     # Highlights
                     Color(rgba=color_highlight)
