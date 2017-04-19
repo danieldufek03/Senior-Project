@@ -54,9 +54,10 @@
 
 <Scanner>:
     cols: 1
-    rows: 6
+    rows: 7
 
     anim_box: anim_box
+    metric:metric
     defconLevel1: defconLevel1
     defconLevel2: defconLevel2
     defconLevel3: defconLevel3
@@ -69,10 +70,31 @@
         Rectangle:
             pos: self.pos
             size: self.size
+    GridLayout:
+        id: metric
+        cols: 2
+        rows: 1
+        canvas:
+            Color:
+                rgba: color_grey
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            id: packet
+            text: "Packets Detected: 0"
+            color: color_defcon1
+
+        Label:
+            id: suspect_packet
+            text: "Suspicious Packets: 0"
+            color: color_defcon1
 
     AnchorLayout:
         id: anim_box
         size_hint: [fontsize_small + 10, None]
+
 
     DefconLevel:
         id: defconLevel1
