@@ -9,16 +9,18 @@ export DEBIAN_FRONTEND=noninteractive
 #   'wget -qO- https://finding-ray.gitlab.io/antikythera/install.sh | sh'
 #
 
+
+# Variables {{{
+
 # System Config
 DOCKER_IMAGE=""
 PKG_MANAGER=""
 ARCH=""
 OS=""
 
-# Variable Functions
+# For root comands
 sh_c=""
 
-# Colors
 # Only run `tput` if session is interactive and TTY is assigned
 if test -t 1; then
     RED=$(tput setaf 1)
@@ -31,12 +33,8 @@ else
     CYAN=''
     NORMAL=''
 fi
-
-
-#
-## Utility Functions
-#
-
+# End Variables }}}
+# Utility Functions {{{
 _banner()
 {
     if test -t 1; then
@@ -110,12 +108,8 @@ command_exists()
 {
     command -v "$@" > /dev/null 2>&1
 }
-
-
-#
-## System Detection
-#
-
+# End Utility Functions }}}
+# System Detection {{{
 found_os()
 {
     local pkg_manager=$1
@@ -210,10 +204,8 @@ check_distro()
 
     OS="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 }
-
-#
-## Dependencies
-#
+# End System Detection }}}
+# Dependencies {{{
 
 # add missing ffmpeg repository
 # it is no longer in debian default repos
@@ -255,16 +247,13 @@ depends_install()
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libswscale-dev libavformat-dev libavcodec-dev' )
     ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install zlib1g-dev curl' )
-    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libxml2-dev libxslt1-dev' )
+    ( set -x; $sh_c 'sleep 3; apt-get --yes -qq --show-progress install libxml2 libxml2-dev libxmlsec1-dev libxslt1-dev' )
 
     # pyshark dependency
     ( set -x; $sh_c 'sleep 3; apt-get --force-yes -qq --show-progress install tshark' )
 }
-
-#
-## Actual Install
-#
-
+# Dependencies }}}
+# Install {{{
 pip_install()
 {
     if ! command_exists pip; then
@@ -309,11 +298,8 @@ pip_install()
     ( set -x; $sh_c "sleep 3; curl -sSL 'https://gitlab.com/finding-ray/antikythera/raw/master/requirements.txt' | xargs -n 1 -L 1 $pip_env install" )
     ( set -x; $sh_c "sleep 3; $pip_env install --no-deps antikythera" )
 }
-
-
-#
-## Main
-#
+# Install }}}
+# Main {{{
 
 install()
 {
@@ -385,6 +371,7 @@ install()
 
     exit 1
 }
+# End Main }}}
 
 # All wrapped up in functions
 # In case of partial download it should fail

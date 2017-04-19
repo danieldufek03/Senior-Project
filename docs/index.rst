@@ -20,7 +20,6 @@ This is the documentation for `antikythera <https://gitlab.com/finding-ray/antik
 
 **antikythera** is an `IMSI-Catcher <https://en.wikipedia.org/wiki/IMSI-catcher>`_ detector and the software component of the *Finding Ray* device. It is built to catch IMSI-Catchers, also known as Stingrays, Dirtboxes, or malicious base stations. IMSI-Catchers are used to perform Man-in-The-Middle (MiTM) attacks on cellular phones. The primary goal the Finding Ray project is to prove the feasibility of a low cost, portable, and zero configuration required IMSI-Catcher detector. There are already IMSI-Catcher detectors available but they either have some drawbacks or cost as much as a car which inspired the development of a new solution. 
 
-
 Contents
 ========
 
