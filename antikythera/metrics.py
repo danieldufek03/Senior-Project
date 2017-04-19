@@ -130,7 +130,7 @@ class Metrics(Process):
         self.c.execute("""SELECT *
             FROM (
             SELECT *
-            FROM PACKETS
+            FROM SYSTEM
             GROUP BY ARFCN)
             GROUP BY LAC, CID
             HAVING COUNT(*) > 1""")
@@ -196,15 +196,15 @@ class Metrics(Process):
             self.conn = sqlite3.connect(self.datadir, check_same_thread=False)
             self.c = self.conn.cursor()
             queryList = []
-            self.c.execute("SELECT DISTINCT LAC FROM PACKETS")
+            self.c.execute("SELECT DISTINCT LAC FROM SYSTEM")
             for row in self.c.fetchall():
                 queryList.append(row)
             for LAC in queryList:
                 self.c.execute("""SELECT *
                     FROM (
                         SELECT LAC, CID
-                        FROM PACKETS
-                        WHERE PACKETS.LAC = ?
+                        FROM SYSTEM
+                        WHERE SYSTEM.LAC = ?
                         )
                     GROUP BY CID
                     HAVING COUNT(CID) = 1""", LAC)
