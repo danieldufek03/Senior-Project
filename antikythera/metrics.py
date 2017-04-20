@@ -92,7 +92,7 @@ class Metrics(Process):
 
         conn.close()
         while not self.exit.is_set():
-            _logger.trace("{}: metrics loop begin".format(self.process_id))
+            _logger.debug("{}: metrics loop begin".format(self.process_id))
             self.imposter_cell()
             self.inconsistent_lac()
             self.lonely_cell_id()
@@ -103,14 +103,14 @@ class Metrics(Process):
 
             packet_list = []
             for row in cursor.fetchall():
-                _logger.trace("{}: {}".format(self.process_id, row))
+                _logger.debug("{}: {}".format(self.process_id, row))
                 packet_list.append(row)
             conn.close()
 
-        _logger.trace("{}: Length of packet list {}"
+        _logger.debug("{}: Length of packet list {}"
                       .format(self.process_id, len(packet_list)))
 
-        _logger.trace("{}: Packet list content {}"
+        _logger.debug("{}: Packet list content {}"
                       .format(self.process_id, packet_list))
 
         _logger.info("{}: Exiting".format(self.process_id))
@@ -135,9 +135,9 @@ class Metrics(Process):
 
         area_cid_list = []
         for row in cursor.fetchall():
-            _logger.trace("{}: {}".format(self.process_id, row))
+            _logger.debug("{}: {}".format(self.process_id, row))
             area_cid_list.append(row)
-        _logger.trace("{}: Length of LAC CID list {}"
+        _logger.debug("{}: Length of LAC CID list {}"
                       .format(self.process_id, len(area_cid_list)))
 
         conn.close()
@@ -171,12 +171,12 @@ class Metrics(Process):
 
         inconsistent_lacs = []
         for row in cursor.fetchall():
-            _logger.trace("{}: {}".format(self.process_id, row))
+            _logger.debug("{}: {}".format(self.process_id, row))
             inconsistent_lacs.append(row)
 
         conn.close()
 
-        _logger.trace("{}: Length of inconsistent LAC list {}"
+        _logger.debug("{}: Length of inconsistent LAC list {}"
                       .format(self.process_id, len(inconsistent_lacs)))
 
         if len(inconsistent_lacs):
@@ -212,9 +212,9 @@ class Metrics(Process):
 
         previous_time_list = []
         for row in cursor.fetchall():
-            _logger.trace("{}: {}".format(self.process_id, row))
+            _logger.debug("{}: {}".format(self.process_id, row))
             previous_time_list.append(row)
-        _logger.trace("{}: Length of previous time list {}"
+        _logger.debug("{}: Length of previous time list {}"
                       .format(self.process_id, previous_time_list))
 
     def lonely_cell_id(self):
@@ -248,12 +248,12 @@ class Metrics(Process):
                 HAVING COUNT(CID) = 1""", lac)
 
             for row in cursor.fetchall():
-                _logger.trace("{}: {}".format(self.process_id, row))
+                _logger.debug("{}: {}".format(self.process_id, row))
                 lonely_list.append(row)
 
         conn.close()
 
-        _logger.trace("{}: Length of lonely list {}"
+        _logger.debug("{}: Length of lonely list {}"
                       .format(self.process_id, len(lonely_list)))
 
         if len(lonely_list):
