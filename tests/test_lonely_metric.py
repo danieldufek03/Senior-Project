@@ -95,6 +95,35 @@ def run_around_tests():
 def test_lonely_lac():
     """Test that lonely LAC is not detected on single LAC.
 
+    Builds The Table:
+
+        +-----+-----+-------+
+        | KEY | LAC |  CID  |
+        +=====+=====+=======+
+        |  0  |  1  |  122  |
+        +-----+-----+-------+
+        |  1  |  1  |  122  |
+        +-----+-----+-------+
+        |  2  |  1  |  132  |
+        +-----+-----+-------+
+        |  3  |  1  |  132  |
+        +-----+-----+-------+
+        |  4  |  2  |  1337 |
+        +-----+-----+-------+
+        |  5  |  2  |  1337 |
+        +-----+-----+-------+
+
+    This is to test that a LAC with two entries of the same CID
+    still triggers the metric. Here LAC 2 only has a single CID
+    1337 in it, but it has been detected multiple times.
+
+    ==========  ==========
+    LAC 1 CIDs LAC 2 CIDs
+    ==========  ==========
+    122        1337
+    132
+    ==========  ==========
+
     """
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -128,6 +157,26 @@ def test_lonely_lac():
 
 def test_not_lonely_lac():
     """Test that lonely LAC is not detected on single LAC.
+
+    Builds The Table:
+
+        +-----+-----+-------+
+        | KEY | LAC |  CID  |
+        +=====+=====+=======+
+        |  0  |  1  |  122  |
+        +-----+-----+-------+
+        |  1  |  1  |  122  |
+        +-----+-----+-------+
+        |  2  |  1  |  132  |
+        +-----+-----+-------+
+        |  3  |  1  |  132  |
+        +-----+-----+-------+
+        |  4  |  1  |  1337 |
+        +-----+-----+-------+
+        |  5  |  1  |  1337 |
+        +-----+-----+-------+
+
+    Only a single LAC with 3 CIDs in it.
 
     """
     conn = sqlite3.connect(DB_FILE)
@@ -164,6 +213,43 @@ def test_lonely_lac_simple():
     """Test that lonely location area codes are detected.
 
     The example from the module docstring.
+
+    Builds The Table:
+
+        +-----+-----+-------+
+        | KEY | LAC |  CID  |
+        +=====+=====+=======+
+        |  0  |  1  |   1   |
+        +-----+-----+-------+
+        |  1  |  1  |   2   |
+        +-----+-----+-------+
+        |  2  |  1  |   3   |
+        +-----+-----+-------+
+        |  3  |  2  |   4   |
+        +-----+-----+-------+
+        |  4  |  2  |   5   |
+        +-----+-----+-------+
+        |  5  |  2  |   6   |
+        +-----+-----+-------+
+        |  6  |  2  |   7   |
+        +-----+-----+-------+
+        |  7  |  2  |   8   |
+        +-----+-----+-------+
+        |  8  |  3  |   9   |
+        +-----+-----+-------+
+
+    LAC 3 only has a single CID belonging to it which should
+    trigger the metric.
+
+    ==========  ==========  ==========
+    LAC 1 CIDs LAC 2 CIDs  LAC 3 CIDs
+    ==========  ==========  ==========
+    1          4            9
+    2          5
+    3          6
+               7
+               8
+    ==========  ==========  ==========
 
     """
     conn = sqlite3.connect(DB_FILE)
