@@ -128,6 +128,119 @@ def test_imposter_cell_simple():
     assert metrics.imposter_cell()
 
 
+def test_imposter_cell_many():
+    """Test that imposter cell is detected.
+
+    Mutliple entries of good cells, and five entries of a single
+    evil cell.
+
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    key = 0
+
+    # Multiple copies of good cell
+    lacs = [1] * 5
+    cids = [7] * 5
+    arfcns = [42] * 5
+
+    # Multiple copies of evil cell
+    lacs += [1] * 5
+    cids += [7] * 5
+    arfcns += [1337] * 5
+
+    # Some random cells
+    lacs += [1] * 20
+    cids += range(20, 40)
+    arfcns += range(20, 40)
+
+    # A few in the different LAC
+    lacs += [2] * 5
+    cids += [7, 7, 8, 9, 10]
+    arfcns += range(50, 55)
+
+    for lac, cid, arfcn in zip(lacs, cids, arfcns):
+        cursor.execute(
+            """INSERT INTO SYSTEM(
+                KEY,
+                LAC,
+                CID,
+                ARFCN
+            ) VALUES (?, ?, ?, ?)
+            """, (
+                key,
+                lac,
+                cid,
+                arfcn
+            )
+        )
+        key += 1
+
+    conn.commit()
+    conn.close()
+
+    metrics = Metrics('test')
+    metrics.data_dir = DB_FILE
+    assert metrics.imposter_cell()
+
+
+def test_imposter_cell_two():
+    """Test that imposter cell is detected.
+
+    Test two evil cells.
+
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    key = 0
+
+    # Multiple copies of good cell
+    lacs = [1] * 5
+    cids = [7] * 5
+    arfcns = [42] * 5
+
+    # Multiple copies of evil cell
+    lacs += [1] * 5
+    cids += [7] * 5
+    arfcns += [1337] * 5
+
+    # Second Good Cell
+    lacs += [1] * 5
+    cids += [42] * 5
+    arfcns += [4444] * 5
+
+    # Second Evil Cell
+    lacs += [1] * 5
+    cids += [42] * 5
+    arfcns += [8888] * 5
+
+    for lac, cid, arfcn in zip(lacs, cids, arfcns):
+        cursor.execute(
+            """INSERT INTO SYSTEM(
+                KEY,
+                LAC,
+                CID,
+                ARFCN
+            ) VALUES (?, ?, ?, ?)
+            """, (
+                key,
+                lac,
+                cid,
+                arfcn
+            )
+        )
+        key += 1
+
+    conn.commit()
+    conn.close()
+
+    metrics = Metrics('test')
+    metrics.data_dir = DB_FILE
+    assert metrics.imposter_cell()
+
+
 def test_not_imposter_same_cell():
     """Test that same cell brodcasts are not detected.
 
@@ -180,6 +293,45 @@ def test_not_imposter_different_cell():
     lacs = [1, 1, 1, 2]
     cids = [7, 8, 9, 10]
     arfcns = [42, 43, 44, 45]
+
+    for lac, cid, arfcn in zip(lacs, cids, arfcns):
+        cursor.execute(
+            """INSERT INTO SYSTEM(
+                KEY,
+                LAC,
+                CID,
+                ARFCN
+            ) VALUES (?, ?, ?, ?)
+            """, (
+                key,
+                lac,
+                cid,
+                arfcn
+            )
+        )
+        key += 1
+
+    conn.commit()
+    conn.close()
+
+    metrics = Metrics('test')
+    metrics.data_dir = DB_FILE
+    assert not metrics.imposter_cell()
+
+
+def test_not_imposter_same_freq():
+    """Test that same cell brodcasts are not detected.
+
+    Same ARFCN, different LAC.
+
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    key = 0
+    lacs = [1, 2]
+    cids = [7, 20]
+    arfcns = [42, 42]
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
