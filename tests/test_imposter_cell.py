@@ -55,21 +55,24 @@ __author__ = "Team Awesome"
 __copyright__ = "Team Awesome"
 __license__ = "GPLv3+"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, 'test.sqlite3')
+
 
 @pytest.yield_fixture(autouse=True)
 def run_around_tests():
     """This fixture will be run code before and after every test.
 
-    Before each test create the database and the ``PACKETS`` table
+    Before each test create the database and the ``SYSTEM`` table
     for the test data. Then run the tests, and after each test is
     completed delete the test database ensuring a new empty databse
     for each test.
 
     """
     # Code that will run before test
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
+    cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
         KEY TEXT PRIMARY KEY,
         LAC TEXT,
         CID TEXT,
@@ -82,7 +85,7 @@ def run_around_tests():
     yield
 
     # Code that will run after test
-    os.remove("test.db")
+    os.remove(DB_FILE)
 
 
 def test_imposter_cell_simple():
@@ -92,7 +95,7 @@ def test_imposter_cell_simple():
     LAC, same CID, but different ARFCNs is an imposter.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     key = 0
@@ -102,7 +105,7 @@ def test_imposter_cell_simple():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID,
@@ -121,7 +124,7 @@ def test_imposter_cell_simple():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert metrics.imposter_cell()
 
 
@@ -131,7 +134,7 @@ def test_not_imposter_same_cell():
     Same LAC, same CID, same ARFCN is just the same cell.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     key = 0
@@ -141,7 +144,7 @@ def test_not_imposter_same_cell():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID,
@@ -160,7 +163,7 @@ def test_not_imposter_same_cell():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert not metrics.imposter_cell()
 
 
@@ -170,7 +173,7 @@ def test_not_imposter_different_cell():
     All cells on different frequencies are not imposters.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     key = 0
@@ -180,7 +183,7 @@ def test_not_imposter_different_cell():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID,
@@ -199,5 +202,5 @@ def test_not_imposter_different_cell():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert not metrics.imposter_cell()

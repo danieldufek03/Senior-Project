@@ -60,20 +60,24 @@ __copyright__ = "Team Awesome"
 __license__ = "GPLv3+"
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, 'test.sqlite3')
+
+
 @pytest.yield_fixture(autouse=True)
 def run_around_tests():
     """This fixture will be run code before and after every test.
 
-    Before each test create the database and the ``PACKETS`` table
+    Before each test create the database and the ``SYSTEM`` table
     for the test data. Then run the tests, and after each test is
     completed delete the test database ensuring a new empty databse
     for each test.
 
     """
     # Code that will run before test
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
+    cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
         KEY TEXT PRIMARY KEY,
         LAC TEXT,
         CID TEXT
@@ -85,14 +89,14 @@ def run_around_tests():
     yield
 
     # Code that will run after test
-    os.remove("test.db")
+    os.remove(DB_FILE)
 
 
 def test_lonely_lac():
     """Test that lonely LAC is not detected on single LAC.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     key = 0
@@ -101,7 +105,7 @@ def test_lonely_lac():
 
     for lac, cid in zip(lacs, cids):
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID
@@ -118,7 +122,7 @@ def test_lonely_lac():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert metrics.lonely_cell_id()
 
 
@@ -126,7 +130,7 @@ def test_not_lonely_lac():
     """Test that lonely LAC is not detected on single LAC.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     key = 0
@@ -135,7 +139,7 @@ def test_not_lonely_lac():
 
     for lac, cid in zip(lacs, cids):
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID
@@ -152,7 +156,7 @@ def test_not_lonely_lac():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert not metrics.lonely_cell_id()
 
 
@@ -162,7 +166,7 @@ def test_lonely_lac_simple():
     The example from the module docstring.
 
     """
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     key = 0
 
@@ -170,7 +174,7 @@ def test_lonely_lac_simple():
     lac_one_cids = ['1', '2', '3']
     for cid in lac_one_cids:
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID
@@ -187,7 +191,7 @@ def test_lonely_lac_simple():
     lac_two_cids = ['4', '5', '6', '7', '8']
     for cid in lac_two_cids:
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID
@@ -204,7 +208,7 @@ def test_lonely_lac_simple():
     evil_cids = ['9']
     for cid in evil_cids:
         cursor.execute(
-            """INSERT INTO PACKETS(
+            """INSERT INTO SYSTEM(
                 KEY,
                 LAC,
                 CID
@@ -221,5 +225,5 @@ def test_lonely_lac_simple():
     conn.close()
 
     metrics = Metrics('test')
-    metrics.data_dir = 'test.db'
+    metrics.data_dir = DB_FILE
     assert metrics.lonely_cell_id()
