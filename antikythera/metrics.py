@@ -40,7 +40,7 @@ class Metrics(Process):
     def __init__(self, process_id, *args, **kwargs):
         super(Metrics, self).__init__(*args, **kwargs)
         self.process_id = process_id
-        self.datadir = appdirs.user_data_dir("anti.sqlite3", "anything")
+        self.data_dir = appdirs.user_data_dir("anti.sqlite3", "anything")
         _logger.debug("{}: Process started successfully"
                       .format(self.process_id))
         self.exit = mp.Event()
@@ -49,7 +49,7 @@ class Metrics(Process):
         """Main process loop.
 
         """
-        conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
                         UnixTime REAL,
@@ -112,7 +112,7 @@ class Metrics(Process):
             self.inconsistent_lac()
             self.lonely_cell_id()
             sleep(3)
-            conn = sqlite3.connect(self.datadir, check_same_thread=False)
+            conn = sqlite3.connect(self.data_dir, check_same_thread=False)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM PACKETS")
 
@@ -179,7 +179,7 @@ class Metrics(Process):
         Location Area Code and Cell ID, but have different ARFCNs.
 
         """
-        conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute("""SELECT *
@@ -260,7 +260,7 @@ class Metrics(Process):
         table INCONSISTENT_AREA_CODE.
 
         """
-        conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         self.create_temp_table_previous_time()
@@ -299,7 +299,7 @@ class Metrics(Process):
         prev_time = (datetime.datetime.now() -
                      datetime.timedelta(days=730, minutes=5))
 
-        conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute(
@@ -308,7 +308,7 @@ class Metrics(Process):
             PreviousTime
             ) VALUES (?, ?)
             """, (
-                ("SELECT LAC FROM PACKETS"),
+                ("SELECT LAC FROM SYSTEM"),
                 prev_time
                 )
             )
@@ -371,7 +371,7 @@ class Metrics(Process):
                 https://lists.srlabs.de/pipermail/gsmmap/2015-March/001272.html
 
         """
-        conn = sqlite3.connect(self.datadir, check_same_thread=False)
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute("SELECT DISTINCT LAC FROM SYSTEM")
