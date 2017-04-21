@@ -112,10 +112,12 @@ class Metrics(Process):
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
-            imposter_present = self.imposter_cell()
-            inconsistent_lac_present = self.inconsistent_lac()
-            lonely_cell_id_present = self.lonely_cell_id()
+            suspectMetrics = []
+            suspectMetrics.append(self.imposter_cell())
+            suspectMetrics.append(self.inconsistent_lac())
+            suspectMetrics.append(self.lonely_cell_id())
             sleep(3)
+            self.shared['defconLevel'].value = 5 - suspectMetrics.count(true)
 
 
         _logger.info("{}: Exiting".format(self.process_id))
