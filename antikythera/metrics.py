@@ -112,27 +112,11 @@ class Metrics(Process):
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
-            self.imposter_cell()
-            self.inconsistent_lac()
-            self.lonely_cell_id()
+            imposter_present = self.imposter_cell()
+            inconsistent_lac_present = self.inconsistent_lac()
+            lonely_cell_id_present = self.lonely_cell_id()
             sleep(3)
-            conn = sqlite3.connect(self.data_dir, check_same_thread=False)
-            cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM PACKETS")
-
-            packet_list = []
-
-            for row in cursor.fetchall():
-                _logger.debug("{}: {}".format(self.process_id, row))
-                packet_list.append(row)
-            conn.close()
-
-        _logger.debug("{}: Length of packet list {}"
-                      .format(self.process_id, len(packet_list)))
-
-        _logger.debug("{}: Packet list content {}"
-                      .format(self.process_id, packet_list))
 
         _logger.info("{}: Exiting".format(self.process_id))
 
