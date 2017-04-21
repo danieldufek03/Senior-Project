@@ -57,7 +57,7 @@
     rows: 7
 
     anim_box: anim_box
-    metric:metric
+    metric: metric
     defconLevel1: defconLevel1
     defconLevel2: defconLevel2
     defconLevel3: defconLevel3
@@ -70,10 +70,15 @@
         Rectangle:
             pos: self.pos
             size: self.size
+    
     GridLayout:
         id: metric
         cols: 2
         rows: 1
+
+        packet_display: packet_display
+        suspect_packet_display: suspect_packet_display
+
         canvas:
             Color:
                 rgba: color_grey
@@ -82,13 +87,15 @@
                 size: self.size
 
         Label:
-            id: packet
-            text: "Packets Detected: 0"
+            id: packet_display
+            font_size: fontsize_small
+            default_text: "Packets Detected: "
             color: color_defcon1
 
         Label:
-            id: suspect_packet
-            text: "Suspicious Packets: 0"
+            id: suspect_packet_display
+            font_size: fontsize_small
+            default_text: "Suspicious Packets: "
             color: color_defcon1
 
     AnchorLayout:
@@ -102,24 +109,28 @@
         color: color_defcon1
         text: "DEFCON 1"
         icon: iconPath + "defcon1.png"
+
     DefconLevel:
         id: defconLevel2
         level: 2
         color: color_defcon2
         text: "DEFCON 2"
         icon: iconPath + "defcon2.png"
+
     DefconLevel:
         id: defconLevel3
         level: 3
         color: color_defcon3
         text: "DEFCON 3"
         icon: iconPath + "defcon3.png"
+
     DefconLevel:
         id: defconLevel4
         level: 4
         color: color_defcon4
         text: "DEFCON 4"
         icon: iconPath + "defcon4.png"
+
     DefconLevel:
         id: defconLevel5
         level: 5

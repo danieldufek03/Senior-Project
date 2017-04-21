@@ -48,6 +48,9 @@ class Anti(Process):
         self.exit = mp.Event()
         #_logger.info(self)
 
+        # Allocates shared memory
+        self.sharedMemory = {'numPackets': mp.Value('i', 0), 'numSuspectPackets': mp.Value('i', 0)}
+
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
              "[*] Headless: {}\n".format(self.headless) +
@@ -99,7 +102,7 @@ class Anti(Process):
 
         self.workers.append(capture_worker)
 
-        metrics_worker = Metrics("metrics", name="metrics", daemon=True)
+        metrics_worker = Metrics("metrics", self.sharedMemory, name="metrics", daemon=True)
         self.workers.append(metrics_worker)
 
         for worker in self.workers:

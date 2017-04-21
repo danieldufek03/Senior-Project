@@ -51,7 +51,10 @@ class Metric(GridLayout):
 class Scanner(GridLayout):
     def __init__(self, *args, **kwargs):
         super(Scanner, self).__init__(*args, **kwargs)
+
         self.defconLevel = 5
+        self.numPackets = 0
+        self.numSuspectPackets = 0
 
         '''
         self.canvas.add(Color(rgba=self.color))
@@ -60,6 +63,9 @@ class Scanner(GridLayout):
 
     # Called whenever itself or children are updated
     def do_layout(self, *args):
+        self.metric.packet_display.text = self.metric.packet_display.default_text + str(self.numPackets)
+        self.metric.suspect_packet_display.text = self.metric.suspect_packet_display.default_text + str(self.numSuspectPackets)
+
         super(Scanner, self).do_layout(*args)
         for child in self.children:
             if not isinstance(child, DefconLevel):
@@ -125,6 +131,14 @@ class Scanner(GridLayout):
 
         _logger.info("GUI: Updated threat level to {}".format(level))
         pass
+    
+    def update_packet_count(self, count):
+        self.numPackets = count
+        self.do_layout() # Re-draws GUI
+    
+    def update_suspect_packet_count(self, count):
+        self.numSuspectPackets = count
+        self.do_layout() # Re-draws GUI
 
 
 class RootWidget(GridLayout):
@@ -181,6 +195,11 @@ class RootWidget(GridLayout):
     def update_defcon(self, level):
         self.scanner.update_defcon(level)
 
+    def update_packet_count(self, count):
+        self.scanner.update_packet_count(count)
+    
+    def update_suspect_packet_count(self, count):
+        self.scanner.update_suspect_packet_count(count)
 
     def update_status(self, new_text):
         self.status.text = new_text
@@ -198,6 +217,8 @@ class MetricDisplay(App):
         self.timesUpdated = 0
 
     def on_start(self):
+        # Set even that's called every 1/2 second
+        event = Clock.schedule_interval(self.update_from_shared_memory, 1/2)
         """
 
         """
@@ -212,7 +233,23 @@ class MetricDisplay(App):
 
         self.IMSI_detector = Anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
 
+    def update_from_shared_memory(self, *args):
+        '''
+        # Updates threat level
+        self.timesUpdated += 1
 
+        if self.timesUpdated > 5:
+            self.timesUpdated = 1
+
+        self.root.update_defcon(self.timesUpdated)
+        '''
+        numPackets = self.IMSI_detector.sharedMemory['numPackets'].value
+        numSuspect = self.IMSI_detector.sharedMemory['numSuspectPackets'].value
+
+        self.root.update_packet_count(numPackets)
+        self.root.update_suspect_packet_count(numSuspect)
+
+        pass
 
     def build(self):
         """
@@ -242,13 +279,7 @@ class MetricDisplay(App):
         Button - Open configuration settings
         """
 
-        # Updates threat level
-        self.timesUpdated += 1
-
-        if self.timesUpdated > 5:
-            self.timesUpdated = 0
-
-        self.root.update_defcon(5 - self.timesUpdated)
+        pass
 
     def build_settings(self, settings):
         json = '''
