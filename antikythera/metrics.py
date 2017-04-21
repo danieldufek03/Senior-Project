@@ -29,7 +29,7 @@ from time import sleep
 
 import appdirs
 
-_logger = logging.getLogger(__name__)
+_logger    = logging.getLogger(__name__)
 __author__ = "TeamAwesome"
 
 
@@ -40,17 +40,20 @@ class Metrics(Process):
     def __init__(self, process_id, *args, **kwargs):
         super(Metrics, self).__init__(*args, **kwargs)
         self.process_id = process_id
-        self.data_dir = appdirs.user_data_dir("anti.sqlite3", "anything")
+        self.data_dir   = appdirs.user_data_dir("anti.sqlite3", "anything")
+
         _logger.debug("{}: Process started successfully"
                       .format(self.process_id))
-        self.exit = mp.Event()
+
+        self.exit       = mp.Event()
 
     def run(self):
         """Main process loop.
 
         """
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        conn   = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
                         UnixTime REAL,
                         PeopleTime TEXT,
@@ -112,20 +115,22 @@ class Metrics(Process):
             self.inconsistent_lac()
             self.lonely_cell_id()
             sleep(3)
-            conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+            conn   = sqlite3.connect(self.data_dir, check_same_thread=False)
             cursor = conn.cursor()
+
             cursor.execute("SELECT * FROM PACKETS")
 
             packet_list = []
+
             for row in cursor.fetchall():
-                _logger.debug("{}: {}".format(self.process_id, row))
+                _logger.trace("{}: {}".format(self.process_id, row))
                 packet_list.append(row)
             conn.close()
 
-        _logger.debug("{}: Length of packet list {}"
+        _logger.trace("{}: Length of packet list {}"
                       .format(self.process_id, len(packet_list)))
 
-        _logger.debug("{}: Packet list content {}"
+        _logger.trace("{}: Packet list content {}"
                       .format(self.process_id, packet_list))
 
         _logger.info("{}: Exiting".format(self.process_id))
@@ -179,7 +184,7 @@ class Metrics(Process):
         Location Area Code and Cell ID, but have different ARFCNs.
 
         """
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        conn   = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute("""SELECT *
@@ -191,10 +196,11 @@ class Metrics(Process):
                         HAVING COUNT(*) > 1""")
 
         area_cid_list = []
+
         for row in cursor.fetchall():
-            _logger.debug("{}: {}".format(self.process_id, row))
+            _logger.trace("{}: {}".format(self.process_id, row))
             area_cid_list.append(row)
-        _logger.debug("{}: Length of LAC CID list {}"
+        _logger.trace("{}: Length of LAC CID list {}"
                       .format(self.process_id, len(area_cid_list)))
 
         conn.close()
@@ -260,7 +266,7 @@ class Metrics(Process):
         table INCONSISTENT_AREA_CODE.
 
         """
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        conn   = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         self.create_temp_table_previous_time()
@@ -274,12 +280,12 @@ class Metrics(Process):
 
         inconsistent_lacs = []
         for row in cursor.fetchall():
-            _logger.debug("{}: {}".format(self.process_id, row))
+            _logger.trace("{}: {}".format(self.process_id, row))
             inconsistent_lacs.append(row)
 
         conn.close()
 
-        _logger.debug("{}: Length of inconsistent LAC list {}"
+        _logger.trace("{}: Length of inconsistent LAC list {}"
                       .format(self.process_id, len(inconsistent_lacs)))
 
         if len(inconsistent_lacs):
@@ -299,7 +305,7 @@ class Metrics(Process):
         prev_time = (datetime.datetime.now() -
                      datetime.timedelta(days=730, minutes=5))
 
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        conn   = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
         cursor.execute(
@@ -315,9 +321,9 @@ class Metrics(Process):
 
         previous_time_list = []
         for row in cursor.fetchall():
-            _logger.debug("{}: {}".format(self.process_id, row))
+            _logger.trace("{}: {}".format(self.process_id, row))
             previous_time_list.append(row)
-        _logger.debug("{}: Length of previous time list {}"
+        _logger.trace("{}: Length of previous time list {}"
                       .format(self.process_id, previous_time_list))
 
     def lonely_cell_id(self):
@@ -371,33 +377,24 @@ class Metrics(Process):
                 https://lists.srlabs.de/pipermail/gsmmap/2015-March/001272.html
 
         """
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT DISTINCT LAC FROM SYSTEM")
-
-        query_list = []
-        for lac in cursor.fetchall():
-            query_list.append(lac)
-
+        conn        = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor      = conn.cursor()
         lonely_list = []
-        for lac in query_list:
-            cursor.execute("""SELECT *
-                FROM (
-                    SELECT LAC, CID
-                    FROM SYSTEM
-                    WHERE SYSTEM.LAC = ?
-                    )
-                GROUP BY CID
-                HAVING COUNT(CID) = 1""", lac)
 
-            for row in cursor.fetchall():
-                _logger.debug("{}: {}".format(self.process_id, row))
-                lonely_list.append(row)
+        cursor.execute("""SELECT *
+            FROM
+            (SELECT *
+                FROM SYSTEM
+                GROUP BY LAC,CID)
+            GROUP BY LAC
+            HAVING COUNT(LAC) = 1""")
+        for row in cursor.fetchall():
+            _logger.trace("{}: {}".format(self.process_id, row))
+            lonely_list.append(row)
 
         conn.close()
 
-        _logger.debug("{}: Length of lonely list {}"
+        _logger.trace("{}: Length of lonely list {}"
                       .format(self.process_id, len(lonely_list)))
 
         if len(lonely_list):
