@@ -112,12 +112,16 @@ class Metrics(Process):
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
-            suspectMetrics = []
-            suspectMetrics.append(self.imposter_cell())
-            suspectMetrics.append(self.inconsistent_lac())
-            suspectMetrics.append(self.lonely_cell_id())
+            suspectMetrics = [ self.imposter_cell(), self.inconsistent_lac(), self.lonely_cell_id()]
             sleep(3)
-            self.shared['defconLevel'].value = 5 - suspectMetrics.count(True)
+
+            level = 5 - suspectMetrics.count(True)
+            _logger.fatal("Metrics: Threat level changed to " + str(level))
+            self.shared['defconLevel'].value = level
+
+            #if level != 5:
+            #    break
+            
 
 
         _logger.info("{}: Exiting".format(self.process_id))
