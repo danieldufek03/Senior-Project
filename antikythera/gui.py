@@ -128,9 +128,6 @@ class Scanner(GridLayout):
 
         self.defconLevel = level
         self.do_layout() # Re-draws GUI
-
-        _logger.info("GUI: Updated threat level to {}".format(level))
-        pass
     
     def update_packet_count(self, count):
         self.numPackets = count
@@ -235,21 +232,20 @@ class MetricDisplay(App):
 
     def update_from_shared_memory(self, *args):
         '''
-        # Updates threat level
-        self.timesUpdated += 1
-
-        if self.timesUpdated > 5:
-            self.timesUpdated = 1
-
-        self.root.update_defcon(self.timesUpdated)
+        Reads values in shared memory and updates GUI display
         '''
-        numPackets = self.IMSI_detector.sharedMemory['numPackets'].value
-        numSuspect = self.IMSI_detector.sharedMemory['numSuspectPackets'].value
 
-        self.root.update_packet_count(numPackets)
-        self.root.update_suspect_packet_count(numSuspect)
+        shared = self.IMSI_detector.sharedMemory
 
-        pass
+        for key in shared:
+            if (key == 'numPackets'):
+                self.root.update_packet_count(shared[key].value)
+            elif (key == 'numSuspectPackets'):
+                self.root.update_suspect_packet_count(shared[key].value)
+            elif (key == 'defconLevel'):
+                self.root.update_defcon(shared[key].value)
+
+        return
 
     def build(self):
         """
