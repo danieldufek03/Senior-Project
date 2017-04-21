@@ -144,24 +144,37 @@ class Decoder(Process):
         each group of packets data important to a given query.
 
         """
+        self.create_generic_table()
+        self.create_page_table()
+        self.create_lac_cid_table()
+        self.create_neighbor_table()
+
+    def create_generic_table(self):
+        """Create table to hold header data for unimplemented types.
+
+        """
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS PACKETS(
                             UnixTime REAL,
                             PeopleTime TEXT,
                             CHANNEL TEXT,
                             DBM TEXT,
                             ARFCN TEXT,
-                            TMSI TEXT,
-                            IMSI TEXT,
-                            LAC TEXT,
-                            CID TEXT,
-                            MCC TEXT,
-                            MNC TEXT,
-                            IMEISV TEXT,
                             FrameNumber TEXT,
                             HASH TEXT PRIMARY KEY
                             )''')
+
+        conn.commit()
+        conn.close()
+
+    def create_page_table(self):
+        """Create table to hold header data for unimplemented types.
+
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS PAGE(
                             HASH TEXT PRIMARY KEY,
@@ -178,6 +191,17 @@ class Decoder(Process):
                             reqChanTwo TEXT
                             )''')
 
+
+        conn.commit()
+        conn.close()
+
+    def create_lac_cid_table(self):
+        """Create table to hold header data for unimplemented types.
+
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS LAC_CID(
                             HASH TEXT PRIMARY KEY,
                             UnixTime REAL,
@@ -190,6 +214,30 @@ class Decoder(Process):
                             CID TEXT
                             )''')
 
+        conn.commit()
+        conn.close()
+
+    def create_neighbor_table(self):
+        """Create table to hold header data for unimplemented types.
+
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS NEIGHBOR(
+                        HASH TEXT PRIMARY KEY,
+                        UnixTime REAL,
+                        PeopleTime TEXT,
+                        CHANNEL TEXT,
+                        DBM TEXT,
+                        ARFCN TEXT,
+                        FrameNumber TEXT,
+                        LAC TEXT,
+                        CID TEXT,
+                        N_CELL_LAC TEXT
+                        )''')
+
+        conn.commit()
         conn.close()
 
 
@@ -510,6 +558,50 @@ class PagePacket(Packet):
                 self.mode,
                 self.chan_req_ch1,
                 self.chan_req_ch2
+            )
+        )
+        conn.commit()
+        conn.close()
+
+
+class NCellPacket(Packet):
+    """Neighbor cell data Packets.
+
+    """
+    def __init__(self, packet):
+        super().__init__(packet)
+
+    def store(self, database):
+        """Store GSM_A.CCCH packets.
+
+        Unique Inserts:
+            * id_type
+            * msg_type
+            * mode
+            * chan_req_ch1
+            * chan_req_ch2
+
+        """
+        conn = sqlite3.connect(database, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO PAGE(
+                HASH,
+                UnixTime,
+                PeopleTime,
+                CHANNEL,
+                DBM,
+                ARFCN,
+                FrameNumber,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                self.hash_,
+                self.timestamp,
+                self.datetime,
+                self.channel,
+                self.signal_dbm,
+                self.arfcn,
+                self.frame_nr,
             )
         )
         conn.commit()
