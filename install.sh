@@ -353,7 +353,7 @@ install()
             _info "Setup successful"
             exit 0
         ;;
-        ubuntu)
+        ubuntu|linuxmint)
             _info "Detected supported Linux distribution $OS"
             _info "Updating Packages..."
             $sh_c 'sleep 3; apt-get --yes -qq update'
