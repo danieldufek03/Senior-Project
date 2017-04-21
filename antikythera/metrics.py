@@ -37,9 +37,10 @@ class Metrics(Process):
     """The metrics
 
     """
-    def __init__(self, process_id, *args, **kwargs):
+    def __init__(self, process_id, sharedMemory = None, *args, **kwargs):
         super(Metrics, self).__init__(*args, **kwargs)
         self.process_id = process_id
+        self.shared = sharedMemory;
         self.data_dir   = appdirs.user_data_dir("anti.sqlite3", "anything")
 
         _logger.debug("{}: Process started successfully"

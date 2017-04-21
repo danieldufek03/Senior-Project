@@ -217,6 +217,8 @@ class MetricDisplay(App):
         self.timesUpdated = 0
 
     def on_start(self):
+        # Set even that's called every 1/2 second
+        event = Clock.schedule_interval(self.update_from_shared_memory, 1/2)
         """
 
         """
@@ -231,7 +233,23 @@ class MetricDisplay(App):
 
         self.IMSI_detector = Anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
 
+    def update_from_shared_memory(self, *args):
+        '''
+        # Updates threat level
+        self.timesUpdated += 1
 
+        if self.timesUpdated > 5:
+            self.timesUpdated = 1
+
+        self.root.update_defcon(self.timesUpdated)
+        '''
+        numPackets = self.IMSI_detector.sharedMemory['numPackets'].value
+        numSuspect = self.IMSI_detector.sharedMemory['numSuspectPackets'].value
+
+        self.root.update_packet_count(numPackets)
+        self.root.update_suspect_packet_count(numSuspect)
+
+        pass
 
     def build(self):
         """
@@ -261,13 +279,7 @@ class MetricDisplay(App):
         Button - Open configuration settings
         """
 
-        # Updates threat level
-        self.timesUpdated += 1
-
-        if self.timesUpdated > 5:
-            self.timesUpdated = 0
-
-        self.root.update_defcon(5 - self.timesUpdated)
+        pass
 
     def build_settings(self, settings):
         json = '''
