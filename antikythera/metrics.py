@@ -117,7 +117,7 @@ class Metrics(Process):
             suspectMetrics.append(self.inconsistent_lac())
             suspectMetrics.append(self.lonely_cell_id())
             sleep(3)
-            self.shared['defconLevel'].value = 5 - suspectMetrics.count(true)
+            self.shared['defconLevel'].value = 5 - suspectMetrics.count(True)
 
 
         _logger.info("{}: Exiting".format(self.process_id))
