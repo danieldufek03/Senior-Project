@@ -93,7 +93,7 @@ def run_around_tests():
 
 
 def test_lonely_lac():
-    """Test that lonely LAC is not detected on single LAC.
+    """Test that lonely LAC is detected with duplicates of lonely LAC.
 
     Builds The Table:
 
