@@ -63,7 +63,7 @@ DB_FILE = os.path.join(BASE_DIR, 'test.sqlite3')
 def run_around_tests():
     """This fixture will be run code before and after every test.
 
-    Before each test create the database and the ``SYSTEM`` table
+    Before each test create the database and the ``LAC_CID`` table
     for the test data. Then run the tests, and after each test is
     completed delete the test database ensuring a new empty databse
     for each test.
@@ -72,7 +72,7 @@ def run_around_tests():
     # Code that will run before test
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
+    cursor.execute('''CREATE TABLE IF NOT EXISTS LAC_CID(
         KEY TEXT PRIMARY KEY,
         LAC TEXT,
         CID TEXT,
@@ -105,7 +105,7 @@ def test_imposter_cell_simple():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,
@@ -162,7 +162,7 @@ def test_imposter_cell_many():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,
@@ -218,7 +218,7 @@ def test_imposter_cell_two():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,
@@ -257,7 +257,7 @@ def test_not_imposter_same_cell():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,
@@ -296,7 +296,7 @@ def test_not_imposter_different_cell():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,
@@ -335,7 +335,7 @@ def test_not_imposter_same_freq():
 
     for lac, cid, arfcn in zip(lacs, cids, arfcns):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID,

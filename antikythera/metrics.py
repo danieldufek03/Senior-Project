@@ -93,7 +93,7 @@ class Metrics(Process):
                             reqChanTwo TEXT
                             )''')
 
-        cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
+        cursor.execute('''CREATE TABLE IF NOT EXISTS LAC_CID(
                             HASH TEXT PRIMARY KEY,
                             UnixTime REAL,
                             PeopleTime TEXT,
@@ -185,7 +185,7 @@ class Metrics(Process):
         cursor.execute("""SELECT *
                         FROM (
                         SELECT *
-                        FROM SYSTEM
+                        FROM LAC_CID
                         GROUP BY ARFCN)
                         GROUP BY LAC, CID
                         HAVING COUNT(*) > 1""")
@@ -308,7 +308,7 @@ class Metrics(Process):
             PreviousTime
             ) VALUES (?, ?)
             """, (
-                ("SELECT LAC FROM SYSTEM"),
+                ("SELECT LAC FROM LAC_CID"),
                 prev_time
                 )
             )
@@ -373,27 +373,21 @@ class Metrics(Process):
         """
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
-
-        cursor.execute("SELECT DISTINCT LAC FROM SYSTEM")
-
-        query_list = []
-        for lac in cursor.fetchall():
-            query_list.append(lac)
-
         lonely_list = []
-        for lac in query_list:
-            cursor.execute("""SELECT *
-                FROM (
-                    SELECT LAC, CID
-                    FROM SYSTEM
-                    WHERE SYSTEM.LAC = ?
-                    )
-                GROUP BY CID
-                HAVING COUNT(CID) = 1""", lac)
 
-            for row in cursor.fetchall():
-                _logger.debug("{}: {}".format(self.process_id, row))
-                lonely_list.append(row)
+        cursor.execute("SELECT DISTINCT LAC FROM LAC_CID")
+
+        cursor.execute("""SELECT *
+            FROM
+            (SELECT *
+                FROM LAC_CID
+                GROUP BY LAC,CID)
+            GROUP BY LAC
+            HAVING COUNT(LAC) = 1""")
+
+        for row in cursor.fetchall():
+            _logger.debug("{}: {}".format(self.process_id, row))
+            lonely_list.append(row)
 
         conn.close()
 

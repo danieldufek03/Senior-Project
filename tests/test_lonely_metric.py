@@ -68,7 +68,7 @@ DB_FILE = os.path.join(BASE_DIR, 'test.sqlite3')
 def run_around_tests():
     """This fixture will be run code before and after every test.
 
-    Before each test create the database and the ``SYSTEM`` table
+    Before each test create the database and the ``LAC_CID`` table
     for the test data. Then run the tests, and after each test is
     completed delete the test database ensuring a new empty databse
     for each test.
@@ -77,7 +77,7 @@ def run_around_tests():
     # Code that will run before test
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS SYSTEM(
+    cursor.execute('''CREATE TABLE IF NOT EXISTS LAC_CID(
         KEY TEXT PRIMARY KEY,
         LAC TEXT,
         CID TEXT
@@ -134,7 +134,7 @@ def test_lonely_lac():
 
     for lac, cid in zip(lacs, cids):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID
@@ -188,7 +188,7 @@ def test_not_lonely_lac():
 
     for lac, cid in zip(lacs, cids):
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID
@@ -260,7 +260,7 @@ def test_lonely_lac_simple():
     lac_one_cids = ['1', '2', '3']
     for cid in lac_one_cids:
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID
@@ -277,7 +277,7 @@ def test_lonely_lac_simple():
     lac_two_cids = ['4', '5', '6', '7', '8']
     for cid in lac_two_cids:
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID
@@ -294,7 +294,7 @@ def test_lonely_lac_simple():
     evil_cids = ['9']
     for cid in evil_cids:
         cursor.execute(
-            """INSERT INTO SYSTEM(
+            """INSERT INTO LAC_CID(
                 KEY,
                 LAC,
                 CID
