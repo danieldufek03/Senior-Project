@@ -10,9 +10,9 @@ import logging
 import argparse
 import multiprocessing as mp
 from multiprocessing import Process, Queue
-
 from time import sleep
 
+import appdirs
 import antikythera.pysharkpatch
 
 from antikythera.capture import Capture
@@ -32,7 +32,8 @@ class Anti(Process):
 
     """
     def __init__(self, num_processes, headless, interface=None,
-                 capturefile=None, max_qsize=100000, *args, **kwargs):
+                 capturefile=None, max_qsize=100000, delay=0.2,
+                 nuke=False, *args, **kwargs):
         """
 
         """
@@ -45,6 +46,8 @@ class Anti(Process):
         self.interface = interface
         self.capturefile = capturefile
         self.headless = headless
+        self.delay = delay
+        self.nuke = nuke
         self.exit = mp.Event()
         #_logger.info(self)
 
@@ -52,6 +55,11 @@ class Anti(Process):
         self.sharedMemory = {'numPackets': mp.Value('i', 0),
             'numSuspectPackets': mp.Value('i', 0),
             'defconLevel':mp.Value('i',5)}
+
+        if nuke:
+            data_dir = appdirs.user_data_dir("anti.sqlite3", "anything")
+            os.remove(data_dir)
+
 
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
@@ -98,7 +106,8 @@ class Anti(Process):
                                      self.pkt_queue,
                                      capturefile=self.capturefile,
                                      name="capture",
-                                     daemon=True)
+                                     daemon=True,
+                                     delay=self.delay)
         else:
             _logger.critical("Anti: no capture method supplied aborting!")
 
@@ -250,6 +259,20 @@ def create_parser():
         dest="interface",
         help="The identifier of the network interface to use.",
         action='store')
+    parser.add_argument(
+        '-d',
+        '--delay',
+        nargs='?',
+        type=float,
+        default=0.2,
+        help="Set the time delay in seconds for reading packets from a PCAP file.",
+        action='store')
+    parser.add_argument(
+        '-n',
+        '--nuke',
+        default=False,
+        help="Nuke the database.",
+        action='store_true')
 
     return parser
 

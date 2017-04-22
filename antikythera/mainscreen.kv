@@ -37,6 +37,7 @@
 
     Button:
         id: button_scan
+        is_running: False
         font_size: fontsize_small
         background_color: color_awesome
         background_normal: ''
@@ -70,7 +71,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    
+
     GridLayout:
         id: metric
         cols: 2

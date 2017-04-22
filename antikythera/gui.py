@@ -53,8 +53,6 @@ class Scanner(GridLayout):
         super(Scanner, self).__init__(*args, **kwargs)
 
         self.defconLevel = 5
-        self.numPackets = 0
-        self.numSuspectPackets = 0
 
         '''
         self.canvas.add(Color(rgba=self.color))
@@ -63,8 +61,6 @@ class Scanner(GridLayout):
 
     # Called whenever itself or children are updated
     def do_layout(self, *args):
-        self.metric.packet_display.text = self.metric.packet_display.default_text + str(self.numPackets)
-        self.metric.suspect_packet_display.text = self.metric.suspect_packet_display.default_text + str(self.numSuspectPackets)
 
         super(Scanner, self).do_layout(*args)
         for child in self.children:
@@ -128,15 +124,6 @@ class Scanner(GridLayout):
 
         self.defconLevel = level
         self.do_layout() # Re-draws GUI
-    
-    def update_packet_count(self, count):
-        self.numPackets = count
-        self.do_layout() # Re-draws GUI
-    
-    def update_suspect_packet_count(self, count):
-        self.numSuspectPackets = count
-        self.do_layout() # Re-draws GUI
-
 
 class RootWidget(GridLayout):
     """
@@ -154,9 +141,9 @@ class RootWidget(GridLayout):
         """
 
         """
-        # TODO: Add stop scan functionality
-        self.title.button_scan.text = "Stop Scan"
-        self.title.button_scan.disabled = True
+        # TODO: Remove thiS
+        # self.title.button_scan.text = "Stop Scan"
+        # self.title.button_scan.disabled = True
 
         '''
         # Remove start button and add status
@@ -192,12 +179,6 @@ class RootWidget(GridLayout):
     def update_defcon(self, level):
         self.scanner.update_defcon(level)
 
-    def update_packet_count(self, count):
-        self.scanner.update_packet_count(count)
-    
-    def update_suspect_packet_count(self, count):
-        self.scanner.update_suspect_packet_count(count)
-
     def update_status(self, new_text):
         self.status.text = new_text
 
@@ -228,7 +209,13 @@ class MetricDisplay(App):
             #loglevel = LOG_LEVELS.get(Config.get(['kivy', 'log_level']))
             Logger.setLevel(level=logging.WARNING)
 
-        self.IMSI_detector = Anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
+        self.IMSI_detector = Anti(args.threads,
+                                  args.headless,
+                                  interface=args.interface,
+                                  capturefile=args.pcap,
+                                  max_qsize=args.qsize,
+                                  delay=args.delay,
+                                  nuke=args.nuke)
 
     def update_from_shared_memory(self, *args):
         '''
@@ -238,11 +225,7 @@ class MetricDisplay(App):
         shared = self.IMSI_detector.sharedMemory
 
         for key in shared:
-            if (key == 'numPackets'):
-                self.root.update_packet_count(shared[key].value)
-            elif (key == 'numSuspectPackets'):
-                self.root.update_suspect_packet_count(shared[key].value)
-            elif (key == 'defconLevel'):
+            if (key == 'defconLevel'):
                 self.root.update_defcon(shared[key].value)
 
         return
@@ -255,8 +238,19 @@ class MetricDisplay(App):
         return RootWidget()
 
     def start(self):
-        self.IMSI_detector.start()
-        self.root.start_detector()
+        # TODO Process cannot be started twice
+        if (self.root.title.button_scan.is_running == False):
+            self.root.title.button_scan.text = "Stop Scan"
+            self.IMSI_detector.start()
+            self.root.start_detector()
+            self.root.title.button_scan.is_running = True
+
+        elif (self.root.title.button_scan.is_running == True):
+            self.root.title.button_scan.text = "Start Scan"
+            self.IMSI_detector.shutdown()
+            # self.IMSI_detector.join()
+            self.root.title.button_scan.is_running = False
+            self.root.title.button_scan.disabled = True
 
 
     def on_stop(self):
