@@ -224,7 +224,7 @@ class Decoder(Process):
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
-        cursor.execute('''CREATE TABLE IF NOT EXISTS NEIGHBOR(
+        cursor.execute('''CREATE TABLE IF NOT EXISTS NEIGHBORS(
                         HASH TEXT PRIMARY KEY,
                         UnixTime REAL,
                         PeopleTime TEXT,

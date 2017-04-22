@@ -99,6 +99,19 @@ class Metrics(Process):
                             CID TEXT
                             )''')
 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS NEIGHBORS(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            LAC TEXT,
+                            CID TEXT,
+                            N_CELL_LAC TEXT
+                            )''')
+
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
