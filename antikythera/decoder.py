@@ -148,6 +148,7 @@ class Decoder(Process):
         self.create_page_table()
         self.create_lac_cid_table()
         self.create_neighbor_table()
+        self.create_page_requests_table()
 
     def create_generic_table(self):
         """Create table to hold header data for unimplemented types.
@@ -191,7 +192,6 @@ class Decoder(Process):
                             reqChanTwo TEXT
                             )''')
 
-
         conn.commit()
         conn.close()
 
@@ -212,6 +212,27 @@ class Decoder(Process):
                             FrameNumber TEXT,
                             LAC TEXT,
                             CID TEXT
+                            )''')
+
+        conn.commit()
+        conn.close()
+
+    def create_page_requests_table(self):
+        """Create table to hold header data for unimplemented types.
+
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS PAGE_REQUESTS(
+                            HASH TEXT PRIMARY KEY,
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            ID TEXT
                             )''')
 
         conn.commit()
@@ -262,7 +283,7 @@ class PacketManager():
 
         self.packet_types = {
             'GSM_A.CCCH': ['33'],
-            'GSM_A.DTAP': ['30']
+            'GSM_A.DTAP': ['30', '25']
         }
 
         self.packet_metrics = {
@@ -320,6 +341,9 @@ class PacketManager():
                 return (_type, _subtype)
             if 'msg_rr_type' in attributes:
                 _subtype = data_layer.msg_rr_type
+                return (_type, _subtype)
+            if 'msg_mm_type' in attributes:
+                _subtype = data_layer.msg_mm_type
                 return (_type, _subtype)
             return (_type, None)
 
@@ -398,6 +422,8 @@ class PacketFactory:
             return PagePacket(packet)
         elif type_ == 'GSM_A.DTAP' and subtype == '30':
             return LACPacket(packet)
+        elif type_ == 'GSM_A.DTAP' and subtype == '25':
+            return PageRequests(packet)
         else:
             return Packet(packet)
 
@@ -466,8 +492,8 @@ class LACPacket(Packet):
     """
     def __init__(self, packet):
         super().__init__(packet)
-        self.cid = self.data_layer.gsm_a_lac
-        self.lac = self.data_layer.gsm_a_bssmap_cell_ci
+        self.lac = self.data_layer.gsm_a_lac
+        self.cid = self.data_layer.gsm_a_bssmap_cell_ci
 
     def store(self, database):
         """Store packets with LAC and CID information.
@@ -602,6 +628,62 @@ class NCellPacket(Packet):
                 self.signal_dbm,
                 self.arfcn,
                 self.frame_nr,
+            )
+        )
+        conn.commit()
+        conn.close()
+
+
+class PageRequests(Packet):
+    """Get information about the identity of phones being paged.
+
+    Store the hash of IMSI/TIMSI for metrics.
+
+    """
+    def __init__(self, packet):
+        super().__init__(packet)
+        attributes = self.data_layer.field_names
+        if 'gsm_a_imsi' in attributes:
+            self.id_ = hash(self.data_layer.gsm_a_imsi)
+        elif 'gsm_a_imei' in attributes:
+            self.id_ = hash(self.data_layer.gsm_a_imei)
+        else:
+            _logger.critical("Page Request packet attribute not implemented")
+
+
+    def store(self, database):
+        """Store GSM_A.CCCH packets.
+
+        Unique Inserts:
+            * id_type
+            * msg_type
+            * mode
+            * chan_req_ch1
+            * chan_req_ch2
+
+        """
+        conn = sqlite3.connect(database, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO PAGE_REQUESTS(
+                HASH,
+                UnixTime,
+                PeopleTime,
+                CHANNEL,
+                DBM,
+                ARFCN,
+                FrameNumber,
+                ID
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                self.hash_,
+                self.timestamp,
+                self.datetime,
+                self.channel,
+                self.signal_dbm,
+                self.arfcn,
+                self.frame_nr,
+                self.id_
             )
         )
         conn.commit()
