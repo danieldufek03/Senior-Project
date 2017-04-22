@@ -8,12 +8,10 @@ The main program manager.
 import os
 import logging
 import argparse
-import appdirs
 import multiprocessing as mp
+from multiprocessing import Process, Queue
 
 from time import sleep
-from multiprocessing import Process, Queue
-from sqlitedict import SqliteDict
 
 import antikythera.pysharkpatch
 
@@ -23,7 +21,8 @@ from antikythera.metrics import Metrics
 
 _logger = logging.getLogger(__name__)
 
-__author__= "Finding Ray"
+__projectname__ = "Finding Ray"
+__author__ = "Team Awesome"
 __copyright__ = "Finding Ray"
 __license__ = "GNU GPLv3+"
 
@@ -49,6 +48,11 @@ class Anti(Process):
         self.exit = mp.Event()
         #_logger.info(self)
 
+        # Allocates shared memory
+        self.sharedMemory = {'numPackets': mp.Value('i', 0),
+            'numSuspectPackets': mp.Value('i', 0),
+            'defconLevel':mp.Value('i',5)}
+
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
              "[*] Headless: {}\n".format(self.headless) +
@@ -70,7 +74,7 @@ class Anti(Process):
         try:
             cpus = mp.cpu_count()
             _logger.info("Anti: system has {} CPUs available".format(cpus))
-        except NotImplementedError as e:
+        except NotImplementedError:
             _logger.info("Anti: could not get number of available CPUs")
 
         for i in range(self.NUMBER_OF_PROCESSES):
@@ -80,18 +84,27 @@ class Anti(Process):
             self.workers.append(decoder_worker)
 
         _logger.info("Anti: Creating capture process capture")
-        if self.interface != None:
-            _logger.debug("Anti: Creating capture process with network interface")
-            capture_worker = Capture("capture", self.pkt_queue, interface=self.interface, name="capture", daemon=True)
-        elif self.capturefile != None:
+        if self.interface is not None:
+            _logger.debug("Anti: Creating capture process with" +
+                          "network interface")
+            capture_worker = Capture("capture",
+                                     self.pkt_queue,
+                                     interface=self.interface,
+                                     name="capture",
+                                     daemon=True)
+        elif self.capturefile is not None:
             _logger.debug("Anti: Creating capture process with capture file")
-            capture_worker = Capture("capture", self.pkt_queue, capturefile=self.capturefile, name="capture", daemon=True)
+            capture_worker = Capture("capture",
+                                     self.pkt_queue,
+                                     capturefile=self.capturefile,
+                                     name="capture",
+                                     daemon=True)
         else:
             _logger.critical("Anti: no capture method supplied aborting!")
 
         self.workers.append(capture_worker)
 
-        metrics_worker = Metrics("metrics", name="metrics", daemon=True)
+        metrics_worker = Metrics("metrics", self.sharedMemory, name="metrics", daemon=True)
         self.workers.append(metrics_worker)
 
         for worker in self.workers:
@@ -104,6 +117,9 @@ class Anti(Process):
         self.wait()
 
     def shutdown(self):
+        """
+
+        """
         _logger.info("Anti: received shutdown command")
         self.exit.set()
 
@@ -130,7 +146,7 @@ class Anti(Process):
         _logger.info("Anti: waiting for shutdown")
         while not self.exit.is_set():
             sleep(1)
-        
+
         _logger.info("Anti: shutting down child processes")
         _logger.debug("Anti: Active children {}".format(mp.active_children()))
 
@@ -153,13 +169,6 @@ class Anti(Process):
             p.join()
 
         _logger.info("Anti: Exiting")
-
-
-    def create_db():
-        """ Create the database if needed.
-
-        """
-        pass
 
 
 def create_parser():
@@ -186,7 +195,7 @@ def create_parser():
         default=1,
         dest="threads",
         help="Number of threads to use.",
-        action='store'),
+        action='store')
     parser.add_argument(
         '-q',
         '--qsize',
@@ -195,34 +204,34 @@ def create_parser():
         default=None,
         dest="qsize",
         help="The maximum queue size for packets waiting to be processed.",
-        action='store'),
+        action='store')
     parser.add_argument(
         '--headless',
         default=False,
         dest="headless",
         help="Run in headless mode without GUI.",
-        action='store_true'),
+        action='store_true')
     logs.add_argument(
         '-v',
         '--verbose',
         dest="loglevel",
         help="set loglevel to INFO",
         action='store_const',
-        const=logging.INFO),
+        const=logging.INFO)
     logs.add_argument(
         '-vv',
         '--very-verbose',
         dest="loglevel",
         help="set loglevel to DEBUG",
         action='store_const',
-        const=logging.DEBUG),
+        const=logging.DEBUG)
     logs.add_argument(
         '-vvv',
         '--trace',
         dest="loglevel",
         help="set loglevel to TRACE",
         action='store_const',
-        const=logging.TRACE),
+        const=logging.TRACE)
     source.add_argument(
         '-c',
         '--capture',
@@ -231,7 +240,7 @@ def create_parser():
         default=None,
         dest="pcap",
         help="Path to a capture file to use as input.",
-        action='store'),
+        action='store')
     source.add_argument(
         '-i',
         '--interface',
@@ -246,4 +255,4 @@ def create_parser():
 
 
 if __name__ == '__main__':
-    a = anti(0)
+    a = Anti()

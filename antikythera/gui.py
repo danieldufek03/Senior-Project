@@ -17,75 +17,125 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.animation import Animation
 from kivy.clock import Clock, mainthread
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.properties import NumericProperty, ReferenceListProperty
+from kivy.graphics import *
 from multiprocessing import Queue
 from time import sleep
 
+from kivy.uix.settings import SettingsWithSidebar
+from kivy.config import Config
 
 from antikythera import __version__
+from antikythera.antikythera import __projectname__, __author__, __copyright__, __license__
 from antikythera.antikythera import Anti, create_parser
 
 _logger = logging.getLogger(__name__)
 
-__author__= "Finding Ray"
-__copyright__ = "Finding Ray"
-__license__ = "GNU GPLv3+"
+# Loads main from design file
+Builder.load_file("mainscreen.kv")
+
+# Color pallete (RGBA)
+color_highlight = [0xAD/255, 0xD8/255, 0xE6/255, 0.5] # Blue highlight
+
+class DefconLevel(GridLayout):
+    pass
+
+class Metric(GridLayout):
+    pass
+
+class Scanner(GridLayout):
+    def __init__(self, *args, **kwargs):
+        super(Scanner, self).__init__(*args, **kwargs)
+
+        self.defconLevel = 5
+        self.numPackets = 0
+        self.numSuspectPackets = 0
+
+        '''
+        self.canvas.add(Color(rgba=self.color))
+        self.canvas.add(Rectangle(pos=self.pos, size=self.size))
+        '''
+
+    # Called whenever itself or children are updated
+    def do_layout(self, *args):
+        self.metric.packet_display.text = self.metric.packet_display.default_text + str(self.numPackets)
+        self.metric.suspect_packet_display.text = self.metric.suspect_packet_display.default_text + str(self.numSuspectPackets)
+
+        super(Scanner, self).do_layout(*args)
+        for child in self.children:
+            if not isinstance(child, DefconLevel):
+                continue
+
+            # Creates new canvas
+            child.canvas.before.clear()
+            child.canvas.after.clear()
+
+            # Calculates values for border (Optional)
+            border = 0
+            insideSize = [child.size[0] - border, child.size[1] - border]
+            insidePos = [child.pos[0] + (child.size[0] - insideSize[0]) / 2, child.pos[1] + (child.size[1] - insideSize[1]) / 2]
+
+            with child.canvas.before:
+                # Defcon color
+                Color(rgba=child.color)
+                Rectangle(pos=insidePos, size=insideSize)
+
+                if (child.level == self.defconLevel):
+                    # Highlights
+                    Color(rgba=color_highlight)
+                    Rectangle(pos=child.pos, size=child.size)
 
 
-# Todo: move this to config file
-Builder.load_string("""
-<AnimWidget@Widget>:
-    canvas:
-        Color:
-            rgba: 13/255, 134/255, 178/255, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
-    size_hint: None, None
-    size: 400, 30
+            #child.canvas.add(rgba=child.color)
+            #child.canvas.add(Rectangle(pos=child.pos, size=child.size))
 
+            # Creates new label
+            '''
+            child.children.clear()
 
-<RootWidget>:
-    cols: 1
+            with Label() as label:
+                label.text = child.text
+            '''
 
-    canvas:
-        Color:
-            rgba: 24/255, 27/255, 30/255, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
+            child.label.text = child.text
+            child.label.color = [0, 0, 0, 1]
 
-    anim_box: anim_box
-    detect_button: detect_button
-    status: status
-    defcon: defcon
+            if (child.level == self.defconLevel):
+                # Changes text color
+                #child.label.color = [1, 1, 1, 1]
 
-    Button:
-        id: detect_button
-        font_size: 30
-        background_color: 255/255, 32/255, 82/255, 1
-        background_normal: ''
-        text: 'Find a Stingray!'
-        on_press: app.start()
+                iconSize = [child.height, child.height]
+                iconPos = [child.pos[0] + (child.size[0] - child.height), child.pos[1]]
 
-    Label:
-        id: status
-        font_size: 30
-        color: 13/255, 134/255, 178/255, 1
-        text_size: self.width, None
-        halign: 'center'
+                with child.canvas.after:
+                    # Meme icon
+                    Color(rgba=[1, 1, 1, 1])
+                    Rectangle(source=child.icon, pos=iconPos, size=iconSize)
+            pass
 
-    AnchorLayout:
-        id: anim_box
+    def update_defcon(self, level):
+        """
+        Updates threat level in GUI.
+            int : level - Defcon level (1-5)
+        """
+        if (level is None):
+            return
 
-    Label:
-        id: defcon
-        font_size: 100
-        color: 178/255, 5/255, 44/255, 1
-        text: '5'
-""")
+        self.defconLevel = level
+        self.do_layout() # Re-draws GUI
+    
+    def update_packet_count(self, count):
+        self.numPackets = count
+        self.do_layout() # Re-draws GUI
+    
+    def update_suspect_packet_count(self, count):
+        self.numSuspectPackets = count
+        self.do_layout() # Re-draws GUI
 
 
 class RootWidget(GridLayout):
@@ -104,26 +154,52 @@ class RootWidget(GridLayout):
         """
 
         """
+        # TODO: Add stop scan functionality
+        self.title.button_scan.text = "Stop Scan"
+        self.title.button_scan.disabled = True
+
+        '''
         # Remove start button and add status
         self.remove_widget(self.detect_button)
         self.status.text = ('Looking for a stingray...')
+        '''
+
+        xMax = self.scanner.anim_box.width * 0.8
+        xMin = xMax * 0.3
 
         # Spinny Widget
         action_bar = Factory.AnimWidget()
-        self.anim_box.add_widget(action_bar)
-        animation = Animation(opacity=0.3, width=10, duration=0.6)
-        animation += Animation(opacity=1, width=400, duration=0.8)
+        self.scanner.anim_box.add_widget(action_bar)
+        animation = Animation(opacity=0.3, width=xMin, duration=0.6)
+        animation += Animation(opacity=1, width= xMax, duration=0.8)
         animation.repeat = True
         animation.start(action_bar)
 
 
-    def update_defcon(self, new_text):
-        self.defcon.text = new_text
+        '''
+        # Scanning Label
+        label = Label()
+        self.scanner.anim_box.add_widget(action_bar)
 
+        with label:
+            font_size = 30
+            text = "Scanning"
+            color = [1, 1, 1, 1]
+            halign = "center"
+        '''
+
+
+    def update_defcon(self, level):
+        self.scanner.update_defcon(level)
+
+    def update_packet_count(self, count):
+        self.scanner.update_packet_count(count)
+    
+    def update_suspect_packet_count(self, count):
+        self.scanner.update_suspect_packet_count(count)
 
     def update_status(self, new_text):
         self.status.text = new_text
-
 
 
 class MetricDisplay(App):
@@ -132,10 +208,14 @@ class MetricDisplay(App):
     """
 
     def __init__(self, *args, **kwargs):
+        self.title = __projectname__
         super(MetricDisplay, self).__init__(*args, **kwargs)
         self.IMSI_detector = None
+        self.timesUpdated = 0
 
     def on_start(self):
+        # Set even that's called every 1/2 second
+        event = Clock.schedule_interval(self.update_from_shared_memory, 1/2)
         """
 
         """
@@ -150,12 +230,28 @@ class MetricDisplay(App):
 
         self.IMSI_detector = Anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
 
+    def update_from_shared_memory(self, *args):
+        '''
+        Reads values in shared memory and updates GUI display
+        '''
 
+        shared = self.IMSI_detector.sharedMemory
+
+        for key in shared:
+            if (key == 'numPackets'):
+                self.root.update_packet_count(shared[key].value)
+            elif (key == 'numSuspectPackets'):
+                self.root.update_suspect_packet_count(shared[key].value)
+            elif (key == 'defconLevel'):
+                self.root.update_defcon(shared[key].value)
+
+        return
 
     def build(self):
         """
 
         """
+        self.settings_cls = SettingsWithSidebar
         return RootWidget()
 
     def start(self):
@@ -174,6 +270,45 @@ class MetricDisplay(App):
             self.IMSI_detector.join()
         _logger.info("GUI: Shutdown successfully".format(self.IMSI_detector.pid))
 
+    def open_config(self):
+        """
+        Button - Open configuration settings
+        """
+
+        pass
+
+    def build_settings(self, settings):
+        json = '''
+        [
+            {
+                "type": "options",
+                "title": "Capture Interface",
+                "desc": "Determines network interface for packet capture",
+                "section": "Finding Mr. Ray",
+                "key": "text",
+                "options": ["Pcap File", "Network"]
+            }
+        ]
+        '''
+        settings.add_json_panel('Finding Mr. Ray', self.config, data=json)
+
+    def build_config(self, config):
+        """
+        Set the default values for the configs sections.
+        """
+        Config.kivy = "Something"
+        config.setdefaults('Finding Mr. Ray', {'text': 'Pcap File'})
+
+    def on_config_change(self, config, section, key, value):
+        if config is self.config:
+            token = (section, key, value)
+            if token == ("Finding Mr. Ray", "text", "Pcap File"):
+                # Do the Pcap File things
+                print('Capture interface changed to', value)
+
+            elif token == ("Finding Mr. Ray", "text", "Network"):
+                # Do the network capture things
+                print('Capture interface changed to', value)
 
 def run():
     """
@@ -181,6 +316,11 @@ def run():
     """
     _logger.info("GUI: Starting GUI App")
     MetricDisplay().run()
+    return
+    try:
+        MetricDisplay().run()
+    except Exception as e:
+        _logger.info("GUI: Exception was thrown\n" + str(e))
 
 
 if __name__ == "__main__":
