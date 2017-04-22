@@ -61,7 +61,7 @@ class Scanner(GridLayout):
 
     # Called whenever itself or children are updated
     def do_layout(self, *args):
-        
+
         super(Scanner, self).do_layout(*args)
         for child in self.children:
             if not isinstance(child, DefconLevel):
@@ -141,9 +141,9 @@ class RootWidget(GridLayout):
         """
 
         """
-        # TODO: Add stop scan functionality
-        self.title.button_scan.text = "Stop Scan"
-        self.title.button_scan.disabled = True
+        # TODO: Remove thiS
+        # self.title.button_scan.text = "Stop Scan"
+        # self.title.button_scan.disabled = True
 
         '''
         # Remove start button and add status
@@ -238,8 +238,19 @@ class MetricDisplay(App):
         return RootWidget()
 
     def start(self):
-        self.IMSI_detector.start()
-        self.root.start_detector()
+        # TODO Process cannot be started twice
+        if (self.root.title.button_scan.is_running == False):
+            self.root.title.button_scan.text = "Stop Scan"
+            self.IMSI_detector.start()
+            self.root.start_detector()
+            self.root.title.button_scan.is_running = True
+
+        elif (self.root.title.button_scan.is_running == True):
+            self.root.title.button_scan.text = "Start Scan"
+            self.IMSI_detector.shutdown()
+            # self.IMSI_detector.join()
+            self.root.title.button_scan.is_running = False
+            self.root.title.button_scan.disabled = True
 
 
     def on_stop(self):
