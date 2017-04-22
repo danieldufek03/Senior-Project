@@ -365,6 +365,48 @@ class Metrics(Process):
         else:
             return False
 
+    def paging_without_transaction(self):
+        """Paging without transaction
+
+        The MS is paged without entering a transaction.
+        Rationale
+
+        Paging by IMSI and subsequently releasing the transaction without SMS or call data being transmitted may be a pattern of a tracking IMSI catcher trying to detect whether a particular user is in the area of the catcher.
+        False Positives
+
+        Reference:
+
+        SnoopSnitch Metrics:
+        https://opensource.srlabs.de/projects/snoopsnitch/wiki/IMSI_Catcher_Score#T3-Paging-without-transaction
+
+        A similar pattern occurs when a MS is called, but the caller releases the call quickly enough such that the MS is paged, but no ALARM is signaled.
+        """
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        rudePagingList = []
+
+        cursor.execute("""SELECT ID
+            FROM PAGE_REQUESTS
+            EXCEPT
+            SELECT DISTINCT ID
+            FROM TRANSACTIONS""")
+
+        for row in cursor.fetchall():
+            _logger.debug("{}: {}".format(self.process_id, row))
+            rudePagingList.append(row)
+
+        conn.close()
+
+        _logger.debug("{}: Length of non-transaction paging {}"
+                      .format(self.process_id, len(rudePagingList)))
+
+        if len(rudePagingList):
+            _logger.info("{}: Paging without transaction is Detected."
+                         .format(self.process_id))
+            return True
+        else:
+            return False
+
     def shutdown(self):
         """ Trigger shutdown and exit of ``run()`` when called by manager.
 
