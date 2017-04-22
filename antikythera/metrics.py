@@ -72,16 +72,6 @@ class Metrics(Process):
                         HASH TEXT PRIMARY KEY
                         )''')
 
-        cursor.execute('''CREATE TABLE IF NOT EXISTS INCONSISTENT_AREA_CODE(
-                        LAC TEXT,
-                        PeopleTime TEXT
-                        )''')
-
-        cursor.execute('''CREATE TABLE IF NOT EXISTS TEMP_PREVIOUS_TIME(
-                        LAC TEXT,
-                        PreviousTime TEXT
-                        )''')
-
         cursor.execute('''CREATE TABLE IF NOT EXISTS PAGE(
                             HASH TEXT PRIMARY KEY,
                             UnixTime REAL,
@@ -112,10 +102,16 @@ class Metrics(Process):
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
-            imposter_present = self.imposter_cell()
-            inconsistent_lac_present = self.inconsistent_lac()
-            lonely_cell_id_present = self.lonely_cell_id()
+            suspectMetrics = [ self.imposter_cell(), self.inconsistent_lac(), self.lonely_cell_id()]
             sleep(3)
+
+            level = 5 - suspectMetrics.count(True)
+            _logger.fatal("Metrics: Threat level changed to " + str(level))
+            self.shared['defconLevel'].value = level
+
+            #if level != 5:
+            #    break
+            
 
 
         _logger.info("{}: Exiting".format(self.process_id))
@@ -254,16 +250,13 @@ class Metrics(Process):
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
 
-        self.create_temp_table_previous_time()
-
-        cursor.execute("""INSERT INTO INCONSISTENT_AREA_CODE SELECT LAC,
-                        PeopleTime FROM PACKETS""")
-
-        cursor.execute("""SELECT LAC, PeopleTime FROM INCONSISTENT_AREA_CODE
-                        WHERE PeopleTime >
-                        (SELECT PreviousTime FROM TEMP_PREVIOUS_TIME)""")
-
         inconsistent_lacs = []
+        cursor.execute("""SELECT DISTINCT LAC
+            FROM NEIGHBORS
+            EXCEPT
+            SELECT DISTINCT LAC
+            FROM NEIGHBORS
+            WHERE LAC = CID""")
         for row in cursor.fetchall():
             _logger.debug("{}: {}".format(self.process_id, row))
             inconsistent_lacs.append(row)
@@ -279,37 +272,6 @@ class Metrics(Process):
             return True
         else:
             return False
-
-    def create_temp_table_previous_time(self):
-        """ Create temp table.
-
-        Create a temp table that houses local area code and a preivious
-        time stamp for verification purposes.
-
-        """
-        prev_time = (datetime.datetime.now() -
-                     datetime.timedelta(days=730, minutes=5))
-
-        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """INSERT INTO TEMP_PREVIOUS_TIME(
-            LAC,
-            PreviousTime
-            ) VALUES (?, ?)
-            """, (
-                ("SELECT LAC FROM LAC_CID"),
-                prev_time
-                )
-            )
-
-        previous_time_list = []
-        for row in cursor.fetchall():
-            _logger.debug("{}: {}".format(self.process_id, row))
-            previous_time_list.append(row)
-        _logger.debug("{}: Length of previous time list {}"
-                      .format(self.process_id, previous_time_list))
 
     def lonely_cell_id(self):
         """Lonesome LAC.
@@ -365,8 +327,6 @@ class Metrics(Process):
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
         cursor = conn.cursor()
         lonely_list = []
-
-        cursor.execute("SELECT DISTINCT LAC FROM LAC_CID")
 
         cursor.execute("""SELECT *
             FROM

@@ -49,7 +49,9 @@ class Anti(Process):
         #_logger.info(self)
 
         # Allocates shared memory
-        self.sharedMemory = {'numPackets': mp.Value('i', 0), 'numSuspectPackets': mp.Value('i', 0)}
+        self.sharedMemory = {'numPackets': mp.Value('i', 0),
+            'numSuspectPackets': mp.Value('i', 0),
+            'defconLevel':mp.Value('i',5)}
 
     def __str__(self):
         s = ("Initial Process Manager State:\n" +
