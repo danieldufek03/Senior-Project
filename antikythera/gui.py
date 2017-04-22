@@ -124,7 +124,6 @@ class Scanner(GridLayout):
 
         self.defconLevel = level
         self.do_layout() # Re-draws GUI
-    
 
 class RootWidget(GridLayout):
     """
@@ -210,7 +209,13 @@ class MetricDisplay(App):
             #loglevel = LOG_LEVELS.get(Config.get(['kivy', 'log_level']))
             Logger.setLevel(level=logging.WARNING)
 
-        self.IMSI_detector = Anti(args.threads, args.headless, interface=args.interface, capturefile=args.pcap, max_qsize=args.qsize)
+        self.IMSI_detector = Anti(args.threads,
+                                  args.headless,
+                                  interface=args.interface,
+                                  capturefile=args.pcap,
+                                  max_qsize=args.qsize,
+                                  delay=args.delay,
+                                  nuke=args.nuke)
 
     def update_from_shared_memory(self, *args):
         '''
