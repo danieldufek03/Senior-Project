@@ -149,6 +149,7 @@ class Decoder(Process):
         self.create_lac_cid_table()
         self.create_neighbor_table()
         self.create_encrypted_table()
+
     def create_generic_table(self):
         """Create table to hold header data for unimplemented types.
 
@@ -169,12 +170,9 @@ class Decoder(Process):
         conn.commit()
         conn.close()
 
-
-
-
     def create_encrypted_table(self):
         """Create table that tells if the packet is encrypted with either.
-		A5_1, A5_2, A5_3 encryption.
+        A5_1, A5_2, A5_3 encryption.
 
         """
         conn = sqlite3.connect(self.data_dir, check_same_thread=False)
@@ -188,18 +186,13 @@ class Decoder(Process):
                             ARFCN TEXT,
                             FrameNumber TEXT,
                             HASH TEXT PRIMARY KEY,
-			    A5_1Encryption TEXT,
-			    A5_2Encryption TEXT,
-			    A5_3Encryption TEXT
-                           
-			    
+                            A5_1Encryption TEXT,
+                            A5_2Encryption TEXT,
+                            A5_3Encryption TEXT
                             )''')
 
         conn.commit()
         conn.close()
-
-
-
 
     def create_page_table(self):
         """Create table to hold header data for unimplemented types.
@@ -222,7 +215,6 @@ class Decoder(Process):
                             reqChanOne TEXT,
                             reqChanTwo TEXT
                             )''')
-
 
         conn.commit()
         conn.close()
@@ -644,14 +636,16 @@ class NCellPacket(Packet):
         conn.commit()
         conn.close()
 
+
 class Ciphering(Packet):
     """ Packet cipher check """
 
-    def __init__(self,packet):
+    def __init__(self, packet):
         super().__init__(packet)
-        self.a51=self.data_layer.gsm_a_a5_1_algorithm_sup
-        self.a52=self.data_layer.gsm_a_a5_2_algorithm_sup
-        self.a53=self.data_layer.gsm_a_a5_3_algorithm_sup
+        self.a51 = self.data_layer.gsm_a_a5_1_algorithm_sup
+        self.a52 = self.data_layer.gsm_a_a5_2_algorithm_sup
+        self.a53 = self.data_layer.gsm_a_a5_3_algorithm_sup
+
     def store(self, database):
         """Stores encryption A5_1/A5_2/A5_3"""
 
@@ -667,7 +661,7 @@ class Ciphering(Packet):
                 ARFCN,
                 FrameNumber,
                 A5_1Encryption,
-		A5_2Encryption,
+    A5_2Encryption,
                 A5_3Encryption
             ) VALUES (?,?,?,?,?,?,?,?,?,?)
             """, (
@@ -680,18 +674,11 @@ class Ciphering(Packet):
                 self.frame_nr,
                 self.a51,
                 self.a52,
-                self.a53 )
+                self.a53
+            )
         )
         conn.commit()
         conn.close()
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
