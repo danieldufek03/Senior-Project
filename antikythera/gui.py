@@ -141,9 +141,8 @@ class RootWidget(GridLayout):
         """
 
         """
-        # TODO: Remove thiS
-        # self.title.button_scan.text = "Stop Scan"
-        # self.title.button_scan.disabled = True
+        self.title.button_scan.text = "Start Scan"
+        self.title.button_scan.disabled = True
 
         '''
         # Remove start button and add status
@@ -238,7 +237,9 @@ class MetricDisplay(App):
         return RootWidget()
 
     def start(self):
-        # TODO Process cannot be started twice
+        self.IMSI_detector.start()
+        self.root.start_detector()
+        """
         if (self.root.title.button_scan.is_running == False):
             self.root.title.button_scan.text = "Stop Scan"
             self.IMSI_detector.start()
@@ -251,12 +252,8 @@ class MetricDisplay(App):
             # self.IMSI_detector.join()
             self.root.title.button_scan.is_running = False
             self.root.title.button_scan.disabled = True
-
-
+        """
     def on_stop(self):
-        """
-
-        """
         if self.IMSI_detector.is_alive():
             _logger.info("GUI: Sending shutdown signal to Anti")
             self.IMSI_detector.shutdown()
