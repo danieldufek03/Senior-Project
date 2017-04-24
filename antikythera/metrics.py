@@ -112,10 +112,24 @@ class Metrics(Process):
                             N_CELL_LAC TEXT
                             )''')
 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS ENCRYPTION(
+                            UnixTime REAL,
+                            PeopleTime TEXT,
+                            CHANNEL TEXT,
+                            DBM TEXT,
+                            ARFCN TEXT,
+                            FrameNumber TEXT,
+                            HASH TEXT PRIMARY KEY,
+                            A5_1Encryption TEXT,
+                            A5_2Encryption TEXT,
+                            A5_3Encryption TEXT
+                            )''')
+
         conn.close()
         while not self.exit.is_set():
             _logger.debug("{}: metrics loop begin".format(self.process_id))
-            suspectMetrics = [ self.imposter_cell(), self.inconsistent_lac(), self.lonely_cell_id()]
+            suspectMetrics = [ self.imposter_cell(), self.inconsistent_lac(), 
+                self.lonely_cell_id(), self.cipher_metrics()]
             sleep(3)
 
             level = 5 - suspectMetrics.count(True)
@@ -137,7 +151,7 @@ class Metrics(Process):
 
         Rationale:
 
-            To avoid leaving traces of a new, non-existent cell, an IMSI
+            To avoid leaving debugs of a new, non-existent cell, an IMSI
             catcher may choose to reuse the cell ID and LAC of an existing
             cell in an area, but using a different frequency. The IMSI
             catcher must have a location area different from the current
@@ -166,7 +180,7 @@ class Metrics(Process):
                 * ARFCN 1337
 
             The evil cell is pretending to be in the location area code to
-            not trigger a lonely LAC metric, and to not leave a trace of a
+            not trigger a lonely LAC metric, and to not leave a debug of a
             strange cell wandering all over town.
 
         Reference:
@@ -241,7 +255,7 @@ class Metrics(Process):
                 * LAC 7
 
             The evil cell is pretending to be in the location area code to
-            not trigger a lonely LAC metric, and to not leave a trace of a
+            not trigger a lonely LAC metric, and to not leave a debug of a
             strange cell wandering all over town. It is detected by all
             cells it advertises having a different LAC.
 
@@ -402,6 +416,37 @@ class Metrics(Process):
 
         if len(rudePagingList):
             _logger.info("{}: Paging without transaction is Detected."
+                         .format(self.process_id))
+            return True
+        else:
+            return False
+
+    def cipher_metrics(self):
+        conn = sqlite3.connect(self.data_dir, check_same_thread=False)
+        cursor = conn.cursor()
+        cipher_metrics_list = []
+
+        cursor.execute("""SELECT A5_1Encryption, A5_2Encryption, A5_3Encryption
+            FROM ENCRYPTION
+            WHERE (A5_1Encryption = '0' 
+            AND A5_2Encryption = '0'
+            AND A5_3Encryption = '0') 
+            OR (A5_1Encryption = '0' 
+            AND A5_2Encryption = '0' 
+            AND A5_3Encryption = '1'
+            )""")
+
+        for row in cursor.fetchall():
+            _logger.debug("{}: {}".format(self.process_id, row))
+            cipher_metrics_list.append(row)
+
+        conn.close()
+
+        _logger.debug("{}: Length of cipher metrics {}"
+                      .format(self.process_id, len(cipher_metrics_list)))
+
+        if len(cipher_metrics_list):
+            _logger.info("{}: Cipher error Code Detected."
                          .format(self.process_id))
             return True
         else:
