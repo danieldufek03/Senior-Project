@@ -58,7 +58,10 @@ class Anti(Process):
 
         if nuke:
             data_dir = appdirs.user_data_dir("anti.sqlite3", "anything")
-            os.remove(data_dir)
+            try:
+                os.remove(data_dir)
+            except OSError:
+                pass
 
 
     def __str__(self):
