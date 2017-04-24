@@ -431,9 +431,7 @@ class Metrics(Process):
             WHERE (A5_1Encryption = '0' 
             AND A5_2Encryption = '0'
             AND A5_3Encryption = '0') 
-            OR (A5_1Encryption = '0' 
-            AND A5_2Encryption = '0' 
-            AND A5_3Encryption = '1'
+            OR (A5_3Encryption = '1'
             )""")
 
         for row in cursor.fetchall():
